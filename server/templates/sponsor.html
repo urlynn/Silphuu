@@ -1,0 +1,187 @@
+{{define "sponsor.html"}}
+{{template "base_layout" .}}
+{{end}}
+
+{{define "head_extra"}}
+    <meta name="theme-color" content="#232A2E">
+    <link rel="stylesheet" href="{{asset "css/browse.bundle.css"}}">
+    <script src="{{asset "js/browse.bundle.js"}}" defer></script>
+{{end}}
+
+{{define "content"}}
+        <div class="profile-card page-card" data-backdrop-scene="b">
+            <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div>
+            <div class="g-tint"></div>
+            <div class="g-noise"></div>
+
+            {{template "page_header" (dict "Icon" "heart-handshake" "Title" .UI.sponsor.header.title "Subtitle" .UI.sponsor.header.subtitle "Notice" .UI.sponsor.header.notice "NoticeIcon" "gift" "Accent" true)}}
+
+            <!-- Donation channels -->
+            <div class="sponsor-qr-grid" style="margin-bottom:24px;">
+                <!-- Alipay -->
+                <div class="sponsor-qr-card" data-backdrop-scene="b" data-hover-glow>
+                    {{template "hover_layers" (dict "glow" true)}}<div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div><div class="g-tint"></div><div class="g-noise"></div>
+                    <div class="sponsor-qr-header">
+                        <div class="sponsor-qr-icon">{{svg "alipay"}}</div>
+                        <h3 class="sponsor-qr-name">{{.UI.sponsor.channel.alipay.name}}</h3>
+                    </div>
+                    <p class="sponsor-qr-desc">{{.UI.sponsor.channel.alipay.desc}}</p>
+                    {{if .UI.sponsor.channel.alipay.link}}<a href="{{.UI.sponsor.channel.alipay.link}}" target="_blank" rel="noopener" class="sponsor-qr-link" style="-webkit-mask-image:url({{asset "image/sponsor/alipay.svg"}});mask-image:url({{asset "image/sponsor/alipay.svg"}});" aria-label="{{.UI.sponsor.channel.alipay.link_aria}}"></a>{{else}}<span class="sponsor-qr-link" style="-webkit-mask-image:url({{asset "image/sponsor/alipay.svg"}});mask-image:url({{asset "image/sponsor/alipay.svg"}});" aria-hidden="true"></span>{{end}}
+                </div>
+
+                <!-- WeChat -->
+                <div class="sponsor-qr-card" data-backdrop-scene="b" data-hover-glow>
+                    {{template "hover_layers" (dict "glow" true)}}<div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div><div class="g-tint"></div><div class="g-noise"></div>
+                    <div class="sponsor-qr-header">
+                        <div class="sponsor-qr-icon">{{svg "wechat"}}</div>
+                        <h3 class="sponsor-qr-name">{{.UI.sponsor.channel.wechat.name}}</h3>
+                    </div>
+                    <p class="sponsor-qr-desc">{{.UI.sponsor.channel.wechat.desc}}</p>
+                    {{if .UI.sponsor.channel.wechat.link}}<a href="{{.UI.sponsor.channel.wechat.link}}" target="_blank" rel="noopener" class="sponsor-qr-link" style="-webkit-mask-image:url({{asset "image/sponsor/wechat.svg"}});mask-image:url({{asset "image/sponsor/wechat.svg"}});" aria-label="{{.UI.sponsor.channel.wechat.link_aria}}"></a>{{else}}<span class="sponsor-qr-link" style="-webkit-mask-image:url({{asset "image/sponsor/wechat.svg"}});mask-image:url({{asset "image/sponsor/wechat.svg"}});" aria-hidden="true"></span>{{end}}
+                </div>
+            </div>
+
+            <!-- Sponsor list -->
+            <div class="page-title-row page-title-row--h3">
+                <div class="page-title-icon">
+                    {{svg "notice"}}
+                </div>
+                <h3 class="page-title-h3 page-title-h3--accent">{{.UI.sponsor.list.title}}</h3>
+                {{if .Sponsors}}<span class="page-title-count">({{len .Sponsors}})</span>{{end}}
+                <button onclick="openSponsorModal()" class="page-title-action admin-control" title="{{.UI.sponsor.new.btn}}">
+                    {{svg "plus"}}
+                </button>
+            </div>
+
+            {{if .Sponsors}}
+            <div id="sponsor-grid" class="sponsor-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;">
+                {{range $i, $s := .Sponsors}}
+                {{template "sponsor_card" (dict
+                    "S" $s
+                    "I" $i
+                    "Admin" true
+                    "UI" $.UI
+                    "Nick" $s.Nick
+                    "Amount" $s.Amount
+                    "Msg" $s.Msg
+                    "Date" $s.Date)}}
+                {{end}}
+            </div>
+            {{else}}
+            <p style="text-align:center;padding:24px 0;color:var(--text-dim);font-size:0.82rem;">{{.UI.sponsor.list.empty}}</p>
+            {{end}}
+        </div>
+{{end}}
+
+{{define "floating"}}
+    {{template "modal_begin" dict
+        "ID" "sponsor-modal"
+        "Title" .UI.sponsor.new.btn
+        "CardClass" ""
+    }}
+                <form id="sponsor-form" method="POST" action="{{ URLCommit "sponsor/add" }}" data-action-add="{{ URLCommit "sponsor/add" }}" data-action-edit="{{ URLCommit "sponsor/edit" }}" class="modal-form">
+                    <input type="hidden" name="redirect" value="{{ URLSponsor }}">
+                    <input type="hidden" name="index" id="sponsor-index" value="">
+                    <input type="date" name="date" id="sponsor-date" class="modal-field">
+                    <input type="text" name="nick" id="sponsor-nick" placeholder="{{.UI.common.input.nickname}}" required class="modal-field">
+                    <input type="text" name="amount" id="sponsor-amount" placeholder="{{.UI.sponsor.new.amount}}" required class="modal-field">
+                    <input type="text" name="msg" id="sponsor-msg" placeholder="{{.UI.common.input.message}}" class="modal-field">
+                    <button type="submit" id="sponsor-modal-submit" class="modal-confirm">{{.UI.common.action.add}}</button>
+                </form>
+    {{template "modal_end"}}
+
+    {{template "edit_bar" dict
+        "ID" "sponsor-edit-bar"
+        "Text" .UI.sponsor.edit.mode
+        "BtnText" .UI.sponsor.edit.done
+        "OnDone" "exitSponsorEditMode()"
+    }}
+{{end}}
+
+{{define "scripts"}}
+        <script>
+        function openSponsorModal(opts) {
+            var modal = document.getElementById('sponsor-modal'), form = document.getElementById('sponsor-form');
+            var isEdit = opts && opts.mode === 'edit';
+            var d = new Date();
+            var today = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+            var title = document.getElementById('sponsor-modal-title');
+            var submitBtn = document.getElementById('sponsor-modal-submit');
+            var idx = document.getElementById('sponsor-index');
+            var date = document.getElementById('sponsor-date');
+            var nick = document.getElementById('sponsor-nick');
+            var amount = document.getElementById('sponsor-amount');
+            var msg = document.getElementById('sponsor-msg');
+            if (title) title.textContent = isEdit ? '{{.UI.sponsor.edit.title}}' : '{{.UI.sponsor.new.btn}}';
+            if (submitBtn) submitBtn.textContent = isEdit ? '{{.UI.common.action.save}}' : '{{.UI.common.action.add}}';
+            if (form) form.action = isEdit ? (form.dataset.actionEdit || form.action) : (form.dataset.actionAdd || form.action);
+            if (idx) idx.value = isEdit && opts.index != null ? opts.index : '';
+            if (date) date.value = isEdit ? (opts.date || '') : today;
+            if (nick) nick.value = isEdit ? (opts.nick || '') : '';
+            if (amount) amount.value = isEdit ? (opts.amount || '') : '';
+            if (msg) msg.value = isEdit ? (opts.msg || '') : '';
+            if (modal) modal.classList.add('show');
+        }
+
+        (function() {
+            var grid = document.getElementById('sponsor-grid');
+            var bar = document.getElementById('sponsor-edit-bar');
+            var timer = null, pressCard = null, startX = 0, startY = 0, longPressed = false, inEditMode = false;
+            function isAdmin() { return document.body.classList.contains('is-admin') || document.documentElement.classList.contains('is-admin'); }
+            function clearPress() { if (timer) { clearTimeout(timer); timer = null; } if (pressCard) { pressCard.classList.remove('is-pressing'); pressCard = null; } }
+            function enterMode() {
+                if (!isAdmin() || inEditMode) return;
+                inEditMode = true;
+                if (navigator.vibrate) try { navigator.vibrate(40); } catch (_) {}
+                if (grid) grid.classList.add('is-edit-mode');
+                if (bar) bar.style.display = 'flex';
+            }
+            window.exitSponsorEditMode = function() {
+                inEditMode = false;
+                clearPress();
+                if (grid) grid.classList.remove('is-edit-mode');
+                if (bar) bar.style.display = 'none';
+            };
+            if (grid) {
+                grid.addEventListener('pointerdown', function(e) {
+                    if (!isAdmin() || e.button !== 0 || e.target.closest('.sponsor-public-actions') || e.target.closest('.modal-overlay')) return;
+                    var card = e.target.closest('.sponsor-public-card');
+                    if (!card) return;
+                    startX = e.clientX; startY = e.clientY; longPressed = false;
+                    clearPress();
+                    pressCard = card;
+                    pressCard.classList.add('is-pressing');
+                    timer = setTimeout(function() {
+                        longPressed = true;
+                        if (pressCard) pressCard.classList.remove('is-pressing');
+                        pressCard = null;
+                        enterMode();
+                    }, 600);
+                });
+                grid.addEventListener('pointermove', function(e) {
+                    if (timer && Math.hypot(e.clientX - startX, e.clientY - startY) > 10) clearPress();
+                });
+                ['pointerup', 'pointerleave', 'pointercancel'].forEach(function(ev) { grid.addEventListener(ev, clearPress); });
+                grid.addEventListener('contextmenu', function(e) { if (longPressed || inEditMode) e.preventDefault(); });
+                grid.addEventListener('click', function(e) {
+                    if (longPressed) { e.preventDefault(); e.stopPropagation(); setTimeout(function() { longPressed = false; }, 50); return; }
+                    if (!inEditMode || e.target.closest('.sponsor-public-action-btn--del') || e.target.closest('form')) return;
+                    var card = e.target.closest('.sponsor-public-card');
+                    if (!card) return;
+                    var b = card.querySelector('.sponsor-edit-btn');
+                    if (b) { e.preventDefault(); openSponsorModal({ mode: 'edit', index: b.dataset.index, date: b.dataset.date, nick: b.dataset.nick, amount: b.dataset.amount, msg: b.dataset.msg }); }
+                });
+            }
+            document.addEventListener('click', function(e) {
+                if (inEditMode && !e.target.closest('#sponsor-grid') && !e.target.closest('#sponsor-edit-bar') && !e.target.closest('#sponsor-modal')) exitSponsorEditMode();
+            });
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && inEditMode) {
+                    var m = document.getElementById('sponsor-modal');
+                    if (!m || !m.classList.contains('show')) exitSponsorEditMode();
+                }
+            });
+        })();
+        </script>
+{{end}}
+

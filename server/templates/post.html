@@ -1,0 +1,95 @@
+{{define "post.html"}}
+{{template "base_layout" .}}
+{{end}}
+
+{{define "body_attrs"}} class="page-article"{{end}}
+
+{{define "body_class"}}page-article{{end}}
+
+{{define "main_class"}}main{{end}}
+
+{{define "content"}}
+        <div class="post-layout">
+            <!-- left: category posts -->
+            <aside class="post-sidebar" data-backdrop-scene="b">
+                <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div><div class="g-tint"></div><div class="g-noise"></div>
+                <div class="sidebar-title">{{.UI.post.sidebar.all_posts}}</div>
+                {{range .CategoryPosts}}
+                <div class="cat-group {{if .Open}}open{{end}}">
+                    <div class="cat-header" tabindex="0" role="button">
+                        <span class="cat-arrow {{if .Open}}open{{end}}">{{svg "chevron-right"}}</span>
+                        <span class="cat-name">{{.Name}}</span>
+                        <span class="cat-count">({{len .Posts}})</span>
+                    </div>
+                    <div class="cat-body {{if .Open}}open{{end}}">
+                        {{range .Posts}}
+                        <a href="{{ URLPost .ID }}" class="cat-post ink-row {{if eq .ID $.CurrentPost.ID}}active{{end}}">
+                            <span class="cat-post-title">{{.Title}}</span>
+                            <span class="cat-post-date">{{.Date.Format "02 Jan"}}</span>
+                        </a>
+                        {{end}}
+                    </div>
+                </div>
+                {{end}}
+            </aside>
+
+            <!-- center: article + comments -->
+            <div class="post-center" id="post-main">
+                {{template "post_article_body" (dict "P" .CurrentPost "UI" .UI "Cats" .CategoryAliases "Nick" .Nickname)}}
+
+            <!-- Scissors divider (between article and comments) -->
+            <div class="article-divider">
+                <div class="article-divider-line"></div>
+                {{svg "scissors"}}
+                <div class="article-divider-line article-divider-line--flex"></div>
+            </div>
+
+            <!-- Comments -->
+            <div class="cmt-section cmt-wrap-glass" id="cmt-section">
+                <div class="cmt-header">
+                    {{svg "comment"}}
+                    <span class="cmt-title">{{.UI.post.comments.title}}</span>
+                    <span class="cmt-count" id="cmt-count"></span>
+                </div>
+            {{template "comment_form" .}}
+
+            <!-- Comment area glass inner layer: wraps only "fixed header + dynamic list".
+                 The form (cmt-form-card) stays above the glass; only on reply does JS move it next to
+                 the target comment (inside the glass).
+                 The glass carries .cmt-glass-panel (persistent layer, morph never
+                 destroys it); #cmt-comment-area is an ordinary dynamic container inside
+                 the glass. -->
+            <div class="cmt-glass-panel" data-backdrop-scene="b">
+                <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div><div class="g-tint"></div><div class="g-noise"></div>
+                <div class="cmt-list-head">
+                    <span class="cmt-list-title">{{len .PostComments}} {{.UI.post.comments.count_unit}}</span>
+                    <div class="cmt-sort">
+                        <a href="?sort=oldest" class="cmt-sort-link {{if or (eq .Sort `oldest`) (eq .Sort ``)}}active{{end}}" hx-get="{{ URLCommentList }}?sort=oldest&post_id={{if .CurrentPost}}{{.CurrentPost.ID}}{{else}}0{{end}}" hx-target="#cmt-comment-area" hx-select="#cmt-comment-area" hx-swap="outerMorph">{{.UI.comment.sort.oldest}}</a>
+                        <a href="?sort=newest" class="cmt-sort-link {{if eq .Sort `newest`}}active{{end}}" hx-get="{{ URLCommentList }}?sort=newest&post_id={{if .CurrentPost}}{{.CurrentPost.ID}}{{else}}0{{end}}" hx-target="#cmt-comment-area" hx-select="#cmt-comment-area" hx-swap="outerMorph">{{.UI.comment.sort.newest}}</a>
+                        <a href="?sort=hottest" class="cmt-sort-link {{if eq .Sort `hottest`}}active{{end}}" hx-get="{{ URLCommentList }}?sort=hottest&post_id={{if .CurrentPost}}{{.CurrentPost.ID}}{{else}}0{{end}}" hx-target="#cmt-comment-area" hx-select="#cmt-comment-area" hx-swap="outerMorph">{{.UI.comment.sort.hottest}}</a>
+                    </div>
+                </div>
+                <div id="cmt-comment-area" data-post-id="{{if .CurrentPost}}{{.CurrentPost.ID}}{{else}}0{{end}}">
+                    <div class="cmt-loading-placeholder"><div class="cmt-spinner"></div></div>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <!-- right: TOC -->
+        <aside class="post-sidebar post-sidebar-right" data-backdrop-scene="b">
+            <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div><div class="g-tint"></div><div class="g-noise"></div>
+            <div class="sidebar-title">{{.UI.post.toc.title}}</div>
+            <div class="toc-list" id="tocList"></div>
+        </aside>
+    </div>
+{{end}}
+
+{{define "head_extra"}}
+<link rel="stylesheet" href="{{asset "css/article.bundle.css"}}">
+<link rel="stylesheet" href="{{asset "css/comment.bundle.css"}}">
+<script src="{{asset "js/article.bundle.js"}}" defer></script>
+<script src="{{asset "js/comment.bundle.js"}}" defer></script>
+{{end}}
+
+{{define "scripts"}}{{end}}

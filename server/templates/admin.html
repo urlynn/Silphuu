@@ -1,0 +1,2210 @@
+{{define "admin.html"}}
+{{template "base_layout" .}}
+{{end}}
+
+{{define "head_extra"}}
+    <link rel="stylesheet" href="{{asset "css/admin.bundle.css"}}">
+    <link rel="stylesheet" href="{{asset "css/home.bundle.css"}}">
+    <link rel="stylesheet" href="{{asset "css/browse.bundle.css"}}">
+    <link rel="stylesheet" href="{{asset "css/article.bundle.css"}}">
+    <link rel="stylesheet" href="{{asset "css/comment.bundle.css"}}">
+{{end}}
+
+{{define "main_class"}}main{{end}}
+
+{{define "content"}}
+<div class="admin-page" hx-boost:inherited="false">
+    <!-- Main dashboard card (single L1 glass base, inheriting the site theme background and floating tangram) -->
+    <div class="profile-card page-card admin-dashboard" data-backdrop-scene="b">
+        <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div>
+        <div class="g-tint"></div>
+        <div class="g-noise"></div>
+
+        <!-- 1. Global standard header -->
+        {{template "page_header" (dict "Icon" "settings" "Title" .UI.nav.menu.admin "Subtitle" "系统运维中心、全站缓存重构、视觉资产与内容管理控制台" "Accent" true)}}
+
+        <!-- 2. System maintenance and cache rebuild hub -->
+        <section class="admin-module admin-module--maint">
+            <div class="admin-module__header">
+                <div class="admin-module__title-wrap">
+                    <div class="admin-module__icon">{{svg "refresh"}}</div>
+                    <div>
+                        <h3 class="admin-module__title">{{.UI.admin.maintenance.title}}</h3>
+                        <p class="admin-module__desc">{{.UI.admin.maintenance.desc}}</p>
+                    </div>
+                </div>
+                <!-- Full rebuild primary action -->
+                <form method="POST" action="{{ URLCommit "rebuild" }}" class="admin-rebuild-form" onsubmit="return confirm('确认执行全量缓存重建？将按序重构文章索引、静态 Bundle、表情缓存与字体子集。')">
+                    <input type="hidden" name="target" value="all">
+                    <button type="submit" class="admin-btn admin-btn--primary admin-rebuild-all-btn">
+                        {{svg "refresh"}} {{.UI.admin.maintenance.all}}
+                    </button>
+                </form>
+            </div>
+
+            <!-- 5 granular maintenance tasks (compact, polished, modern) -->
+            <div class="admin-maint-grid">
+                <!-- 1. Posts and search pool -->
+                <div class="admin-maint-card" data-hover-glow>
+                    {{template "hover_layers" (dict "glow" true)}}<div class="admin-maint-card__icon">{{svg "archive"}}</div>
+                    <div class="admin-maint-card__body">
+                        <h4 class="admin-maint-card__title">{{.UI.admin.maintenance.posts}}</h4>
+                        <p class="admin-maint-card__desc">重扫 posts/ 重构文章内存索引</p>
+                    </div>
+                    <form method="POST" action="{{ URLCommit "rebuild" }}" class="admin-rebuild-form">
+                        <input type="hidden" name="target" value="posts">
+                        <button type="submit" class="admin-btn admin-btn--subtle admin-btn--sm">重扫</button>
+                    </form>
+                </div>
+
+                <!-- 2. Sticker and kaomoji mapping -->
+                <div class="admin-maint-card" data-hover-glow>
+                    {{template "hover_layers" (dict "glow" true)}}<div class="admin-maint-card__icon">{{svg "smiley"}}</div>
+                    <div class="admin-maint-card__body">
+                        <h4 class="admin-maint-card__title">{{.UI.admin.maintenance.sticker}}</h4>
+                        <p class="admin-maint-card__desc">重载 static/sticker/ 映射及缩略图</p>
+                    </div>
+                    <form method="POST" action="{{ URLCommit "rebuild" }}" class="admin-rebuild-form">
+                        <input type="hidden" name="target" value="sticker">
+                        <button type="submit" class="admin-btn admin-btn--subtle admin-btn--sm">刷新</button>
+                    </form>
+                </div>
+
+                <!-- Visual alignment debugging -->
+                <div class="admin-maint-card" data-hover-glow>
+                    {{template "hover_layers" (dict "glow" true)}}<div class="admin-maint-card__icon">{{svg "code"}}</div>
+                    <div class="admin-maint-card__body">
+                        <h4 class="admin-maint-card__title">视觉对齐调试</h4>
+                        <p class="admin-maint-card__desc">墨水偏移(Ink Shift) 渲染测试界面</p>
+                    </div>
+                    <a href="/debug/align" target="_blank" class="admin-btn admin-btn--subtle admin-btn--sm" style="text-decoration:none;">进入</a>
+                </div>
+
+                <!-- 3. Site-wide font subsetting -->
+                <div class="admin-maint-card" data-hover-glow>
+                    {{template "hover_layers" (dict "glow" true)}}<div class="admin-maint-card__icon">{{svg "scissors"}}</div>
+                    <div class="admin-maint-card__body">
+                        <h4 class="admin-maint-card__title">{{.UI.admin.maintenance.font}}</h4>
+                        <p class="admin-maint-card__desc">调用 Python 重建 woff2 字体子集</p>
+                    </div>
+                    <form method="POST" action="{{ URLCommit "rebuild" }}" class="admin-rebuild-form">
+                        <input type="hidden" name="target" value="font">
+                        <button type="submit" class="admin-btn admin-btn--subtle admin-btn--sm">重建</button>
+                    </form>
+                </div>
+
+                <!-- 4. Static asset bundle packing -->
+                <div class="admin-maint-card" data-hover-glow>
+                    {{template "hover_layers" (dict "glow" true)}}<div class="admin-maint-card__icon">{{svg "repeat"}}</div>
+                    <div class="admin-maint-card__body">
+                        <h4 class="admin-maint-card__title">{{.UI.admin.maintenance.bundle}}</h4>
+                        <p class="admin-maint-card__desc">重新打包合并 CSS/JS 资源</p>
+                    </div>
+                    <form method="POST" action="{{ URLCommit "rebuild" }}" class="admin-rebuild-form">
+                        <input type="hidden" name="target" value="bundle">
+                        <button type="submit" class="admin-btn admin-btn--subtle admin-btn--sm">打包</button>
+                    </form>
+                </div>
+
+                <!-- 5. Edge hot sync -->
+                <div class="admin-maint-card" data-hover-glow>
+                    {{template "hover_layers" (dict "glow" true)}}<div class="admin-maint-card__icon">{{svg "shuffle"}}</div>
+                    <div class="admin-maint-card__body">
+                        <h4 class="admin-maint-card__title">{{.UI.admin.maintenance.sync}}</h4>
+                        <p class="admin-maint-card__desc">向生产对端节点发起热同步</p>
+                    </div>
+                    <form method="POST" action="{{ URLCommit "rebuild" }}" class="admin-rebuild-form">
+                        <input type="hidden" name="target" value="sync">
+                        <button type="submit" class="admin-btn admin-btn--subtle admin-btn--sm">同步</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Workspace core two-column split (posts & assets) -->
+        <div class="admin-workspace-grid">
+            <!-- Left column: post management -->
+            <section class="admin-panel admin-panel--posts">
+                <div class="admin-panel__header">
+                    <div class="admin-panel__title-wrap">
+                        <div class="admin-panel__icon">{{svg "file"}}</div>
+                        <h3 class="admin-panel__title">{{.UI.admin.posts.manage}}</h3>
+                        {{if .Posts}}<span class="admin-badge">{{len .Posts}} 篇</span>{{end}}
+                    </div>
+                    <a href="{{ URLAdminNewPost }}" class="admin-btn admin-btn--primary admin-btn--sm">
+                        {{svg "plus"}} {{.UI.admin.posts.new}}
+                    </a>
+                </div>
+
+                <div class="admin-panel__content">
+                    {{if .Posts}}
+                    <ul class="admin-post-list" id="post-list">
+                        {{range $i, $p := .Posts}}
+                        <li class="post-row admin-list-item{{if eq $p.ID $.PinnedPostID}} is-pinned{{end}}">
+                            {{if eq $p.ID $.PinnedPostID}}
+                            <span class="admin-tag admin-tag--pinned" title="{{$.UI.admin.posts.pinned_title}}">{{svg "pin"}} {{$.UI.admin.posts.pinned_tag}}</span>
+                            {{end}}
+                            <span class="admin-tag">{{$p.Category}}</span>
+                            <a href="{{ URLPost $p.ID }}" class="admin-list-item__link" title="{{$p.Title}}">{{$p.Title}}</a>
+                            <span class="admin-list-item__date">{{$p.Date.Format "2006-01-02"}}</span>
+                            <a href="{{ URLPostEdit $p.ID }}" class="admin-list-item__action admin-btn admin-btn--subtle admin-btn--xs" title="{{$.UI.post.meta.edit}}">
+                                {{svg "edit"}} {{$.UI.post.meta.edit}}
+                            </a>
+                            <form method="POST" action="{{ URLCommit "post/pin" }}" class="admin-list-item__action" onsubmit="return confirm('{{if eq $p.ID $.PinnedPostID}}{{$.UI.admin.posts.confirm_unpin}}{{else}}{{$.UI.admin.posts.confirm_pin}}{{end}}')">
+                                <input type="hidden" name="post_id" value="{{$p.ID}}">
+                                <button type="submit" class="admin-btn {{if eq $p.ID $.PinnedPostID}}admin-btn--primary{{else}}admin-btn--subtle{{end}} admin-btn--xs" title="{{if eq $p.ID $.PinnedPostID}}{{$.UI.admin.posts.unpin_action}}{{else}}{{$.UI.admin.posts.pin_action}}{{end}}">
+                                    {{svg "pin"}} {{if eq $p.ID $.PinnedPostID}}{{$.UI.admin.posts.pinned}}{{else}}{{$.UI.admin.posts.pin}}{{end}}
+                                </button>
+                            </form>
+                            <form method="POST" action="{{ URLCommit "post/delete" }}" class="admin-list-item__action" onsubmit="return confirm('确认删除？')">
+                                <input type="hidden" name="post_id" value="{{$p.ID}}">
+                                <button type="submit" class="admin-btn admin-btn--danger admin-btn--xs" title="{{$.UI.common.action.delete}}">
+                                    {{svg "trash"}}
+                                </button>
+                            </form>
+                        </li>
+                        {{end}}
+                    </ul>
+                    {{if gt (len .Posts) 1}}
+                    <button type="button" id="post-toggle" class="admin-btn admin-btn--subtle admin-btn--block" style="margin-top:12px;">
+                        展开全部 ({{len .Posts}})
+                    </button>
+                    {{end}}
+                    {{else}}
+                    <div class="admin-card__empty">{{.UI.admin.posts.empty}}</div>
+                    {{end}}
+                </div>
+            </section>
+
+            <!-- Right column: visual assets and personalization -->
+            <div class="admin-panel-col">
+                <!-- Background wallpaper management -->
+                <section class="admin-panel admin-panel--bg">
+                    <div class="admin-panel__header">
+                        <div class="admin-panel__title-wrap">
+                            <div class="admin-panel__icon">{{svg "image"}}</div>
+                            <h3 class="admin-panel__title">{{.UI.admin.bg.manage}}</h3>
+                        </div>
+                    </div>
+
+                    <div class="admin-panel__content">
+                        <!-- Desktop wallpaper -->
+                        {{if .DesktopBgs}}
+                        <div class="admin-subheading">
+                            <span class="admin-tag admin-tag--accent">桌面端 ({{len .DesktopBgs}})</span>
+                        </div>
+                        <div class="bg-grid">
+                            {{range $bg := .DesktopBgs}}
+                            <div class="bg-grid-item" title="{{$bg.URL}}">
+                                <div class="bg-preview bg-preview--desktop">
+                                    <img src="{{$bg.URL}}" alt="" loading="lazy" onerror="this.parentElement.style.background='var(--bg-subtle)'; this.style.display='none'">
+                                    <div class="bg-preview-overlay">
+                                        <form method="POST" action="{{ URLCommit "background/delete" }}" class="bg-delete-form">
+                                            <input type="hidden" name="src" value="{{$bg.URL}}">
+                                            <button type="submit" class="bg-delete-btn" title="{{$.UI.common.action.delete}}">{{svg "close"}}</button>
+                                        </form>
+                                        <form method="POST" action="{{ URLCommit "background/set-tone" }}" class="bg-tone-form">
+                                            <input type="hidden" name="src" value="{{$bg.URL}}">
+                                            <input type="hidden" name="tone" value="{{if eq $bg.Tone "dark"}}light{{else}}dark{{end}}">
+                                            <button type="submit" class="bg-tone-btn" title="切换装饰颜色">{{if eq $bg.Tone "dark"}}白系{{else}}黑系{{end}}</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {{end}}
+                        </div>
+                        {{end}}
+
+                        <!-- Mobile wallpaper -->
+                        {{if .MobileBgs}}
+                        <div class="admin-subheading" style="margin-top:12px;">
+                            <span class="admin-tag admin-tag--accent">移动端 ({{len .MobileBgs}})</span>
+                        </div>
+                        <div class="bg-grid">
+                            {{range $bg := .MobileBgs}}
+                            <div class="bg-grid-item bg-grid-item--mobile" title="{{$bg.URL}}">
+                                <div class="bg-preview bg-preview--mobile">
+                                    <img src="{{$bg.URL}}" alt="" loading="lazy" onerror="this.parentElement.style.background='var(--bg-subtle)'; this.style.display='none'">
+                                    <div class="bg-preview-overlay">
+                                        <form method="POST" action="{{ URLCommit "background/delete" }}" class="bg-delete-form">
+                                            <input type="hidden" name="src" value="{{$bg.URL}}">
+                                            <button type="submit" class="bg-delete-btn" title="{{$.UI.common.action.delete}}">{{svg "close"}}</button>
+                                        </form>
+                                        <form method="POST" action="{{ URLCommit "background/set-tone" }}" class="bg-tone-form">
+                                            <input type="hidden" name="src" value="{{$bg.URL}}">
+                                            <input type="hidden" name="tone" value="{{if eq $bg.Tone "dark"}}light{{else}}dark{{end}}">
+                                            <button type="submit" class="bg-tone-btn" title="切换装饰颜色">{{if eq $bg.Tone "dark"}}白系{{else}}黑系{{end}}</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {{end}}
+                        </div>
+                        {{end}}
+
+                        {{if not .Backgrounds}}<p class="admin-card__empty">{{.UI.admin.bg.empty}}</p>{{end}}
+
+                        <!-- Upload and download form -->
+                        <div class="admin-bg-actions">
+                            <form method="POST" action="{{ URLCommit "background/add" }}" class="admin-form-row">
+                                <input type="text" name="url" placeholder="{{.UI.admin.bg.url_input}}" class="admin-input" style="flex:1;">
+                                <button type="submit" class="admin-btn admin-btn--subtle admin-btn--sm">下载添加</button>
+                            </form>
+                            <form method="POST" action="{{ URLCommit "background/upload" }}" enctype="multipart/form-data" class="admin-form-row" style="margin-top:8px;">
+                                <input type="file" name="files" multiple accept="image/*" class="admin-input admin-file-input" style="flex:1;">
+                                <button type="submit" class="admin-btn admin-btn--primary admin-btn--sm">{{.UI.admin.bg.upload}}</button>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Sponsor and motto side-by-side mini grid -->
+                <div class="admin-subgrid">
+                    <!-- Sponsor management -->
+                    <section class="admin-panel admin-panel--sponsors">
+                        <div class="admin-panel__header">
+                            <div class="admin-panel__title-wrap">
+                                <div class="admin-panel__icon">{{svg "heart-handshake"}}</div>
+                                <h3 class="admin-panel__title">{{.UI.admin.sponsor.manage}}</h3>
+                                {{if .Sponsors}}<span class="admin-badge">{{len .Sponsors}}</span>{{end}}
+                            </div>
+                            <button onclick="openSponsorModal()" class="admin-icon-btn admin-icon-btn--sm" title="{{.UI.sponsor.new.btn}}">
+                                {{svg "plus"}}
+                            </button>
+                        </div>
+                        <div class="admin-panel__content">
+                            {{if .Sponsors}}
+                            <ul class="admin-sponsor-list">
+                                {{range $i, $s := .Sponsors}}
+                                <li class="sponsor-row admin-list-item">
+                                    <span class="admin-list-item__date">{{if $s.Date}}{{$s.Date}}{{else}}-{{end}}</span>
+                                    <span class="admin-list-item__name" title="{{$s.Nick}}">{{$s.Nick}}</span>
+                                    <span class="admin-sponsor-amount">¥{{$s.Amount}}</span>
+                                    <div class="admin-sponsor-actions">
+                                        <button type="button" class="sponsor-edit-btn admin-icon-btn admin-icon-btn--xs"
+                                            data-index="{{$i}}"
+                                            data-date="{{$s.Date}}"
+                                            data-nick="{{$s.Nick}}"
+                                            data-amount="{{$s.Amount}}"
+                                            data-msg="{{$s.Msg}}"
+                                            title="{{$.UI.common.action.edit}}">
+                                            {{svg "edit"}}
+                                        </button>
+                                        <form method="POST" action="{{ URLCommit "sponsor/delete" }}" class="sponsor-del-form">
+                                            <input type="hidden" name="index" value="{{$i}}">
+                                            <input type="hidden" name="redirect" value="{{ URLAdminDashboard }}">
+                                            <button type="submit" class="sponsor-del-btn" title="{{$.UI.common.action.delete}}">{{svg "close"}}</button>
+                                        </form>
+                                    </div>
+                                </li>
+                                {{end}}
+                            </ul>
+                            {{else}}
+                            <div class="admin-card__empty">{{.UI.admin.sponsor.empty}}</div>
+                            {{end}}
+                        </div>
+                    </section>
+
+                    <!-- Personal motto -->
+                    <section class="admin-panel admin-panel--motto">
+                        <div class="admin-panel__header">
+                            <div class="admin-panel__title-wrap">
+                                <div class="admin-panel__icon">{{svg "lightbulb"}}</div>
+                                <h3 class="admin-panel__title">{{.UI.admin.signature.title}}</h3>
+                            </div>
+                        </div>
+                        <div class="admin-panel__content">
+                            <form method="POST" action="{{ URLCommit "config" }}" class="admin-form-row">
+                                <input type="text" name="motto" value="{{.Motto}}" class="admin-input" style="flex:1;" placeholder="输入个人签名...">
+                                <button type="submit" class="admin-btn admin-btn--primary admin-btn--sm">{{.UI.common.action.save}}</button>
+                            </form>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sponsor create/edit modal (global overlay) -->
+    {{template "modal_begin" dict
+        "ID" "sponsor-modal"
+        "Title" .UI.sponsor.new.btn
+        "CardClass" ""
+    }}
+            <form id="sponsor-form" method="POST" action="{{ URLCommit "sponsor/add" }}" data-action-add="{{ URLCommit "sponsor/add" }}" data-action-edit="{{ URLCommit "sponsor/edit" }}" class="admin-form-col">
+                <input type="hidden" name="redirect" value="{{ URLAdminDashboard }}">
+                <input type="hidden" name="index" id="sponsor-index" value="">
+                <input type="date" name="date" id="sponsor-date" class="admin-input">
+                <input type="text" name="nick" id="sponsor-nick" placeholder="{{.UI.common.input.nickname}}" required class="admin-input">
+                <input type="text" name="amount" id="sponsor-amount" placeholder="{{.UI.sponsor.new.amount}}" required class="admin-input">
+                <input type="text" name="msg" id="sponsor-msg" placeholder="{{.UI.common.input.message}}" class="admin-input">
+                <button type="submit" id="sponsor-modal-submit" class="admin-btn admin-btn--primary" style="margin-top:4px;">{{.UI.common.action.add}}</button>
+            </form>
+    {{template "modal_end"}}
+
+        <!-- Font Preset Manager -->
+        <div class="font-config">
+            <h2 class="font-config__title">{{.UI.admin.font.preset_title}}</h2>
+            <p class="font-config__desc">{{.UI.admin.font.desc}}</p>
+
+            <!-- Preset switcher: one select box; change = activate + delete current + create new -->
+            <div class="font-config__preset-bar">
+                <form method="POST" action="{{ URLCommit "font/activate" }}" class="font-config__switch-form">
+                    <select class="font-config__preset-select" name="preset_id" onchange="this.form.submit()">
+                        {{range .FontPresets}}
+                        <option value="{{.ID}}" {{if eq .ID $.ActiveFontPreset}}selected{{end}}>{{.Name}}{{if eq .ID $.ActiveFontPreset}} {{$.UI.admin.font.current}}{{end}}</option>
+                        {{end}}
+                    </select>
+                </form>
+                <form method="POST" action="{{ URLCommit "font/delete" }}" class="font-config__del-form" onsubmit="return confirm('确定删除当前预设？');">
+                    <input type="hidden" name="preset_id" value="{{$.ActiveFontPreset}}">
+                    <button type="submit" title="{{.UI.admin.font.preset_delete}}" class="font-config__preset-btn font-config__preset-btn--delete">删除当前</button>
+                </form>
+                <form method="POST" action="{{ URLCommit "font/create" }}" class="font-config__new-form">
+                    <input type="text" name="preset_name" placeholder="{{.UI.admin.font.new_name}}" class="font-config__new-input">
+                    <button type="submit" class="font-config__new-btn">{{.UI.admin.font.new_btn}}</button>
+                </form>
+            </div>
+
+            <!-- Per-item editing of the active preset -->
+            {{range .FontPresets}}
+            {{if eq .ID $.ActiveFontPreset}}
+            {{$fonts := .Fonts}}
+            {{/* The form body IS the left column, not a wrapper around the preview: HTML
+                forbids nested forms, and the preview's comment_form contains a <form> whose
+                hidden required controls would silently cancel fontPresetForm submits. */}}
+            <!-- Top bar: global preset name and scene switcher (outside the form; attached to fontPresetForm via the form attribute) -->
+            <div class="font-studio__header">
+                <div class="font-studio__name-box">
+                    <label class="font-config__label" style="margin:0;">{{$.UI.admin.font.preset_name}}</label>
+                    <input type="text" name="preset_name" form="fontPresetForm" value="{{.Name}}" class="font-config__select font-studio__name-input">
+                </div>
+                <div class="font-studio__tabs" role="tablist">
+                        <button type="button" class="font-studio__tab-btn is-active" data-scene="home">{{$.UI.admin.font.tab_home}}</button>
+                        <button type="button" class="font-studio__tab-btn" data-scene="article">{{$.UI.admin.font.tab_article}}</button>
+                        <button type="button" class="font-studio__tab-btn" data-scene="archive">{{$.UI.admin.font.tab_archive}}</button>
+                        <button type="button" class="font-studio__tab-btn" data-scene="comment">{{$.UI.admin.font.tab_comment}}</button>
+                        <button type="button" class="font-studio__tab-btn" data-scene="lalafell">{{$.UI.admin.font.tab_lalafell}}</button>
+                        <button type="button" class="font-studio__tab-btn" data-scene="sponsor">{{$.UI.admin.font.tab_sponsor}}</button>
+                        <button type="button" class="font-studio__tab-btn" data-scene="all">{{$.UI.admin.font.tab_all}}</button>
+                    </div>
+                </div>
+
+                <div class="font-config__panels">
+                    <!-- Left: scene-based font config panel — this column IS the fontPresetForm body -->
+                    <form method="POST" action="{{ URLCommit "font/save" }}" id="fontPresetForm" novalidate
+                          class="font-config__panel font-studio__left" data-backdrop-scene="b">
+                        <input type="hidden" name="preset_id" value="{{.ID}}">
+                        <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div><div class="g-tint"></div><div class="g-noise"></div>
+                        
+                        <!-- Scene 1 left: home showcase (4 items) -->
+                        <div class="font-studio__scene-left is-active" data-scene="home">
+                            <div class="font-config__panel-title">{{$.UI.admin.font.tab_home}}</div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.art_title}}</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="display_heading" data-preview="preview-display-heading">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                    <input type="hidden" name="display_heading" value="{{index $fonts "display_heading"}}">
+                                </div>
+                            </div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.art_body}}</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="display_body" data-preview="preview-display-body">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                    <input type="hidden" name="display_body" value="{{index $fonts "display_body"}}">
+                                </div>
+                            </div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.deco_jp}}</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="display_jp" data-preview="preview-display-jp">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                    <input type="hidden" name="display_jp" value="{{index $fonts "display_jp"}}">
+                                </div>
+                            </div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.deco_mono}}</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="display_mono" data-preview="preview-display-mono">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                    <input type="hidden" name="display_mono" value="{{index $fonts "display_mono"}}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Scene 2 left: article typography (7 items) -->
+                        <div class="font-studio__scene-left" data-scene="article" style="display: none;">
+                            <div class="font-config__panel-title">{{$.UI.admin.font.tab_article}}</div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.title_main}} (主标题)</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="heading" data-preview="preview-heading">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                    <input type="hidden" name="heading" value="{{index $fonts "heading"}}">
+                                </div>
+                            </div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.title_sub}} (副标题/小标题)</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="subheading" data-preview="preview-subheading">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                    <input type="hidden" name="subheading" value="{{index $fonts "subheading"}}">
+                                </div>
+                            </div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.body_long}} (文章正文)</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="article" data-preview="preview-article">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                    <input type="hidden" name="article" value="{{index $fonts "article"}}">
+                                </div>
+                            </div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.code}} (代码/等宽)</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="mono" data-preview="preview-mono">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                    <input type="hidden" name="mono" value="{{index $fonts "mono"}}">
+                                </div>
+                            </div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.serif}} (引用衬线)</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="serif" data-preview="preview-serif">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                    <input type="hidden" name="serif" value="{{index $fonts "serif"}}">
+                                </div>
+                            </div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.attach_text}} (说明小字/文末)</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="caption" data-preview="preview-caption">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                    <input type="hidden" name="caption" value="{{index $fonts "caption"}}">
+                                </div>
+                            </div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.footer_copy}} (页脚版权)</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="footer" data-preview="preview-footer">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                    <input type="hidden" name="footer" value="{{index $fonts "footer"}}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Scene 3 left: archive and lists (4 items) -->
+                        <div class="font-studio__scene-left" data-scene="archive" style="display: none;">
+                            <div class="font-config__panel-title">{{$.UI.admin.font.tab_archive}}</div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.title_main}} (归档年份)</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="heading" data-preview="preview-arch-year">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                    <input type="hidden" name="heading" value="{{index $fonts "heading"}}">
+                                </div>
+                            </div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.title_sub}} (文章列表标题)</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="subheading" data-preview="preview-arch-title">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                    <input type="hidden" name="subheading" value="{{index $fonts "subheading"}}">
+                                </div>
+                            </div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.body_short}} (摘要正文)</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="body" data-preview="preview-topic-summary">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                    <input type="hidden" name="body" value="{{index $fonts "body"}}">
+                                </div>
+                            </div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.data_text}} (日期与篇数)</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="data" data-preview="preview-arch-date">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                    <input type="hidden" name="data" value="{{index $fonts "data"}}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Scene 3 left: comments and footer (4 items) -->
+                        <div class="font-studio__scene-left" data-scene="comment" style="display: none;">
+                            <div class="font-config__panel-title">{{$.UI.admin.font.tab_comment}}</div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.comment}}</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="cmt" data-preview="preview-cmt">
+                                        <option value="" data-weight="" data-bevl="">{{$.UI.admin.font.unspecified}}</option>
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                    <input type="hidden" name="cmt" value="{{index $fonts "cmt"}}">
+                                </div>
+                            </div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.body_short}}</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="body" data-preview="preview-body">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                    <input type="hidden" name="body" value="{{index $fonts "body"}}">
+                                </div>
+                            </div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.data_text}}</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="data" data-preview="preview-data">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                    <input type="hidden" name="data" value="{{index $fonts "data"}}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Scene 4 left: per-row fonts for the random lalafell card (5 items) -->
+                        <div class="font-studio__scene-left" data-scene="lalafell" style="display: none;">
+                            <div class="font-config__panel-title">{{$.UI.admin.font.tab_lalafell}}</div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.fun_pill}}</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="fun_pill" data-preview="preview-fun-pill">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                    <input type="hidden" name="fun_pill" value="{{if index $fonts "fun_pill"}}{{index $fonts "fun_pill"}}{{else}}{{index $fonts "display_mono"}}{{end}}">
+                                </div>
+                            </div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.fun_title}}</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="fun_title" data-preview="preview-fun-title">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                    <input type="hidden" name="fun_title" value="{{if index $fonts "fun_title"}}{{index $fonts "fun_title"}}{{else}}{{index $fonts "heading"}}{{end}}">
+                                </div>
+                            </div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.fun_title_sym}}</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="fun_title_sym" data-preview="preview-fun-title-sym">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                    <input type="hidden" name="fun_title_sym" value="{{if index $fonts "fun_title_sym"}}{{index $fonts "fun_title_sym"}}{{else}}{{index $fonts "heading"}}{{end}}">
+                                </div>
+                            </div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.fun_desc}}</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="fun_desc" data-preview="preview-fun-desc">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                    <input type="hidden" name="fun_desc" value="{{if index $fonts "fun_desc"}}{{index $fonts "fun_desc"}}{{else}}{{index $fonts "serif"}}{{end}}">
+                                </div>
+                            </div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.fun_btn}}</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="fun_btn" data-preview="preview-fun-btn">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                    <input type="hidden" name="fun_btn" value="{{if index $fonts "fun_btn"}}{{index $fonts "fun_btn"}}{{else}}{{index $fonts "body"}}{{end}}">
+                                </div>
+                            </div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.fun_reroll}}</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="fun_reroll" data-preview="preview-fun-reroll">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                    <input type="hidden" name="fun_reroll" value="{{if index $fonts "fun_reroll"}}{{index $fonts "fun_reroll"}}{{else}}{{index $fonts "body"}}{{end}}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Scene 6 left: sponsor cards (3 items) -->
+                        <div class="font-studio__scene-left" data-scene="sponsor" style="display: none;">
+                            <div class="font-config__panel-title">{{$.UI.admin.font.tab_sponsor}}</div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.deco_i18n}}</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="display_i18n" data-preview="preview-display-i18n">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                    <input type="hidden" name="display_i18n" value="{{index $fonts "display_i18n"}}">
+                                    <input type="hidden" name="display_i18n_jp" value="{{index $fonts "display_i18n_jp"}}">
+                                </div>
+                            </div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.body_short}}</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="body" data-preview="preview-body">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                    <input type="hidden" name="body" value="{{index $fonts "body"}}">
+                                </div>
+                            </div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.data_text}}</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="data" data-preview="preview-data">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                    <input type="hidden" name="data" value="{{index $fonts "data"}}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Scene 7 left: all-role overview and advanced overrides -->
+                        <div class="font-studio__scene-left" data-scene="all" style="display: none;">
+                            <div class="font-config__panel-title">{{$.UI.admin.font.tab_all}}</div>
+                            <div class="font-config__group-title">{{$.UI.admin.font.title_group}}</div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.title_main}}</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="heading" data-preview="preview-heading">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.title_sub}}</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="subheading" data-preview="preview-subheading">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="font-config__group-title">{{$.UI.admin.font.group_display}}</div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.art_title}}</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="display_heading" data-preview="preview-display-heading">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.art_body}}</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="display_body" data-preview="preview-display-body">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.deco_mono}}</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="display_mono" data-preview="preview-display-mono">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.deco_jp}}</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="display_jp" data-preview="preview-display-jp">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.deco_i18n}}</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="display_i18n" data-preview="preview-display-i18n">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="font-config__group-title">{{$.UI.admin.font.body_group}}</div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.body_long}}</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="article" data-preview="preview-article">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.body_short}}</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="body" data-preview="preview-body">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.attach_text}}</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="caption" data-preview="preview-caption">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.comment}}</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="cmt" data-preview="preview-cmt">
+                                        <option value="" data-weight="" data-bevl="">{{$.UI.admin.font.unspecified}}</option>
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.data_text}}</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="data" data-preview="preview-data">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.footer_copy}}</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="footer" data-preview="preview-footer">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="font-config__group-title">{{$.UI.admin.font.code_group}}</div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.code}}</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="mono" data-preview="preview-mono">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="font-config__row">
+                                <label class="font-config__label">{{$.UI.admin.font.serif}}</label>
+                                <div class="font-config__control">
+                                    <select class="font-select font-config__select" data-name="serif" data-preview="preview-serif">
+                                        {{range $.AvailableFonts}}
+                                        <option value="{{.Family}}" data-weight="{{.Weight}}" data-bevl="{{.Bevl}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <div class="font-config__weight-box" title="可变字重调节 (100~900)">
+                                        <input type="number" class="font-weight-input" min="100" max="900" step="10" placeholder="400">
+                                        <span class="font-config__weight-unit">wght</span>
+                                    </div>
+                                    <div class="font-config__bevl-box" title="可变圆角调节 (1~100)" style="display: none;">
+                                        <input type="number" class="font-bevl-input" min="1" max="100" step="1" placeholder="100">
+                                        <span class="font-config__weight-unit">bevl</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="metrics" id="fontPresetMetrics" value="">
+                        <button type="submit" class="font-config__save">{{$.UI.admin.font.save}}</button>
+                    </form>
+
+                    <!-- Right: scene-based live preview workshop (1:1 linked to the scene selected on the left) -->
+                    <div class="font-config__panel font-preview-workshop" id="fontPreviewWorkshop" data-backdrop-scene="b">
+                        <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div><div class="g-tint"></div><div class="g-noise"></div>
+
+                        {{/* Missing-glyph self-audit bar — filled by auditPreviewFonts() in
+                             scripts; stays hidden when no glyphs are missing. The preview
+                             fixtures share the same source as the admin font subset, so
+                             gaps should not occur; this is an acceptance tool that turns
+                             missing glyphs from invisible (a character quietly thinning)
+                             into visible. */}}
+                        <div id="fontGapAudit" style="display:none;margin:0 0 12px;padding:10px 14px;border-radius:10px;font-size:13px;line-height:1.6;border:1px solid var(--border-light);background:var(--bg-subtle);color:var(--text-primary);"></div>
+
+                        <!-- Scene 1 right: full home panorama, both screens, 1:1 live reuse of real markup -->
+                        <div class="font-preview__scene is-active" data-scene="home">
+                            <div class="font-preview__hero-stage" style="margin-bottom:12px;">
+                                {{/* IsPreview is intentionally NOT set true. It only gates
+                                     #wpBlur / #wpSharp / .mask; the first two draw no image
+                                     here and the third is display:none, so it is inert. */}}
+                                {{template "hero_section" (dict "HeroBg" $.HeroBg "UI" $.UI "Nickname" $.PreviewNickname "HomeMotto" $.PreviewHomeMotto "Title" $.Title)}}
+                            </div>
+
+                            {{/* References the production partial directly (home_section_inner),
+                               so structure and glass come from the same markup the site serves:
+                               only the production partial carries data-backdrop-scene and the
+                               glass triplet, and --shadow-card with an opaque --bg-card would
+                               fake the glow instead. Stats use fixed sample values (handler.go's
+                               PreviewStats) so preview numbers do not jump with live traffic. */}}
+                            <div class="font-preview__home-section">
+                                {{template "home_section_inner" (dict
+                                    "UI"         $.UI
+                                    "Posts"      $.PreviewPosts
+                                    "Categories" $.PreviewCategories
+                                    "AllTags"    $.PreviewAllTags
+                                    "VisitStats" $.PreviewStats
+                                    "PinnedPost" $.PreviewPost
+                                    "LatestPost" $.PreviewLatest)}}
+                            </div>
+                        </div>
+
+                        <!-- Scene 2 right: article body and footer, 1:1 native typography
+
+     References the production partial directly (post_article_body), so structure,
+     glass, outline and glow are the ones the site serves: only the production partial
+     carries data-backdrop-scene and the triplet, and --shadow-card with an opaque
+     --bg-card would smother the glass it is supposed to show. The body uses a real
+     post (handler.go's PreviewPost — idxSnapshot carries no Content, so it is
+     rendered separately for preview). -->
+<div class="font-preview__scene" data-scene="article" style="display: none;">
+    <div class="post-center font-preview__post-center">
+        {{with $.PreviewPost}}
+        {{template "post_article_body" (dict "P" . "UI" $.UI "Cats" $.CategoryAliases "Nick" $.PreviewNickname)}}
+        {{end}}
+        <div class="font-preview__footer-box">
+            <div class="font-preview__footer-label">{{$.UI.admin.font.footer_copy}} (可变字体 + 粗细/圆角)</div>
+            <div id="preview-scene-footer" class="font-preview__text--footer" style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;">
+                <span>RSS</span><span class="footer-sep"></span>
+                <span>{{$.UI.footer.tech.jxl}}</span><span class="footer-sep"></span>
+                <span>{{$.UI.footer.tech.avif}}</span><span class="footer-sep"></span>
+                <span>{{$.UI.footer.tech.quic}}</span><span class="footer-sep"></span>
+                <span style="display:flex;align-items:center;gap:3px;">{{svg "copyright"}}{{$.UI.footer.copy.year}}</span><span class="footer-sep"></span>
+                <span style="display:flex;align-items:center;gap:3px;">{{svg "copyright"}}{{$.UI.footer.copy.name}}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scene 3 right: archive and lists, 1:1 native markup
+
+     References the production partial directly, so the preview matches production
+     bit-for-bit and a production template change reaches the preview on its own. Two
+     things go wrong the moment this markup is rebuilt by hand:
+        · .browse-header carries data-backdrop-scene and the triplet, without which
+          there is no glass where glass is expected
+        · .archive-panel has NO background/border/shadow in production (archive.css:5),
+          so a --shadow-card glow here gives a card a glow it must not have -->
+<div class="font-preview__scene" data-scene="archive" style="display: none;">
+    {{/* 1. Real browse header (category and tag navigation) — posts_header partial */}}
+    <div class="font-preview__browse-wrap">
+        {{template "posts_header" (dict
+            "IsArchive" true
+            "UI" $.UI
+            "Posts" $.PreviewPosts
+            "AllTags" $.PreviewAllTags
+            "Categories" $.PreviewCategories
+            "CategoryAliases" $.CategoryAliases)}}
+    </div>
+
+    {{/* 2. Real timeline archive structure — archive_year_block partial (latest year only; the preview need not be exhaustive) */}}
+    <div class="archive-panel font-preview__archive-panel">
+        {{range $i, $g := $.PreviewArchive}}{{if eq $i 0}}
+        {{template "archive_year_block" (dict "G" $g "UI" $.UI "Cats" $.CategoryAliases)}}
+        {{end}}{{end}}
+    </div>
+
+    {{/* 3. Real topic card — post_card partial (latest post) */}}
+    <div class="post-list-container post-list font-preview__topic-panel">
+        {{range $i, $p := $.PreviewPosts}}{{if eq $i 0}}
+        {{template "post_card" (dict "P" $p "I" 0 "Cats" $.CategoryAliases "ShowDate" true "ShowTags" true)}}
+        {{end}}{{end}}
+    </div>
+</div>
+
+                        <!-- Scene 4 right: comments, 1:1 native markup — references the production
+     partials directly (comment_form + comment_item). Guestbook is not previewed separately;
+     comment data comes from handler.go's PreviewComments fixed samples. -->
+<div class="font-preview__scene" data-scene="comment" style="display: none;">
+    <div class="font-preview__cmt-stage">
+        {{if $.PreviewPost}}
+        <div class="cmt-section cmt-wrap-glass" style="padding:0;margin-bottom:16px;">
+            <div class="cmt-header">
+                {{svg "comment"}}
+                <span class="cmt-title">{{$.UI.post.comments.title}}</span>
+                <span class="cmt-count">({{len $.PreviewComments}} {{$.UI.post.comments.count_unit}})</span>
+            </div>
+            {{template "comment_form" (dict "CurrentPost" $.PreviewPost "UI" $.UI)}}
+        </div>
+        {{end}}
+
+        <div class="cmt-section cmt-wrap-glass" style="padding:0;">
+            <div id="cmt-comment-area">
+                <div class="cmt-list-head">
+                    <span class="cmt-list-title">{{len $.PreviewComments}} {{$.UI.post.comments.count_unit}}</span>
+                    <div class="cmt-sort">
+                        <span class="cmt-sort-link active">{{$.UI.comment.sort.oldest}}</span>
+                        <span class="cmt-sort-link">{{$.UI.comment.sort.newest}}</span>
+                        <span class="cmt-sort-link">{{$.UI.comment.sort.hottest}}</span>
+                    </div>
+                </div>
+                <div class="cmt-list">
+                    {{range $c := $.PreviewComments}}
+                    {{template "comment_item" (dict "C" $c "UAShort" $c.UAShort "RenderedContent" $c.RenderedContent "UI" $.UI)}}
+                    {{end}}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scene 5 right: random lalafell card, 1:1 live reuse of real markup -->
+                        <div class="font-preview__scene" data-scene="lalafell" style="display: none;">
+                            <div class="font-preview__lalafell-wrap">
+                                {{template "fun_error_stage" $}}
+                            </div>
+                        </div>
+
+<!-- Scene 6 right: sponsor cards, 1:1 real markup
+
+     References the production partial directly (sponsor_card) — bit-for-bit identical
+     source with the sponsor page; structure / glass / outline / hover layers all come
+     from production, no hand-built markup.
+     Copy comes from config/preview_fixtures.json sponsors[] — each card uses its OWN
+     nick/amount/message (roles: display_i18n / data / body), not a shared sample,
+     otherwise the looped cards would look identical. Fonts consume workshop-level CSS
+     variables in real time. -->
+<div class="font-preview__scene" data-scene="sponsor" style="display: none;">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;">
+        {{range $i, $s := $.PreviewSponsors}}{{if lt $i 3}}
+        {{/* The arguments match sponsor.html:59 exactly (same $s.Nick/Amount/Msg/Date) —
+             preview and production share the same data path, and card copy stays
+             independent. */}}
+        {{template "sponsor_card" (dict
+            "S" $s
+            "I" $i
+            "Admin" false
+            "UI" $.UI
+            "Nick" $s.Nick
+            "Amount" $s.Amount
+            "Msg" $s.Msg
+            "Date" $s.Date)}}
+        {{end}}{{end}}
+    </div>
+</div>
+
+                        <!-- Scene 7 right: all-role canonical specimen table -->
+                        <div class="font-preview__scene" data-scene="all" style="display: none;">
+                            <div class="font-preview__item">
+                                <div class="font-preview__label">{{$.UI.admin.font.title_main}} (heading)</div>
+                                <div id="preview-heading" class="font-preview__text--display">{{$.UI.admin.preview.display1}}</div>
+                            </div>
+                            <div class="font-preview__item">
+                                <div class="font-preview__label">{{$.UI.admin.font.title_sub}} (subheading)</div>
+                                <div id="preview-subheading" class="font-preview__text--post-title">{{$.UI.admin.preview.post_title}}</div>
+                            </div>
+                            <div class="font-preview__item">
+                                <div class="font-preview__label">{{$.UI.admin.font.art_title}} (display_heading)</div>
+                                <div id="preview-display-heading" class="font-preview__text--display">{{$.UI.admin.preview.display2}}</div>
+                            </div>
+                            <div class="font-preview__item">
+                                <div class="font-preview__label">{{$.UI.admin.font.art_body}} (display_body)</div>
+                                <div id="preview-display-body" class="font-preview__text--hero-body">{{$.UI.admin.preview.hero_body}}</div>
+                            </div>
+                            <div class="font-preview__item">
+                                <div class="font-preview__label">{{$.UI.admin.font.deco_mono}} (display_mono)</div>
+                                <div id="preview-display-mono" class="font-preview__text--mono">{{$.UI.admin.preview.mono_meta}}</div>
+                            </div>
+                            <div class="font-preview__item">
+                                <div class="font-preview__label">{{$.UI.admin.font.deco_jp}} (display_jp)</div>
+                                <div id="preview-display-jp" class="font-preview__text--display" style="font-size:1.15rem;">{{$.UI.admin.preview.jp_sample}}</div>
+                            </div>
+                            <div class="font-preview__item">
+                                <div class="font-preview__label">{{$.UI.admin.font.deco_i18n}} (display_i18n)</div>
+                                <div id="preview-display-i18n" class="font-preview__text--display" style="font-size:1.15rem;">{{$.UI.admin.preview.sponsor_nick}}</div>
+                            </div>
+                            <div class="font-preview__item">
+                                <div class="font-preview__label">{{$.UI.admin.font.body_long}} (article)</div>
+                                <div id="preview-article" class="font-preview__text--body">{{$.UI.admin.preview.body_sample1}}</div>
+                            </div>
+                            <div class="font-preview__item">
+                                <div class="font-preview__label">{{$.UI.admin.font.body_short}} (body)</div>
+                                <div id="preview-body" class="font-preview__text--body">{{$.UI.admin.preview.body_sample2}}</div>
+                            </div>
+                            <div class="font-preview__item">
+                                <div class="font-preview__label">{{$.UI.admin.font.attach_text}} (caption)</div>
+                                <div id="preview-caption" class="font-preview__text--serif">{{$.UI.admin.preview.serif_sample}}</div>
+                            </div>
+                            <div class="font-preview__item">
+                                <div class="font-preview__label">{{$.UI.admin.font.comment}} (cmt)</div>
+                                <div id="preview-cmt" class="font-preview__text--body">{{$.UI.admin.preview.comment_sample}}</div>
+                            </div>
+                            <div class="font-preview__item">
+                                <div class="font-preview__label">{{$.UI.admin.font.data_text}} (data)</div>
+                                <div id="preview-data" class="font-preview__text--mono">{{$.UI.admin.preview.mono_stat}}</div>
+                            </div>
+                            <div class="font-preview__item">
+                                <div class="font-preview__label">{{$.UI.admin.font.footer_copy}} (footer)</div>
+                                <div id="preview-footer" class="font-preview__text--footer" style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;"><span>RSS</span><span class="footer-sep"></span><span>{{$.UI.footer.tech.jxl}}</span><span class="footer-sep"></span><span>{{$.UI.footer.tech.avif}}</span><span class="footer-sep"></span><span>{{$.UI.footer.tech.quic}}</span><span class="footer-sep"></span><span style="display:flex;align-items:center;gap:3px;">{{svg "copyright"}}{{$.UI.footer.copy.year}}</span><span class="footer-sep"></span><span style="display:flex;align-items:center;gap:3px;">{{svg "copyright"}}{{$.UI.footer.copy.name}}</span></div>
+                            </div>
+                            <div class="font-preview__item">
+                                <div class="font-preview__label">{{$.UI.admin.preview.symbol_label}} (symbol)</div>
+                                <div id="preview-symbol" class="font-preview__text--body" style="font-size:1.05rem;">(・ω<)* (〃▽〃) (￣▽￣)ゞ (๑>ᴗ<๑)♡ (つ﹏⊂) (๑•̀ㅂ•́)و✧ (╯‵□′)╯ (◕‿◕✿)</div>
+                            </div>
+                            <div class="font-preview__item">
+                                <div class="font-preview__label">{{$.UI.admin.font.code}} (mono)</div>
+                                <div id="preview-mono" class="font-preview__text--mono">{{$.UI.admin.preview.mono_code}}</div>
+                            </div>
+                            <div class="font-preview__item">
+                                <div class="font-preview__label">{{$.UI.admin.font.serif}} (serif)</div>
+                                <div id="preview-serif" class="font-preview__text--serif">{{$.UI.admin.preview.serif_sample}}</div>
+                            </div>
+                            <div class="font-preview__item">
+                                <div class="font-preview__label">{{$.UI.admin.font.fun_pill}} (fun_pill)</div>
+                                <div id="preview-fun-pill" class="font-preview__text--mono">418<span class="fun-dot">·</span>I'M<span class="fun-space"></span>A<span class="fun-space"></span>LALAFELL</div>
+                            </div>
+                            <div class="font-preview__item">
+                                <div class="font-preview__label">{{$.UI.admin.font.fun_title}} (fun_title)</div>
+                                <div id="preview-fun-title" class="font-preview__text--display">拉拉菲尔无情的拒绝了你的请求<span class="sym">！</span></div>
+                            </div>
+                            <div class="font-preview__item">
+                                <div class="font-preview__label">{{$.UI.admin.font.fun_title_sym}} (fun_title_sym)</div>
+                                <div id="preview-fun-title-sym" class="font-preview__text--display">！</div>
+                            </div>
+                            <div class="font-preview__item">
+                                <div class="font-preview__label">{{$.UI.admin.font.fun_desc}} (fun_desc)</div>
+                                <div id="preview-fun-desc" class="font-preview__text--serif">Lalafell<span class="fun-space"></span>says<span class="fun-space"></span>No!</div>
+                            </div>
+                            <div class="font-preview__item">
+                                <div class="font-preview__label">{{$.UI.admin.font.fun_btn}} (fun_btn)</div>
+                                <div id="preview-fun-btn" class="font-preview__text--body ink-row" style="display:inline-flex;align-items:center;gap:0;"><span>返回博客主页</span>{{svg "arrow-right"}}</div>
+                            </div>
+                            <div class="font-preview__item">
+                                <div class="font-preview__label">{{$.UI.admin.font.fun_reroll}} (fun_reroll)</div>
+                                <div id="preview-fun-reroll" class="font-preview__text--body">🎲 再掷一次</div>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            {{end}}
+            {{end}}
+        </div>
+{{end}}
+
+{{define "scripts"}}
+{{template "search_script" .}}
+<script>
+/* Font preview missing-glyph audit: walks the preview's text nodes and checks each
+   character against the HEAD of its computed font-family (the -Admin face; the whole stack
+   would false-negative once the glyph falls back). Never modifies the preview DOM. */
+(function () {
+    var box = document.getElementById('fontGapAudit');
+    if (!box || !document.fonts) return;
+
+    function collect() {
+        var out = [];
+        document.querySelectorAll('.font-preview__scene').forEach(function (scene) {
+            var walker = document.createTreeWalker(scene, NodeFilter.SHOW_TEXT);
+            var node;
+            while ((node = walker.nextNode())) {
+                var text = node.nodeValue;
+                if (!text || !text.trim()) continue;
+                var el = node.parentElement;
+                if (!el) continue;
+                var fam = (getComputedStyle(el).fontFamily || '').split(',')[0]
+                    .replace(/["']/g, '').trim();
+                if (!fam) continue;
+                out.push({
+                    fam: fam, text: text,
+                    scene: scene.getAttribute('data-scene') || '?'
+                });
+            }
+        });
+        return out;
+    }
+
+    function check(items) {
+        var gaps = [];
+        var seen = Object.create(null);
+        items.forEach(function (it) {
+            for (var i = 0; i < it.text.length; i++) {
+                var ch = it.text.charAt(i);
+                if (/\s/.test(ch)) continue;
+                var key = it.fam + '|' + ch;
+                if (seen[key]) continue;
+                seen[key] = 1;
+                if (document.fonts.check('16px "' + it.fam + '"', ch)) continue;
+                gaps.push({ ch: ch, fam: it.fam, scene: it.scene });
+            }
+        });
+        return gaps;
+    }
+
+    function render(gaps) {
+        if (!gaps.length) {
+            box.style.display = 'none';
+            box.innerHTML = '';
+            return;
+        }
+        var byFam = Object.create(null);
+        gaps.forEach(function (g) {
+            if (!byFam[g.fam]) byFam[g.fam] = [];
+            if (byFam[g.fam].indexOf(g.ch) < 0) byFam[g.fam].push(g.ch);
+        });
+        var parts = Object.keys(byFam).map(function (fam) {
+            return '<span style="font-size:12px;opacity:.85;">' +
+                '<code style="font-size:12px;">' + fam + '</code> \u2192 ' +
+                byFam[fam].join('') + '</span>';
+        });
+        box.innerHTML = '<b>\u26a0 预览缺字 ' + gaps.length + ' 处</b>' +
+            '<span style="opacity:.7">（目标字体无此字形，浏览器已回退系统字体）</span>' +
+            '<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:10px;">' +
+            parts.join('') + '</div>';
+        box.style.display = 'block';
+        console.warn('[字体预览缺字自检]', gaps);
+    }
+
+    function audit() {
+        var items = collect();
+        if (!items.length) { render([]); return; }
+        // Make sure these families are loaded first — check() returns false for any
+        // unloaded family (false positives)
+        var fams = [];
+        items.forEach(function (it) { if (fams.indexOf(it.fam) < 0) fams.push(it.fam); });
+        Promise.all(fams.map(function (f) {
+            return document.fonts.load('16px "' + f + '"')['catch'](function () {});
+        })).then(function () { render(check(items)); });
+    }
+
+    // Run after fonts load; re-run on scene switches / font selection changes
+    document.fonts.ready.then(function () {
+        requestAnimationFrame(function () { setTimeout(audit, 80); });
+    });
+    document.querySelectorAll('.font-studio__tab-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () { setTimeout(audit, 150); });
+    });
+    document.querySelectorAll('.font-select').forEach(function (sel) {
+        sel.addEventListener('change', function () { setTimeout(audit, 150); });
+    });
+
+    window.__FONT_GAP_AUDIT__ = audit;
+})();
+</script>
+<script>
+        // Admin AJAX form submission: all admin forms submit via fetch; on success the page
+        // does not reload (scroll preserved). The backend checks X-Requested-With: fetch and
+        // returns JSON instead of a redirect.
+        (function() {
+            // Toast notification
+            function toast(msg, type) {
+                var t = document.createElement('div');
+                t.className = 'admin-toast' + (type === 'error' ? ' admin-toast--error' : '');
+                // Glass triplet: toasts created dynamically from JS must also go through the CSS filter replication
+                if (window.__glassKit) window.__glassKit(t);
+                t.textContent = msg;
+                document.body.appendChild(t);
+                if (window.__backdropRescan) window.__backdropRescan();
+                requestAnimationFrame(function() { t.classList.add('admin-toast--show'); });
+                setTimeout(function() {
+                    t.classList.remove('admin-toast--show');
+                    setTimeout(function() { t.remove(); }, 300);
+                }, 2000);
+            }
+            window.adminToast = toast;
+
+            // Excluded forms: image conversion (needs its result page), font preset
+            // switching (its onchange submit must refresh the editor area)
+            var EXCLUDE_ACTIONS = [window.SITE_URLS.commit.fontActivate, window.SITE_URLS.commit.fontSave];
+
+            document.querySelectorAll('.admin-page form[method="POST"]').forEach(function(form) {
+                // Skip excluded forms
+                var excluded = false;
+                EXCLUDE_ACTIONS.forEach(function(a) {
+                    if (form.action.indexOf(a) >= 0) excluded = true;
+                });
+                if (excluded) return;
+
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    var fd = new FormData(form);
+                    // Check whether the form contains a file upload.
+                    // File-less forms are sent as URLSearchParams (Content-Type:
+                    // application/x-www-form-urlencoded) to avoid multipart/form-data
+                    // breaking Go's r.ParseForm() field parsing
+                    var hasFile = false;
+                    fd.forEach(function(v) { if (v instanceof File) hasFile = true; });
+                    var body;
+                    if (hasFile) {
+                        body = fd;
+                    } else {
+                        var params = new URLSearchParams();
+                        fd.forEach(function(v, k) { params.append(k, v); });
+                        body = params;
+                    }
+                    var btn = form.querySelector('[type="submit"]');
+                    if (btn) btn.disabled = true;
+                    form.classList.add('is-loading');
+
+                    fetch(form.action, {
+                        method: 'POST',
+                        body: body,
+                        headers: {'X-Requested-With': 'fetch'}
+                    }).then(function(r) { return r.json(); }).then(function(data) {
+                        if (data.ok === 'true' || data.ok === true) {
+                            // Redirect cases (e.g. jumping to the post page after saving)
+                            if (data.redirect) {
+                                location.href = data.redirect;
+                                return;
+                            }
+                            toast(data.msg || '操作成功');
+
+                            // Delete actions: remove the corresponding DOM element
+                            var action = form.action;
+                            if (action.indexOf('/delete') >= 0 || action.indexOf('/batch-delete') >= 0) {
+                                var item = form.closest('li, .bg-grid-item, .sponsor-row, .post-row');
+                                if (item) {
+                                    item.style.transition = 'opacity 0.3s';
+                                    item.style.opacity = '0';
+                                    setTimeout(function() { item.remove(); }, 300);
+                                }
+                            }
+
+                            // Add actions: reset the form
+                            if (action.indexOf('/add') >= 0 || action.indexOf('/create') >= 0) {
+                                form.reset();
+                                // Close the sponsor modal
+                                var modal = document.getElementById('sponsor-modal');
+                                if (modal) modal.classList.remove('show');
+                            }
+                        } else {
+                            toast(data.msg || '操作失败', 'error');
+                        }
+                    }).catch(function() {
+                        toast('网络错误', 'error');
+                    }).finally(function() {
+                        if (btn) btn.disabled = false;
+                        form.classList.remove('is-loading');
+                    });
+                });
+            });
+        })();
+
+        // Sponsor modal (supports create and edit)
+        function openSponsorModal(opts) {
+            var modal = document.getElementById('sponsor-modal');
+            var form = document.getElementById('sponsor-form');
+            var title = document.getElementById('sponsor-modal-title');
+            var submitBtn = document.getElementById('sponsor-modal-submit');
+            var idxInput = document.getElementById('sponsor-index');
+            var dateInput = document.getElementById('sponsor-date');
+            var nickInput = document.getElementById('sponsor-nick');
+            var amountInput = document.getElementById('sponsor-amount');
+            var msgInput = document.getElementById('sponsor-msg');
+            if (opts && opts.mode === 'edit') {
+                if (title) title.textContent = '{{.UI.sponsor.edit.title}}';
+                if (submitBtn) submitBtn.textContent = '{{.UI.common.action.save}}';
+                if (form) form.action = form.dataset.actionEdit || form.action;
+                if (idxInput) idxInput.value = opts.index != null ? opts.index : '';
+                if (dateInput) dateInput.value = opts.date || '';
+                if (nickInput) nickInput.value = opts.nick || '';
+                if (amountInput) amountInput.value = opts.amount || '';
+                if (msgInput) msgInput.value = opts.msg || '';
+            } else {
+                if (title) title.textContent = '{{.UI.sponsor.new.btn}}';
+                if (submitBtn) submitBtn.textContent = '{{.UI.common.action.add}}';
+                if (form) form.action = form.dataset.actionAdd || form.action;
+                if (idxInput) idxInput.value = '';
+                var d = new Date();
+                if (dateInput) dateInput.value = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+                if (nickInput) nickInput.value = '';
+                if (amountInput) amountInput.value = '';
+                if (msgInput) msgInput.value = '';
+            }
+            if (modal) modal.classList.add('show');
+        }
+
+        document.addEventListener('click', function(e) {
+            var btn = e.target.closest('.sponsor-edit-btn');
+            if (btn) {
+                e.preventDefault();
+                openSponsorModal({
+                    mode: 'edit',
+                    index: btn.dataset.index,
+                    date: btn.dataset.date,
+                    nick: btn.dataset.nick,
+                    amount: btn.dataset.amount,
+                    msg: btn.dataset.msg
+                });
+            }
+        });
+
+        // Post list collapsed by default, showing only the latest entry
+        (function() {
+            var rows = document.querySelectorAll('#post-list .post-row');
+            var toggle = document.getElementById('post-toggle');
+            if (!toggle || rows.length <= 1) return;
+            for (var i = 1; i < rows.length; i++) {
+                rows[i].style.display = 'none';
+            }
+            toggle.addEventListener('click', function() {
+                var collapsed = rows[1].style.display === 'none';
+                for (var i = 1; i < rows.length; i++) {
+                    rows[i].style.display = collapsed ? 'flex' : 'none';
+                }
+                toggle.textContent = collapsed ? '折叠' : '展开全部 (' + rows.length + ')';
+            });
+        })();
+    </script>
+    <script>
+    // Scene-centric studio: live 1:1 preview workshop linked to the left config scenes.
+    (function() {
+
+        /* Preview article "keep head and tail, elide the middle": hide only the middle
+           blocks (brute-force truncation would cut off the footer/signature). Must run only
+           AFTER the scene is visible — under display:none all offsetHeights are 0. */
+        var HEAD_KEEP = 6, TAIL_KEEP = 2;
+        function trimPreviewArticle() {
+            var content = document.querySelector('.font-preview__scene[data-scene="article"] .article-content');
+            if (!content || content.dataset.trimmed === '1') return;
+            var blocks = Array.prototype.filter.call(content.children, function(el) {
+                return el.offsetHeight > 0;
+            });
+            if (blocks.length <= HEAD_KEEP + TAIL_KEEP + 1) return;   // not long enough, leave as is
+            content.dataset.trimmed = '1';
+            var hidden = blocks.slice(HEAD_KEEP, blocks.length - TAIL_KEEP);
+            hidden.forEach(function(el) { el.style.display = 'none'; });
+            var omit = document.createElement('div');
+            omit.className = 'font-preview__omit';
+            omit.textContent = '⋯ 已省略中间 ' + hidden.length + ' 段 ⋯';
+            content.insertBefore(omit, hidden[0]);
+        }
+
+        var tabBtns = document.querySelectorAll('.font-studio__tab-btn');
+        var leftScenes = document.querySelectorAll('.font-studio__scene-left');
+        var rightScenes = document.querySelectorAll('.font-preview__scene');
+
+        tabBtns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var targetScene = btn.getAttribute('data-scene');
+                tabBtns.forEach(function(b) { b.classList.remove('is-active'); });
+                btn.classList.add('is-active');
+
+                leftScenes.forEach(function(ls) {
+                    if (ls.getAttribute('data-scene') === targetScene) {
+                        ls.classList.add('is-active');
+                        ls.style.display = 'block';
+                    } else {
+                        ls.classList.remove('is-active');
+                        ls.style.display = 'none';
+                    }
+                });
+
+                rightScenes.forEach(function(rs) {
+                    if (rs.getAttribute('data-scene') === targetScene) {
+                        rs.classList.add('is-active');
+                        rs.style.display = 'block';
+                    } else {
+                        rs.classList.remove('is-active');
+                        rs.style.display = 'none';
+                    }
+                });
+
+                // Scenes switching from display:none need layout-dependent components to
+                // recompute (all getBoundingClientRect() values are 0 while hidden): one
+                // resize dispatch covers posts_header's indicator; trimPreviewArticle is idempotent.
+                window.dispatchEvent(new Event('resize'));
+
+                // The article scene only has measurable body content after being switched to
+                // (the default first screen is the home scene); trimPreviewArticle is idempotent.
+                if (targetScene === 'article') trimPreviewArticle();
+            });
+        });
+    })();
+    </script>
+    <script>
+    // Font selector linked with weight/rounding adaptive controls
+    document.querySelectorAll('.font-config__control').forEach(function(ctrl) {
+        var sel = ctrl.querySelector('.font-select');
+        var weightInput = ctrl.querySelector('.font-weight-input');
+        var bevlBox = ctrl.querySelector('.font-config__bevl-box');
+        var bevlInput = ctrl.querySelector('.font-bevl-input');
+        var hiddenInput = ctrl.querySelector('input[type="hidden"]');
+        if (!sel) return;
+
+        var rawRole = sel.getAttribute('data-name') || '';
+        var cssRole = rawRole.replace(/_/g, '-');
+        var previewId = sel.getAttribute('data-preview');
+        var previewEl = previewId ? document.getElementById(previewId) : null;
+
+        function isVariableFont(opt) {
+            if (!opt) return false;
+            var w = opt.getAttribute('data-weight') || '';
+            return w.indexOf(' ') > 0 || w === '100 900' || w === '200 700';
+        }
+
+        function hasBevlAxis(opt) {
+            if (!opt) return false;
+            var b = opt.getAttribute('data-bevl') || '';
+            return b.length > 0;
+        }
+
+        function updateHiddenAndPreview() {
+            var opt = sel.selectedOptions[0];
+            if (!opt || !opt.value) {
+                if (hiddenInput) hiddenInput.value = '';
+                if (previewEl) {
+                    previewEl.style.fontFamily = '';
+                    previewEl.style.fontVariationSettings = '';
+                }
+                return;
+            }
+            var fam = opt.value;
+            var cleanFam = fam.replace(/^['"]|['"]$/g, '');
+            var weight = weightInput && !weightInput.disabled && weightInput.value ? weightInput.value.trim() : (opt.getAttribute('data-weight') || '400');
+            if (weight.indexOf(' ') > 0) weight = '400';
+
+            var hasBevl = hasBevlAxis(opt);
+            var bevl = hasBevl && bevlInput && bevlInput.value ? bevlInput.value.trim() : '';
+
+            var valToSave = hasBevl && bevl ? (fam + '|' + weight + '|' + bevl) : (fam + '|' + weight);
+            if (hiddenInput) {
+                hiddenInput.value = valToSave;
+            }
+
+            // Sync other hidden fields carrying the same role name
+            var sameRoleHiddens = document.querySelectorAll('input[type="hidden"][name="' + rawRole + '"]');
+            sameRoleHiddens.forEach(function(h) {
+                h.value = valToSave;
+            });
+
+            var fontVal = "'" + cleanFam + "-Admin', " + fam;
+
+            // 1. Update workshop-level CSS variables (drives the home hero, article
+            // typography, comment cards, and random lalafell scenes in real time)
+            var workshop = document.getElementById('fontPreviewWorkshop');
+            if (workshop && cssRole) {
+                workshop.style.setProperty('--font-' + cssRole, fontVal);
+                workshop.style.setProperty('--font-' + cssRole + '-weight', weight);
+                if (cssRole === 'fun-pill') {
+                    var numWeight = parseInt(weight, 10) || 400;
+                    var inkW = (numWeight >= 700 ? '0.175em' : numWeight >= 500 ? '0.145em' : '0.125em');
+                    workshop.style.setProperty('--font-fun-pill-ink-weight', inkW);
+                }
+                if (hasBevl && bevl) {
+                    workshop.style.setProperty('--font-' + cssRole + '-bevl', bevl);
+                    workshop.style.setProperty('font-variation-settings', "'BEVL' " + bevl);
+                }
+            }
+
+            // 2. Update the individually bound specimen table preview items and the
+            // scene-linked preview items
+            if (previewId) {
+                var targetEls = document.querySelectorAll('#' + previewId + ', .' + previewId);
+                targetEls.forEach(function(el) {
+                    el.style.fontFamily = fontVal;
+                    el.style.fontWeight = weight;
+                    if (hasBevl && bevl) {
+                        el.style.fontVariationSettings = "'BEVL' " + bevl;
+                    } else {
+                        el.style.fontVariationSettings = '';
+                    }
+                });
+            }
+            if (rawRole === 'footer') {
+                var sceneFooterEl = document.getElementById('preview-scene-footer');
+                if (sceneFooterEl) {
+                    sceneFooterEl.style.fontFamily = fontVal;
+                    sceneFooterEl.style.fontWeight = weight;
+                    if (hasBevl && bevl) {
+                        sceneFooterEl.style.fontVariationSettings = "'BEVL' " + bevl;
+                    } else {
+                        sceneFooterEl.style.fontVariationSettings = '';
+                    }
+                }
+            }
+        }
+
+        function syncState(currentWeight, currentBevl) {
+            var opt = sel.selectedOptions[0];
+            if (!opt || !opt.value) {
+                if (weightInput) {
+                    weightInput.value = '';
+                    weightInput.disabled = true;
+                }
+                if (bevlBox) bevlBox.style.display = 'none';
+                if (hiddenInput) hiddenInput.value = '';
+                if (previewEl) previewEl.style.fontFamily = '';
+                return;
+            }
+
+            var isVar = isVariableFont(opt);
+            var optDefaultWeight = opt.getAttribute('data-weight') || '400';
+            var hasBevl = hasBevlAxis(opt);
+
+            if (isVar) {
+                if (weightInput) {
+                    weightInput.disabled = false;
+                    var w = currentWeight || weightInput.value || '400';
+                    if (w.indexOf(' ') > 0) w = '400';
+                    weightInput.value = w;
+                    weightInput.placeholder = opt.getAttribute('data-weight') || '100~900';
+                }
+            } else {
+                if (weightInput) {
+                    weightInput.disabled = true;
+                    weightInput.value = optDefaultWeight;
+                }
+            }
+
+            if (hasBevl) {
+                if (bevlBox) bevlBox.style.display = 'inline-flex';
+                if (bevlInput) {
+                    bevlInput.disabled = false;
+                    bevlInput.value = currentBevl || bevlInput.value || '100';
+                }
+            } else {
+                if (bevlBox) bevlBox.style.display = 'none';
+                if (bevlInput) {
+                    bevlInput.disabled = true;
+                    bevlInput.value = '';
+                }
+            }
+
+            updateHiddenAndPreview();
+        }
+
+        // Initialize: restore from hiddenInput or the form
+        function initFromHidden() {
+            var hidden = hiddenInput || document.querySelector('input[type="hidden"][name="' + rawRole + '"]');
+            var raw = hidden ? (hidden.value || '').trim() : '';
+            var parts = raw.split('|');
+            var fam = parts[0] ? parts[0].trim() : '';
+            var weight = parts[1] ? parts[1].trim() : '';
+            var bevl = parts[2] ? parts[2].trim() : '';
+
+            if (fam) {
+                sel.value = fam;
+            }
+            syncState(weight, bevl);
+        }
+
+        initFromHidden();
+
+        sel.addEventListener('change', function() {
+            syncState();
+        });
+
+        if (weightInput) {
+            weightInput.addEventListener('input', function() {
+                var val = parseInt(weightInput.value, 10);
+                if (!isNaN(val)) {
+                    if (val < 100) val = 100;
+                    if (val > 900) val = 900;
+                }
+                updateHiddenAndPreview();
+            });
+            weightInput.addEventListener('change', function() {
+                var val = parseInt(weightInput.value, 10);
+                if (isNaN(val) || val < 100) weightInput.value = '400';
+                else if (val > 900) weightInput.value = '900';
+                updateHiddenAndPreview();
+            });
+        }
+
+        if (bevlInput) {
+            bevlInput.addEventListener('input', function() {
+                var val = parseInt(bevlInput.value, 10);
+                if (!isNaN(val)) {
+                    if (val < 1) val = 1;
+                    if (val > 100) val = 100;
+                }
+                updateHiddenAndPreview();
+            });
+            bevlInput.addEventListener('change', function() {
+                var val = parseInt(bevlInput.value, 10);
+                if (isNaN(val) || val < 1) bevlInput.value = '100';
+                else if (val > 100) bevlInput.value = '100';
+                updateHiddenAndPreview();
+            });
+        }
+    });
+    </script>
+    <script src="{{asset "js/admin.bundle.js"}}"></script>
+    <script>
+    // Preview sandbox guard: the preview reuses real partials whose forms target the live
+    // comment API; a capture-phase listener swallows every submit inside #fontPreviewWorkshop
+    // and stops propagation (no inert — it would kill the hover preview too).
+    (function () {
+        var workshop = document.getElementById('fontPreviewWorkshop');
+        if (!workshop) return;
+        workshop.addEventListener('submit', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }, true);
+    })();
+    </script>
+    <script>
+    // Font preset save: browser-measured metrics (standalone module) are posted back
+    // to the server; blocking overlay before save + success/failure status log.
+    (function () {
+        var saveForm = document.getElementById('fontPresetForm') || document.querySelector('form[action*="' + window.SITE_URLS.commit.fontSave + '"]');
+        if (!saveForm) return;
+
+        // One-time injection of the measuring overlay styles
+        if (!document.getElementById('fm-style')) {
+            var st = document.createElement('style');
+            st.id = 'fm-style';
+            st.textContent = '.fm-overlay{position:fixed;inset:0;z-index:9999;display:none;' +
+                'align-items:center;justify-content:center;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}' +
+                '.fm-box{background:color-mix(in srgb,var(--glass-base) calc(var(--glass-l1-alpha) * 100%),transparent);backdrop-filter:var(--glass-l1-filter);-webkit-backdrop-filter:var(--glass-l1-filter);color:var(--text-primary);border:1px solid var(--border-light);border-radius:var(--radius-lg);padding:18px 22px;min-width:320px;max-width:90vw;' +
+                'font:14px/1.5 system-ui,-apple-system,sans-serif;}' +
+                '.fm-title{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-weight:600;color:var(--text-primary);}' +
+                '.fm-spin{width:18px;height:18px;border:2px solid var(--border-medium);border-top-color:var(--accent);border-radius:50%;animation:fm-spin .8s linear infinite;}' +
+                '@keyframes fm-spin{to{transform:rotate(360deg)}}' +
+                '.fm-status{list-style:none;margin:6px 0 0;padding:0;max-height:230px;overflow:auto;font-size:12.5px;}' +
+                '.fm-status li{padding:3px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text-muted);}' +
+                '.fm-ok{color:var(--success-green);}.fm-err{color:var(--danger-red);}.fm-dim{color:var(--text-dim);}' +
+                '.fm-actions{margin-top:12px;display:none;text-align:right;}' +
+                '.fm-btn{background:var(--bg-subtle);color:var(--text-primary);border:1px solid var(--border-light);border-radius:var(--radius-sm);padding:6px 14px;cursor:pointer;font:13px system-ui;transition:all var(--duration-normal);}' +
+                '.fm-btn:hover{background:var(--bg-hover);border-color:var(--accent-soft);color:var(--accent);}';
+            document.head.appendChild(st);
+        }
+
+        function ensureOverlay() {
+            var ov = document.getElementById('fm-overlay');
+            if (ov) return ov;
+            ov = document.createElement('div');
+            ov.id = 'fm-overlay';
+            ov.className = 'fm-overlay';
+            ov.innerHTML = '<div class="fm-box"><div class="fm-title">' +
+                '<span class="fm-spin"></span><span class="fm-t">测量字体 metrics 中…</span></div>' +
+                '<ul class="fm-status"></ul>' +
+                '<div class="fm-actions"><button type="button" class="fm-btn fm-close">关闭</button></div></div>';
+            document.body.appendChild(ov);
+            ov.querySelector('.fm-close').addEventListener('click', function () { ov.style.display = 'none'; });
+            return ov;
+        }
+
+        function addLog(ov, msg, cls) {
+            var ul = ov.querySelector('.fm-status');
+            var li = document.createElement('li');
+            li.className = cls || 'fm-dim';
+            li.textContent = (cls === 'fm-ok' ? '✓ ' : cls === 'fm-err' ? '✗ ' : '') + msg;
+            ul.appendChild(li);
+            ul.scrollTop = ul.scrollHeight;
+        }
+
+        saveForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (!window.BlogFontMetrics || !BlogFontMetrics.measure) {
+                saveForm.submit(); // module not loaded: fall back to a plain submit (no measuring)
+                return;
+            }
+            var btn = saveForm.querySelector('[type="submit"]');
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = '保存中…';
+            }
+
+            var ov = ensureOverlay();
+            ov.style.display = 'flex';
+            ov.querySelector('.fm-spin').style.display = '';
+            ov.querySelector('.fm-t').textContent = '测量字体 metrics 中…';
+            ov.querySelector('.fm-status').innerHTML = '';
+            ov.querySelector('.fm-actions').style.display = 'none';
+
+            var formVals = {};
+            saveForm.querySelectorAll('input[type="hidden"][name]').forEach(function (inp) {
+                if (inp.name && inp.name !== 'metrics' && inp.name !== 'preset_id') {
+                    formVals[inp.name] = inp.value;
+                }
+            });
+            saveForm.querySelectorAll('select[name]').forEach(function (sel) {
+                if (sel.name && !formVals[sel.name]) formVals[sel.name] = sel.value;
+            });
+
+            BlogFontMetrics.measure(formVals, function (entry) {
+                addLog(ov, entry.base + '：' + entry.msg, entry.ok ? 'fm-ok' : 'fm-dim');
+            }).then(function (res) {
+                var metricsInput = document.getElementById('fontPresetMetrics');
+                if (metricsInput && res && res.metrics) {
+                    metricsInput.value = JSON.stringify(res.metrics);
+                }
+                ov.querySelector('.fm-t').textContent = '正在保存…';
+
+                var params = new URLSearchParams();
+                new FormData(saveForm).forEach(function (v, k) { params.append(k, v); });
+                fetch(saveForm.action, {
+                    method: 'POST',
+                    body: params,
+                    headers: { 'X-Requested-With': 'fetch' }
+                }).then(function (r) { return r.json(); }).then(function (data) {
+                    ov.querySelector('.fm-spin').style.display = 'none';
+                    if (data.ok === 'true' || data.ok === true) {
+                        ov.querySelector('.fm-t').textContent = '保存成功！';
+                        addLog(ov, data.msg || '服务端已接收并存储配置。', 'fm-ok');
+                        if (window.adminToast) window.adminToast('字体预设保存成功');
+                        setTimeout(function () {
+                            ov.style.display = 'none';
+                        }, 500);
+                        if (btn) { btn.disabled = false; btn.textContent = '保存预设'; }
+                    } else {
+                        ov.querySelector('.fm-t').textContent = '保存失败';
+                        addLog(ov, data.msg || '服务端返回错误', 'fm-err');
+                        ov.querySelector('.fm-actions').style.display = 'block';
+                        if (btn) { btn.disabled = false; btn.textContent = '保存预设'; }
+                    }
+                }).catch(function () {
+                    ov.querySelector('.fm-spin').style.display = 'none';
+                    ov.querySelector('.fm-t').textContent = '保存失败';
+                    addLog(ov, '网络错误', 'fm-err');
+                    ov.querySelector('.fm-actions').style.display = 'block';
+                    if (btn) { btn.disabled = false; btn.textContent = '保存预设'; }
+                });
+            }).catch(function (err) {
+                // Even if the frontend measuring logic throws unexpectedly, degrade to
+                // saving the form directly
+                addLog(ov, '测量跳过，直接保存中…', 'fm-dim');
+                var params = new URLSearchParams();
+                new FormData(saveForm).forEach(function (v, k) { params.append(k, v); });
+                fetch(saveForm.action, {
+                    method: 'POST',
+                    body: params,
+                    headers: { 'X-Requested-With': 'fetch' }
+                }).then(function (r) { return r.json(); }).then(function (data) {
+                    ov.querySelector('.fm-spin').style.display = 'none';
+                    if (data.ok === 'true' || data.ok === true) {
+                        ov.querySelector('.fm-t').textContent = '保存成功！';
+                        if (window.adminToast) window.adminToast('字体预设保存成功');
+                        setTimeout(function () {
+                            ov.style.display = 'none';
+                        }, 500);
+                        if (btn) { btn.disabled = false; btn.textContent = '保存预设'; }
+                    } else {
+                        ov.querySelector('.fm-t').textContent = '保存失败';
+                        addLog(ov, data.msg || '服务端返回错误', 'fm-err');
+                        ov.querySelector('.fm-actions').style.display = 'block';
+                        if (btn) { btn.disabled = false; btn.textContent = '保存预设'; }
+                    }
+                }).catch(function () {
+                    ov.querySelector('.fm-spin').style.display = 'none';
+                    ov.querySelector('.fm-t').textContent = '保存失败';
+                    addLog(ov, '网络错误', 'fm-err');
+                    ov.querySelector('.fm-actions').style.display = 'block';
+                    if (btn) { btn.disabled = false; btn.textContent = '保存预设'; }
+                });
+            });
+        });
+    })();
+    </script>
+{{end}}

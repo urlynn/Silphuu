@@ -1,0 +1,77 @@
+/* Ink Transition Engine: static forms.
+   Companion to src/js/parts/13-ink-transition.js (A: article line shatter, B: comment
+   FLIP, C: per-character TOC). Position/size/font are written per element by JS from
+   measured coordinates (dynamic values); this file only carries the static forms.
+   z-index 2: above the new content, below the bottom footer (z-index 3). */
+.ink-ghost {
+    position: absolute;
+    /* Explicit origin: without left/top, absolute uses the static position (hypothetical
+       in-flow box), shifting all child relative coordinates. */
+    left: 0;
+    top: 0;
+    pointer-events: none;
+    z-index: 2;
+}
+.ink-ghost .ink-line {
+    position: absolute;
+    white-space: nowrap;
+}
+.ink-ghost .ink-block {
+    position: absolute;
+    overflow: hidden;
+}
+.ink-ghost .ink-toc-line {
+    position: absolute;
+    white-space: nowrap;
+}
+.ink-ghost .ink-char {
+    position: absolute;
+    top: 0;
+    white-space: pre;
+}
+/* Heading shatter holder: absolute + nowrap, character spans individually positioned (prefix width measurement) */
+.ink-ghost .ink-title-ghost {
+    position: absolute;
+    white-space: nowrap;
+    pointer-events: none;
+}
+/* Tag shatter ghost: pin captured width/height + nowrap (same lesson as the meta items) */
+.ink-ghost .ink-tag-ghost {
+    position: absolute;
+    white-space: nowrap;
+    pointer-events: none;
+}
+.ink-char-in {
+    display: inline-block;
+    /* 2026-09-17 fix: without this, spaces are lost.
+       playTocEnter() wraps TOC labels into .ink-char-in per character (and never cleans
+       them up; they persist). Inline-block collapses leading/trailing whitespace, so a
+       span holding only spaces gets zero width. Measured: after a page switch, every
+       space in "OpenWrt 编译篇" / "ProxmoxVE 容器篇" became zero-width.
+       .ink-ghost .ink-char (heading/tag/TOC shatter) already had white-space: pre; this
+       one was missing it — added to match. */
+    white-space: pre;
+}
+
+/* Per-digit rolling numbers (odometer: static window + inner scrolling track). Structural
+   contract: .ink-reel is the overflow:hidden clip window and must never be the animated target —
+   animating the window leaves the digit band behind, clipped. Use .ink-reel > .ink-reel-track > .ink-reel-cell x N. */
+.ink-reel {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: bottom;
+    line-height: 1;
+    height: 1em;
+}
+.ink-reel-track {
+    display: block;
+}
+.ink-reel-cell {
+    display: block;
+    line-height: 1;
+    height: 1em;
+}
+/* Character reel container: clips glyphs overflowing while rolling out/in */
+.ink-roll-char {
+    display: inline-block;
+}

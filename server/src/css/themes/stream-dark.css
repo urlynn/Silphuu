@@ -1,0 +1,111 @@
+/* Kanagawa Wave - semantic layer (layer 2). Created 2026-08-31 (dark):
+   ukiyo-e night - sumi-ink blue base, wave-teal accent, cherry/chrysanthemum accents. */
+
+[data-theme="stream-dark"] {
+  /* Accent */
+  --accent: #7E9CD8;
+
+  /* Glass system (hex base) */
+  --glass-tint: #242634;        /* Lifted sumi ink */
+  --glass-light: #C3D7EB;       /* Ice blue white (Ayanami) */
+  --glass-dark: #000000;
+  
+
+  --glass-l1-alpha: 0.10;
+  --glass-l2-alpha: 0.16;
+  --glass-noise-opacity: 0;
+  --bg-noise-opacity: 0;
+
+  /* Wave-teal ukiyo-e glow */
+  --shadow-sm: 0 0 6px color-mix(in srgb, var(--accent) 25%, transparent);
+
+  /* Background */
+  --bg-body: #1F1F28;
+  --bg-base: #1F1F28;
+  --bg-glass-alt: rgba(32, 32, 44, 0.55);
+  --bg-nav: rgba(32, 32, 44, 0.55);
+  --bg-code: rgba(32, 32, 44, 0.55);
+  --bg-chroma: rgba(32, 32, 44, 0.55);
+  --bg-card: rgba(42, 42, 55, 0.40);
+  --bg-input: rgba(10, 12, 24, 0.35);
+  --bg-overlay: color-mix(in srgb, var(--glass-dark) 55%, transparent);
+
+  /* Surface */
+  --bg-subtle: color-mix(in srgb, var(--glass-light) calc(var(--surface-alpha) * 100%), transparent);
+  --bg-hover: color-mix(in srgb, var(--glass-light) 10%, transparent);
+  --bg-interactive: color-mix(in srgb, var(--glass-light) 8%, transparent);
+
+  /* Text (derived from ink-seed) */
+  --text-primary: #C4CBD4;
+  --text-muted: #AFB6BF;
+  --text-dim: #979DA6;
+  --timeline-line: color-mix(in srgb, var(--text-primary) 22%, transparent);
+  --timeline-node: color-mix(in srgb, var(--text-primary) 50%, transparent);
+
+  /* Accent & hover (derived from accent) */
+  --accent-hover: #7FB4CA;
+  --accent-soft: color-mix(in srgb, var(--accent) 15%, transparent);
+
+  /* Border */
+  --border-light: color-mix(in srgb, var(--glass-light) 14%, transparent);
+  --border-medium: color-mix(in srgb, var(--accent) 26%, transparent);
+  --border-subtle: color-mix(in srgb, var(--glass-light) 10%, transparent);
+
+  /* Shadow */
+  --shadow-card: 0 0 8px color-mix(in srgb, var(--accent) 28%, transparent), 0 0 16px color-mix(in srgb, var(--accent) 14%, transparent);
+
+  /* Hover states */
+  --hover-bg: color-mix(in srgb, var(--accent) 8%, transparent);
+  --hover-text: var(--accent);
+  --hover-border: color-mix(in srgb, var(--accent) 35%, transparent);
+  --hover-blur: 8px;
+  --hover-bg-active: color-mix(in srgb, var(--accent) 12%, transparent);
+  --hover-text-active: #C34043;
+
+  /* Nav */
+  --nav-bg: rgba(10, 12, 24, 0.30);
+
+  /* Layout */
+  --sidebar-radius: var(--radius-md);
+  --blur-amount: 8px;
+
+  /* Group hover */
+  --group-hover-bg: color-mix(in srgb, var(--glass-light) 8%, transparent);
+  --group-hover-text: var(--accent);
+
+  /* Comment form */
+  --cmt-form-bg: #2A2A37;
+  --cmt-input-color: var(--text-primary);
+  --cmt-input-placeholder: var(--text-muted);
+  --cmt-textarea-color: var(--text-primary);
+  --cmt-textarea-placeholder: var(--text-muted);
+  --cmt-textarea-focus: var(--text-primary);
+  --cmt-input-focus: var(--text-primary);
+  --cmt-submit-bg: var(--accent);
+
+
+  /* Chroma */
+  --chroma-keyword: #957FB8;
+  --chroma-function: #7E9CD8;
+  --chroma-string: #98BB6C;
+  --chroma-comment: rgba(220, 215, 186, 0.38);
+  --chroma-number: #D27E99;
+  --chroma-operator: #C0A36E;
+  --chroma-punctuation: color-mix(in srgb, var(--glass-light) 65%, transparent);
+  --chroma-tag: #C34043;
+  --chroma-deleted: #C34043;
+  --chroma-inserted: #76946A;
+
+  /* Decorative shapes: ukiyo-e motifs - wave, cherry, chrysanthemum, pine */
+  --shape-1: #76946A;
+  --shape-2: #C34043;
+  --shape-3: #7E9CD8;
+  --shape-4: #D27E99;
+  --shape-5: #DCA561;
+  --shape-6: #E6C384;
+  --shape-7: #6A9589;
+  --shape-8: #957FB8;
+  --shape-9: #7FB4CA;
+  --shape-10: #2D4F67;
+  --shape-blend: screen;
+}

@@ -1,0 +1,46 @@
+<!-- Dynamic fragment: contains only the comment list body.
+     The fixed header (comment count + sort links) has moved to post.html's persistent
+     server-rendered markup — the sort hx-get target/swap is unchanged; this fragment no
+     longer carries the header (avoiding duplication with the persistent header during
+     morph). -->
+{{if eq .CurrentPost.ID 0}}
+<div class="gb-list" id="cmt-comment-area" data-post-id="0">
+    {{if .PostComments}}
+        {{range $i, $c := .PostComments}}
+        <div class="glass-wrap" id="cmt-{{$c.ID}}" style="--i:{{$i}}">
+            <div class="cmt-item-meta">
+                {{if $c.Website}}<a href="{{$c.Website}}" target="_blank" rel="noopener" class="cmt-nick">{{$c.Nick}}</a>{{else}}<span class="cmt-nick">{{$c.Nick}}</span>{{end}}
+                <span class="cmt-date"><time datetime="{{$c.Date}}" data-ts="{{$c.Date}}">{{$c.Date}}</time></span>
+            </div>
+            <div class="cmt-body">
+                <img class="cmt-avatar" src="{{if $c.Avatar}}{{$c.Avatar}}{{else}}{{asset "image/default-avatar.avif"}}{{end}}" alt="" referrerpolicy="no-referrer">
+                <div class="profile-card" data-cmt-id="{{$c.ID}}" data-rid="{{$c.Rid}}" data-backdrop-scene="b">
+<div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div><div class="g-tint"></div><div class="g-noise"></div>
+            <button class="cmt-del-btn admin-control owner-control" data-id="{{$c.ID}}" title="{{$.UI.common.action.delete}}">{{svg "trash"}}</button>
+            <div class="cmt-item-main">
+                <div class="cmt-content">{{$c.RenderedContent}}</div>
+            </div>
+                </div>
+            </div>
+        </div>
+        {{end}}
+    {{else}}
+    <div class="glass-wrap"><div class="profile-card" data-backdrop-scene="b">
+<div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div><div class="g-tint"></div><div class="g-noise"></div>
+        <p class="cmt-empty">{{.UI.guestbook.list.empty}}</p>
+    </div></div>
+    {{end}}
+</div>
+{{else}}
+<div id="cmt-comment-area" data-post-id="{{.CurrentPost.ID}}">
+    <div class="cmt-list" id="cmt-list">
+    {{if .PostComments}}
+    {{range .PostComments}}
+    {{template "comment_item" (dict "C" . "UAShort" .UAShort "RenderedContent" .RenderedContent "UI" $.UI)}}
+    {{end}}
+    {{else}}
+    <p class="cmt-empty">{{.UI.comment.list.empty}}</p>
+    {{end}}
+    </div>
+</div>
+{{end}}

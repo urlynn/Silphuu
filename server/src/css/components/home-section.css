@@ -1,0 +1,930 @@
+/* Home Second Section — Stats + Latest Posts */
+
+/* Scroll snap: home only, two screens each filling the viewport. */
+html:has(body.home) {
+    scroll-snap-type: y mandatory;
+}
+
+body.home .hero,
+body.home .home-section {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+}
+
+/* Home isolates its own backgrounds: the fixed .bg-base/.bg-shapes go display:none here, or the
+   full-screen layer corrupts .hero__text's backdrop sampling. Keyed on the page, never on .hero:
+   the admin preview reuses that class — see docs/GOTCHAS.md §backdrop-shape-layers. */
+body.home > .bg-base,
+body.home > .bg-shapes {
+    display: none;
+}
+
+/* First screen: the navbar reads the wallpaper's optical tones (--hero-*, the same set
+   the hero uses), only at the top of the page — hero-off marks half a screen scrolled,
+   from where the navbar eases back to the theme. Hover and active stay on the theme. */
+html:has(body.home):not(.hero-off) .nav-bubble {
+    background: var(--hero-backdrop);
+    outline-color: var(--hero-line-soft);
+}
+html.chromium:has(body.home):not(.hero-off) .nav-bubble {
+    --glass-tint: var(--hero-backdrop);
+}
+html:has(body.home):not(.hero-off) .nav-bubble--right .shortcut {
+    border-color: var(--hero-line-soft);
+}
+/* Dropdown on home: takes the same wallpaper optics; interaction states and
+   link hover stay on the theme. */
+html:has(body.home):not(.hero-off) .nav-bubble--center .nav-group .dd {
+    background: var(--hero-backdrop);
+    border-color: var(--hero-line-soft);
+}
+html:has(body.home):not(.hero-off) .nav-bubble--center .nav-group .dd::after {
+    border-color: var(--hero-line-soft) !important;
+}
+html.chromium:has(body.home):not(.hero-off) .nav-bubble--center .nav-group .dd {
+    --glass-tint: var(--hero-backdrop);
+    --glass-blur-fallback: var(--hero-blur);
+}
+/* Resting text follows the wallpaper optics (--hero-text-soft) and eases back over 0.25s
+   when hero-off applies. The transition is split so labl / nav-item / button keep their
+   own hover behaviour and shortcut keeps its 1s fade-in. */
+html:has(body.home) .nav-bubble .labl,
+html:has(body.home) .nav-bubble--center .nav-item,
+html:has(body.home) .nav-bubble--right button {
+    transition: color 0.25s ease, background-color 0.25s ease, border-color 0.25s ease;
+}
+html:has(body.home) .nav-bubble--right .shortcut {
+    transition: opacity 1s ease, color 0.25s ease, border-color 0.25s ease;
+}
+html:has(body.home):not(.hero-off) .nav-bubble .labl,
+html:has(body.home):not(.hero-off) .nav-bubble--center .nav-item,
+html:has(body.home):not(.hero-off) .nav-bubble--right .shortcut,
+html:has(body.home):not(.hero-off) .nav-bubble--right button {
+    color: var(--hero-text-soft);
+}
+/* Hover, active and isolation states outrank the wallpaper resting colour,
+   restated here at equal weight and order. */
+html:has(body.home):not(.hero-off) .nav-bubble--center .nav-item:hover {
+    color: var(--group-hover-text, var(--text-primary));
+}
+html:has(body.home):not(.hero-off) .nav-bubble--center .nav-item.active {
+    color: var(--accent);
+}
+html:has(body.home):not(.hero-off) .nav-bubble--center .nav-group.nav-group--hover > .nav-item {
+    color: var(--group-hover-text, var(--accent));
+}
+html:has(body.home):not(.hero-off) .nav-bubble--center .nav-group:has(.dd a:hover) > .nav-item {
+    color: var(--accent-hover, var(--accent));
+}
+html:has(body.home):not(.hero-off) .nav-bubble--center.nav-hovering .nav-item.active:not(:hover) {
+    /* On the first screen the isolation state rests on the wallpaper text colour;
+   --text-muted would snap the active item back to the theme. */
+    color: var(--hero-text-soft);
+}
+html:has(body.home):not(.hero-off) .nav-bubble--center.nav-hovering .nav-group.nav-group--hover > .nav-item.active {
+    color: var(--group-hover-text, var(--accent));
+}
+html:has(body.home):not(.hero-off) .nav-bubble--left a:hover .labl {
+    color: var(--accent);
+}
+html:has(body.home):not(.hero-off) .nav-bubble--right button:hover {
+    color: var(--accent);
+}
+/* Dropdown link text: one with the navbar body, reading --hero-text-soft and
+   returning to the theme accent on hover. */
+html:has(body.home):not(.hero-off) .nav-bubble--center .nav-group .dd a {
+    color: var(--hero-text-soft);
+}
+html:has(body.home):not(.hero-off) .nav-bubble--center .nav-group .dd a:hover {
+    color: var(--accent);
+}
+
+/* Home hero fills the screen: main's 80px top padding would leave a gap above
+   the hero and cost a screen. */
+body.home main.main-content {
+    padding: 0;
+    max-width: none;
+}
+
+.home-section {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 24px;
+    background: var(--bg-body);
+}
+
+.home-section .footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 16px 24px clamp(16px, 3vh, 28px);
+}
+
+.home-section__inner {
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Local shape background: absolute, not fixed, to stay clear of the hero's backdrop sampling
+   (see the isolation note above); shapes line the 720px column so every glass card has a
+   colour boundary to blur. Ordering is isolation + z-index:-1 — never position on __inner,
+   it would shift the absolute children's containing block. */
+.home-section {
+    isolation: isolate;
+}
+.home-section__bg {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+}
+.home-section__bg .bg-shape {
+    position: absolute;
+}
+
+/* Heading and Latin kicker */
+.home-section__heading {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+    width: 100%;
+}
+
+.home-section__heading-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.22s var(--card-ease);
+}
+
+/* Flush left */
+[data-heading-align="left"] .home-section__heading-group {
+    width: auto;
+    justify-content: flex-start;
+}
+
+/* Flush right: the Latin kicker goes to the outermost edge. */
+[data-heading-align="right"] .home-section__heading-group {
+    width: 100%;
+    justify-content: space-between;
+}
+
+[data-heading-align="right"] .home-section__kicker {
+    margin-left: auto;
+}
+
+.home-section__title {
+    margin: 0;
+    font-family: var(--font-display-heading);
+    font-weight: var(--font-display-heading-weight, 700);
+    font-variation-settings: 'BEVL' var(--font-display-heading-bevl, 100);
+    font-size: clamp(22px, 2.5vw, 29px);
+    line-height: 1.15;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+    flex-shrink: 0;
+}
+
+.home-section__kicker {
+    font-family: var(--font-display-mono);
+    font-weight: var(--font-display-mono-weight, 500);
+    font-variation-settings: 'BEVL' var(--font-display-mono-bevl, 100);
+    font-size: 11px;
+    line-height: 1;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    transition: all 0.22s var(--card-ease);
+    flex-shrink: 0;
+}
+
+/* Six heading and kicker layouts */
+
+/* Layout 1, badge pill: the pill is exactly as tall as the heading CJK ink
+   (clamp(22px, 2.5vw, 29px) * 0.826) and the 0.0955 translate cancels the gap between
+   line-box centre and glyph ink centre, so the pill meets the ink on both edges. */
+[data-heading-layout="1"] .home-section__kicker {
+    margin-top: 0;
+    height: calc(clamp(22px, 2.5vw, 29px) * 0.826);
+    translate: 0 calc(clamp(22px, 2.5vw, 29px) * 0.0955);
+    padding: 0 10px;
+    border-radius: var(--radius-full);
+    background: color-mix(in srgb, var(--accent) calc(0.12 * 100%), transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) calc(0.28 * 100%), transparent);
+    color: var(--accent);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    box-sizing: border-box;
+}
+
+/* Layout 2, overline eyebrow: the English sits above the heading, leading from
+   the top when left aligned and meeting the right top corner when right. */
+[data-heading-layout="2"][data-heading-align="left"] .home-section__heading-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+}
+[data-heading-layout="2"][data-heading-align="left"] .home-section__kicker {
+    order: -1;
+    margin-top: 0;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    color: var(--accent);
+    line-height: 1;
+    opacity: 0.9;
+}
+[data-heading-layout="2"][data-heading-align="right"] .home-section__kicker {
+    margin-top: 0;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    color: var(--accent);
+    line-height: 1;
+    align-self: flex-start;
+}
+
+/* Layout 3, slash accent: a tilted slash separates the two. */
+[data-heading-layout="3"] .home-section__kicker {
+    margin-top: 0;
+    translate: 0 calc(clamp(22px, 2.5vw, 29px) * 0.0955);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    color: var(--text-dim);
+}
+[data-heading-layout="3"] .home-section__kicker::before {
+    content: '/';
+    font-family: var(--font-display-mono);
+    font-size: 14px;
+    color: var(--card-border);
+    opacity: 0.7;
+}
+
+/* Layout 4, tech brackets: square terminal brackets wrap the heading. */
+[data-heading-layout="4"] .home-section__kicker {
+    margin-top: 0;
+    translate: 0 calc(clamp(22px, 2.5vw, 29px) * 0.0955);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--text-dim);
+}
+[data-heading-layout="4"] .home-section__kicker::before {
+    content: '[';
+    opacity: 0.45;
+    margin-right: 3px;
+}
+[data-heading-layout="4"] .home-section__kicker::after {
+    content: ']';
+    opacity: 0.45;
+    margin-left: 3px;
+}
+
+/* Layout 5, baseline grounded: aligned on the classical baseline. */
+[data-heading-layout="5"] .home-section__heading-group {
+    align-items: baseline;
+}
+[data-heading-layout="5"] .home-section__kicker {
+    margin-top: 0;
+    font-size: 11.5px;
+    letter-spacing: 0.16em;
+    color: var(--text-dim);
+}
+
+/* Layout 6, pure plain: monospace characters alone, spaced naturally. */
+[data-heading-layout="6"] .home-section__kicker {
+    margin-top: 0;
+    translate: 0 calc(clamp(22px, 2.5vw, 29px) * 0.0955);
+    font-size: 11.5px;
+    letter-spacing: 0.18em;
+    color: var(--text-dim);
+    opacity: 0.8;
+}
+
+/* Stats Grid */
+.home-section__stats {
+    display: flex;
+    gap: 12px;
+    margin-bottom: clamp(2rem, 4vw, 3rem);
+}
+
+.stat-card {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    padding: 28px 24px;
+    border-radius: var(--radius-xl);
+    border: none !important;
+    overflow: visible !important;
+    box-shadow: var(--card-shadow);
+    background: color-mix(in srgb, var(--glass-base) calc(var(--card-alpha) * 100%), transparent);
+    backdrop-filter: blur(var(--card-blur));
+    -webkit-backdrop-filter: blur(var(--card-blur));
+    transition: transform 0.22s var(--card-ease);
+    cursor: default;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+}
+
+.stat-card::after {
+    content: '';
+    display: block;
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 1px solid var(--card-border);
+    box-sizing: border-box;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 1;
+    background: transparent;
+
+}
+/* Hover: the ring highlights on the ::after overlay and the glow lives on its
+   own .hg-glow layer, fading opacity on the compositor. The card body itself
+   must not carry a :hover paint rule. */
+
+/* Chromium rebuild of the stat card glass. */
+.chromium .stat-card {
+    position: relative;
+    --glass-blur-fallback: var(--card-blur);
+    --glass-tint: color-mix(in srgb, var(--glass-base) calc(var(--card-alpha) * 100%), transparent);
+}
+
+.stat-card__value {
+    font-family: var(--font-data);
+    font-weight: var(--font-data-weight, 500);
+    font-variation-settings: 'BEVL' var(--font-data-bevl, 100);
+    font-size: clamp(28px, 3vw, 38px);
+    color: var(--accent);
+    line-height: 1.1;
+    display: inline-flex;
+    align-items: center;
+}
+
+.stat-card__label {
+    font-family: var(--font-display-body);
+    font-weight: var(--font-display-body-weight, 400);
+    font-variation-settings: 'BEVL' var(--font-display-body-bevl, 100);
+    font-size: 13px;
+    color: var(--text-dim);
+    letter-spacing: 0.03em;
+}
+
+.stat-card__extra {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font-caption);
+    font-weight: var(--font-caption-weight, 400);
+    font-variation-settings: 'BEVL' var(--font-caption-bevl, 100);
+    font-size: round(up, calc(12px * var(--font-caption-ink-scale)), 1px);
+    color: var(--text-dim);
+    margin-top: 2px;
+    line-height: 1;
+    white-space: nowrap;
+    flex-wrap: nowrap;
+}
+
+.stat-card__extra > span:not(.stat-card__num) {
+    opacity: 0.7;
+}
+
+/* Label text: the shift reads the CSS font-role channel (--font-caption-shift, this row's
+   role — .stat-card__extra sets font-family: var(--font-caption)). Without the rule the
+   label loses compensation, and the separator dot has no shared value to align against. */
+.stat-card__extra > span:not(.stat-card__num):not(.stat-card__sep) {
+    translate: 0 calc(-1 * var(--font-caption-shift, 0em));
+}
+
+.stat-card__extra .stat-card__num {
+    font-family: var(--font-data);
+    font-weight: var(--font-data-weight, 500);
+    font-variation-settings: 'BEVL' var(--font-data-bevl, 100);
+    font-size: 12px;
+/* Digits are data-font and numeric, so they take data-num, the value sampled from digits.
+   Reading the role variable keeps the engine default at 0 and picks up the measured value
+   once a site measures its fonts. */
+    translate: 0 calc(-1 * var(--font-data-num-shift, 0em));
+    display: inline-flex;
+    align-items: center;
+    opacity: 0.7;
+}
+
+/* Two-tone accent: the view and visitor totals on the stats card use accent-2,
+   the warm amber. */
+.stat-card--visits .stat-card__extra .stat-card__num {
+    color: var(--accent-2);
+    font-weight: var(--font-data-weight, 600);
+    opacity: 1;
+}
+
+.stat-card__sep {
+    width: 1.5px;
+    height: 1.5px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+/* No shift: ink compensation moves a glyph's ink centre to the box centre, and a geometric
+   dot is already centred. No role variable can express the sub-0.13px residual — the dot
+   has no font role and its neighbours use different roles; site overlays may tune it. */
+}
+
+/* Mechanical odometer: one wheel per digit. */
+.odometer {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: top;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    overflow: hidden;
+    height: 1em;
+}
+
+.odometer-digit {
+    display: inline-block;
+    height: 1em;
+    overflow: hidden;
+    position: relative;
+    line-height: 1;
+    text-align: center;
+    width: 0.6em;
+}
+
+.odometer-ribbon {
+    display: flex;
+    flex-direction: column;
+    will-change: transform;
+    transition: transform var(--odo-duration, 1.2s) cubic-bezier(0.12, 0.88, 0.28, 1);
+}
+
+.odometer-ribbon > span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 1em;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.odometer-sep {
+    display: inline-block;
+    line-height: 1;
+}
+
+/* Latest Posts
+    Same visual level as .home-section__title: same font variables, size and
+    weight, only the margin differs. */
+.home-section__posts-title {
+    margin: 0 0 16px;
+    font-family: var(--font-display-heading);
+    font-weight: var(--font-display-heading-weight, 700);
+    font-variation-settings: 'BEVL' var(--font-display-heading-bevl, 100);
+    font-size: clamp(22px, 2.5vw, 29px);
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+}
+
+.home-section__posts {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.home-post-card {
+    position: relative;
+    display: block;
+    padding: 16px 18px;
+    border-radius: var(--radius-lg);
+    border: none !important;
+    overflow: visible !important;
+    box-shadow: var(--card-shadow);
+    background: color-mix(in srgb, var(--glass-base) calc(var(--card-alpha) * 100%), transparent);
+    backdrop-filter: blur(var(--card-blur));
+    -webkit-backdrop-filter: blur(var(--card-blur));
+    cursor: pointer;
+    transition: transform 0.22s var(--card-ease);
+}
+
+.home-post-card.has-badge {
+    padding-top: 22px;
+}
+
+.home-post-card::after {
+    content: '';
+    display: block;
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 1px solid var(--card-border);
+    box-sizing: border-box;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 1;
+    background: transparent;
+
+}
+
+/* Chromium rebuild of the home post card glass. */
+.chromium .home-post-card {
+    position: relative;
+    --glass-blur-fallback: var(--card-blur);
+    --glass-tint: color-mix(in srgb, var(--glass-base) calc(var(--card-alpha) * 100%), transparent);
+}
+/* Hover: the ring highlights on the ::after overlay and the glow lives on its
+   own .hg-glow layer, fading opacity on the compositor. The card body itself
+   must not carry a :hover paint rule. */
+
+.home-post-card__meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 12px;
+    line-height: 1;
+}
+
+.home-post-card__cat {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-family: var(--font-caption);
+    font-weight: var(--font-caption-weight, 400);
+    font-variation-settings: 'BEVL' var(--font-caption-bevl, 100);
+    font-size: round(up, calc(12px * var(--font-caption-ink-scale)), 1px);
+    letter-spacing: 0.03em;
+    line-height: 1;
+}
+
+.home-post-card__date {
+    font-family: var(--font-data);
+    font-weight: var(--font-data-weight, 500);
+    font-variation-settings: 'BEVL' var(--font-data-bevl, 100);
+    color: var(--text-dim);
+    line-height: 1;
+}
+
+.home-post-card__title {
+    margin: 0 0 4px;
+    font-family: var(--font-subheading);
+    font-weight: var(--font-subheading-weight, 600);
+    font-variation-settings: 'BEVL' var(--font-subheading-bevl, 100);
+    font-size: 15px;
+    color: var(--text-primary);
+    line-height: 1.4;
+    transition: color 0.22s var(--card-ease-title, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.home-post-card:hover .home-post-card__title {
+    color: var(--accent);
+}
+
+.home-post-card__summary {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* 45-degree ribbon and its own clipping layer. The card body stays
+   overflow: visible so the glow is not cut. */
+.card-ribbon-clip {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.corner-ribbon {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 110px;
+    height: 110px;
+    pointer-events: none;
+}
+
+.corner-ribbon > span {
+    position: absolute;
+    top: 24px;
+    right: -44px;
+    width: 160px;
+    height: 24px;
+    transform: rotate(45deg);
+    background: var(--accent-2);
+    color: #fff;
+    text-shadow: 0 1px 2px var(--accent-2-edge);
+    font-size: 10.5px;
+    font-weight: var(--font-display-mono-weight, 700);
+    letter-spacing: 1.5px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display-mono, monospace);
+    line-height: 1;
+}
+
+/* Corner badge, fitted to the top-left radius. */
+.badge-top-left {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 3.5px 8px 3.5px 7px;
+    font-family: var(--font-body);
+    font-weight: var(--font-body-weight, 600);
+    font-size: 9.5px;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3.5px;
+    border-top-left-radius: var(--radius-lg);
+    border-bottom-right-radius: 8px;
+    border-top-right-radius: 0;
+    border-bottom-left-radius: 0;
+    z-index: 2;
+    line-height: 1;
+}
+
+.badge-top-left svg {
+    width: 9.5px;
+    height: 9.5px;
+    display: block;
+}
+
+.badge-top-left.pinned {
+    background: var(--accent-2);
+    color: #fff;
+    text-shadow: 0 1px 2px var(--accent-2-edge);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.badge-top-left.badge-new {
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
+.badge-top-left.badge-new svg {
+    color: var(--accent);
+}
+
+/* Footer row: SVG, digits, CJK and the pure-CSS dot are all ink-aligned to the
+   same standard as stat-card__extra. */
+.home-post-card__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 12px -18px -16px -18px;
+    padding: 10px 18px 12px 18px;
+    border-top: none;
+    border-bottom-left-radius: var(--radius-lg);
+    border-bottom-right-radius: var(--radius-lg);
+    background: var(--bento-dock-bg);
+    backdrop-filter: blur(var(--bento-dock-blur));
+    -webkit-backdrop-filter: blur(var(--bento-dock-blur));
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.home-post-card__footer .footer-left {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    line-height: 1;
+}
+
+.home-post-card__footer .footer-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-dim);
+    line-height: 1;
+    white-space: nowrap;
+    flex-wrap: nowrap;
+}
+
+.home-post-card__footer .footer-item svg {
+    width: 11px;
+    height: 11px;
+    opacity: 0.75;
+    display: block;
+    flex-shrink: 0;
+}
+
+/* Category name, in CJK: takes the body font. */
+.home-post-card__footer .footer-item.cat {
+    font-family: var(--font-body);
+    font-weight: var(--font-body-weight, 400);
+    color: var(--text-muted);
+}
+
+/* Digits and dates: align through --font-data-shift, the data font's role. */
+/* Only leaves are compensated, never wrappers: a translate on both a wrapper and its leaf
+   compounds, because the child shifts again inside the parent's coordinates. Each leaf
+   takes the role of the font it actually renders: "Jan 02 2006" is data, "1.3k" is data-num. */
+.home-post-card__footer .footer-item.date,
+.home-post-card__footer .footer-item__num,
+.home-post-card__footer .words-num {
+    font-family: var(--font-data);
+    font-weight: var(--font-data-weight, 500);
+    font-variation-settings: 'BEVL' var(--font-data-bevl, 100);
+}
+.home-post-card__footer .footer-item.date .footer-item__num {
+    translate: 0 calc(-1 * var(--font-data-shift, 0em));
+}
+.home-post-card__footer .footer-item.words .footer-item__num {
+    translate: 0 calc(-1 * var(--font-data-num-shift, 0em));
+}
+/* The category name inherits --font-body; the shift lands on the inner <span>. */
+.home-post-card__footer .footer-item.cat > span {
+    translate: 0 calc(-1 * var(--font-body-shift, 0em));
+}
+/* .words-num exists in neither the templates nor the JS. The font declaration
+   stays for site overlays, but it gets no shift. */
+
+/* Character-count unit, in CJK: align-items: center aligns boxes, not baselines, and the
+   mono baseline sits ~0.94px above the body font's at 11px, so this needs --font-body-shift.
+   Do not write translate: none — it would sit about 1px low. */
+.home-post-card__footer .words-unit {
+    font-family: var(--font-body);
+    font-weight: var(--font-body-weight, 400);
+    line-height: 1;
+    margin-left: 1px;
+    translate: 0 calc(-1 * var(--font-body-shift, 0em));
+}
+
+/* Pure CSS geometric dot: 1.5px round, centred, matching stat-card__sep. */
+/* Separator dot on the home cards. A geometric circle: its ink centre is already the box
+   centre, so it takes no shift — compensated text lands there too and they align on their own. */
+.home-post-card__sep {
+    width: 1.5px;
+    height: 1.5px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.5;
+    flex-shrink: 0;
+    transform: none;
+}
+
+/* Tag list */
+.home-post-card__footer .footer-tags {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    line-height: 1;
+}
+
+/* Tags take the body font. */
+.home-post-card__footer .footer-tag {
+    font-family: var(--font-body);
+    font-size: 10.5px;
+    color: var(--text-dim);
+    opacity: 0.85;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Scroll reveal: the container stays visible — it fills with a solid
+   background — and only its children stagger in. The container is not faded, or
+   the layer beneath would show through and read as a second background. */
+.home-section__heading {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+.home-section.is-visible .home-section__heading {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.1s;
+}
+
+.home-section.is-visible .home-section__heading--posts {
+    transition-delay: 0.4s;
+}
+
+.home-section__stats .stat-card {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+.home-section.is-visible .stat-card:nth-child(1) {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.2s;
+}
+
+.home-section.is-visible .stat-card:nth-child(2) {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.35s;
+}
+
+.home-section .home-post-card {
+    opacity: 0;
+    transform: translateX(30px);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+.home-section.is-visible .home-post-card {
+    opacity: 1;
+    transform: translateX(0);
+    transition-delay: 0.5s;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+    .home-section__heading--stats,
+    .home-section__heading--posts {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .home-section__stats {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .stat-card {
+        padding: 20px 18px;
+    }
+
+    .home-post-card {
+        padding: 12px 14px;
+    }
+
+    .home-post-card__footer {
+        margin: 10px -14px -12px -14px;
+        padding: 8px 14px 10px 14px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html:has(body.home) {
+        scroll-snap-type: none;
+    }
+    body.home .hero,
+    body.home .home-section {
+        scroll-snap-align: none;
+    }
+    .home-section__heading,
+    .home-section .stat-card,
+    .home-section .home-post-card {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+    }
+}
+
+/* Top-left badge: asymmetric padding instead of translate, because Safari
+   drops fractional translations. The horizontal sides keep their original
+   8px / 7px; only the vertical changes. */
+.badge-top-left {
+    padding-top:    calc(3.5px - var(--font-caption-shift, 0em));
+    padding-bottom: calc(3.5px + var(--font-caption-shift, 0em));
+}
+/* Only the text is exempt from translate — do not write `> *`, which would
+   also catch the pin and sparkle SVG icons inside. */
+.badge-top-left > .badge-label {
+    translate: none !important;
+}
+/* The icons are pushed back: the asymmetric padding above lifts the whole content by one
+   shift, and an icon that was centred should not move. SVGs get no ink compensation, so
+   nothing compounds. */
+.badge-top-left svg {
+    translate: 0 var(--font-caption-shift, 0em);
+}

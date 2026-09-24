@@ -1,0 +1,1414 @@
+/* Navbar: three absolutely positioned glass capsules — left (avatar and
+   signature), centre (navigation), right (search). Scroll collapse is driven
+   by CSS calc anchors rather than per-frame measurement; the label shatters
+   per character through WAAPI. */
+
+/* Layout variables */
+:root {
+    --nav-page-pad: 24px;
+    --nav-gap: 8px;              /* Gap between the outer segments and the centre column once compacted. */
+    --nav-icon-size: 18px;
+    --nav-item-height: 28px;
+    --seg-dur: 0.8s;            /* Travel time of the left and right segments. */
+    --center-half: 140px;       /* Centre half-width fallback; JS measureCenterHalf() overwrites it. */
+    --labl-w: 400px;            /* Signature width in px; JS applyLablWidth() writes the measured value. */
+}
+
+/* Fixed header container. */
+#navbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    padding: 0 var(--nav-page-pad);
+    box-sizing: border-box;
+    pointer-events: none;
+    line-height: 1;
+    font-family: var(--font-caption), var(--font-symbol);
+}
+
+#navbar.scrolled {
+    pointer-events: auto;
+}
+
+/* Segment container: flex and relative, holding the three capsules. */
+.navbar-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 1200px;
+    min-height: 44px;
+    margin-inline: auto;
+    position: relative;
+    pointer-events: auto;
+}
+
+/* Base bubble: each capsule carries its own glass. */
+.nav-bubble {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 9999px;
+    padding: 0 9px;          /* +1px replaces the native 1px border the overlay took over, so icons keep their distance from the edge. */
+    background: color-mix(in srgb, var(--glass-base) calc(var(--panel-alpha) * 100%), transparent);
+    backdrop-filter: blur(var(--panel-blur));
+    -webkit-backdrop-filter: blur(var(--panel-blur));
+    box-shadow: var(--panel-shadow);
+    /* The ring is drawn as an outline: pure paint outside the box, so it never
+       enters the element's own overflow clip and never affects layout. The
+       wallpaper state on the home page overrides outline-color. */
+    outline: 1px solid var(--panel-border);
+    /* Negative offset keeps the ring inside the box: a ring drawn 1px outside falls
+       past the paint bounds WebKit gives a composited layer (the right bubble is
+       always composited; the collapsed left one is overflow:hidden), so Safari clips it. */
+    outline-offset: -1px;
+    transition:
+        left var(--seg-dur) ease,
+        transform var(--seg-dur) ease,
+        width 0.55s cubic-bezier(0.34, 1.56, 0.64, 1),
+        max-width var(--seg-dur) ease,
+        height var(--seg-dur) ease,
+        padding var(--seg-dur) ease,
+        border-radius var(--seg-dur) ease,
+        background-color 0.25s ease,
+        border-color 0.25s ease,
+        outline-color 0.25s ease;
+}
+
+/* Bubble shadow comes from --nav-bubble-shadow in tokens.css: none on dark
+   themes, a symmetric halo on light ones. */
+.nav-bubble {
+    box-shadow: var(--nav-bubble-shadow);
+}
+
+/* Non-Chromium: blur moves to ::before (see docs/GOTCHAS.md §backdrop-root-nesting) or the inner
+   .dd dropdown samples nothing. The bubbles carry transforms so are stacking contexts; the
+   -1 pseudo sinks below the icons. Do not substitute isolation. */
+html:not(.chromium) .nav-bubble {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+html:not(.chromium) .nav-bubble::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    z-index: -1;
+    pointer-events: none;
+    backdrop-filter: blur(var(--panel-blur));
+    -webkit-backdrop-filter: blur(var(--panel-blur));
+}
+
+.nav-bubble svg {
+    display: block;
+    width: var(--nav-icon-size);
+    height: var(--nav-icon-size);
+    flex-shrink: 0;
+    transform-origin: center;
+}
+
+/* Corrects the SVG size with a scale rather than editing the file. */
+.nav-item[data-icon="about"] svg { transform: scale(1.1); }
+/* No per-icon offset here: guestbook.svg declares data-ink-center and the
+   server injects the measured value as --icon-shift, which is what the
+   svg[data-icon][data-ink-center] rule in icons.css applies. */
+
+/* Left segment: hugs the container edge when expanded; left stays 0 and
+   collapsing is driven by transform. */
+.nav-bubble--left {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    justify-content: flex-start;
+    max-width: calc(var(--labl-w) + 50px);
+    height: 38px;
+    padding: 0 12px 0 0;
+    transition:
+        transform var(--seg-dur) ease,
+        max-width var(--seg-dur) ease,
+        height var(--seg-dur) ease,
+        padding var(--seg-dur) ease,
+        border-radius var(--seg-dur) ease;
+}
+
+#navbar.intro .nav-bubble--left {
+    max-width: calc(var(--labl-w) + 50px);
+    transition:
+        transform var(--seg-dur) ease,
+        max-width 1s ease,
+        height 0.6s ease,
+        padding 0.6s ease,
+        border-radius 0.6s ease;
+}
+
+.nav-bubble--left a {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    text-decoration: none;
+    color: var(--text-primary);
+    overflow: hidden;
+    height: 36px;
+    padding: 0;
+    width: max-content;
+}
+
+/* Avatar: anchored absolutely to the left edge so collapsing cannot squash it. */
+.nav-bubble--left .avatar {
+    position: absolute;
+    left: 7px;               /* +1px replaces the native border the overlay took over; the absolute anchor
+   follows the padding box outwards. */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    object-fit: cover;
+    border: 1.5px solid var(--border-light);
+}
+
+/* Text wrapper: its own max-width widens the bubble. The wipe is a horizontal
+   clip-path on .labl, so vertical overflow is allowed here — otherwise the
+   taller kaomoji gets clipped. */
+.nav-bubble--left .labl-wrap {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    margin-left: 37px;
+    max-width: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Text itself: full width, nowrap, clip-path wipe plus an opacity fade. */
+.nav-bubble--left .labl {
+    font-size: round(up, calc(13px * var(--font-caption-ink-scale)), 1px);
+    white-space: nowrap;
+    margin-left: 0;
+    width: max-content;
+    translate: 0 calc(-1 * var(--font-caption-shift));
+}
+
+/* Previous label, stacked above the new one; WAAPI shatters it per character
+   and then it goes away. */
+.nav-bubble--left .labl-old {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: round(up, calc(13px * var(--font-caption-ink-scale)), 1px);
+    white-space: nowrap;
+    color: var(--text-primary);
+    pointer-events: none;
+    clip-path: inset(0 0 0 0);
+    translate: 0 calc(-1 * var(--font-caption-shift));
+}
+
+/* First paint only (.intro): bubble stretch 1s, text wipe 1.2s, fade 1.5s.
+   Scrolling never replays it. */
+@keyframes leftBubbleExtend { from { max-width: 0; } to { max-width: var(--labl-w); } }
+@keyframes leftTextReveal { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes leftTextFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes leftAvatarSlide { from { transform: translateX(-4px); } to { transform: translateX(0); } }
+
+#navbar.intro .nav-bubble--left .labl-wrap { animation: leftBubbleExtend 1s ease both; }
+#navbar.intro .nav-bubble--left .labl { animation: leftTextReveal 1.2s ease both, leftTextFade 1.5s ease both, leftAvatarSlide 1s ease both; }
+#navbar.intro .nav-bubble--left a { animation: none; }
+#navbar.nav-ready .nav-bubble--left .labl-wrap { max-width: var(--labl-w); }
+
+/* Centre segment: absolutely centred, never distorted. */
+.nav-bubble--center {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 20;
+    height: 38px;
+    padding: 0 6px;
+    gap: 2px;
+    transition: padding 0.4s ease;
+}
+
+.nav-bubble--center .nav-item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 0 8px;
+    height: var(--nav-item-height);
+    border: none;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: round(up, calc(12.5px * var(--font-caption-ink-scale)), 1px);
+    font-family: inherit;
+    font-weight: inherit;
+    line-height: 1;
+    white-space: nowrap;
+    text-decoration: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.nav-bubble--center .nav-item > span {
+    display: flex;
+    align-items: center;
+    height: var(--nav-icon-size);
+    line-height: 1;
+    translate: 0 calc(-1 * var(--font-caption-shift));
+}
+
+.nav-bubble--center .nav-item:hover {
+    background: var(--group-hover-bg, var(--bg-interactive));
+    color: var(--group-hover-text, var(--text-primary));
+}
+
+.nav-bubble--center .nav-item.active {
+    color: var(--accent);
+}
+
+/* Dropdown menu */
+.nav-bubble--center .nav-group {
+    position: relative;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+
+.nav-bubble--center .nav-group .dd {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%) translateY(-6px);
+    min-width: 110px;
+    padding: 6px;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--glass-base) calc(var(--panel-alpha) * 100%), transparent);
+    backdrop-filter: blur(var(--panel-blur));
+    -webkit-backdrop-filter: blur(var(--panel-blur));
+    box-shadow: var(--panel-shadow);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: all 0.2s ease;
+}
+
+.nav-bubble--center .nav-group .dd::before {
+    content: '';
+    position: absolute;
+    top: -13px; left: 0; right: 0; height: 13px;
+}
+
+/* Divider inside the dropdown, between the admin-injected items and the rest. */
+.nav-bubble--center .nav-group .dd .dd-sep {
+    display: block;
+    height: 1px;
+    margin: 6px 8px;
+    background: var(--border-medium);
+}
+
+.nav-bubble--center .nav-group.nav-group--hover .dd,
+.nav-bubble--center .nav-group:focus-within .dd {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+}
+
+.nav-bubble--center .nav-group .dd a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 12px;
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-size: round(up, calc(13px * var(--font-caption-ink-scale)), 1px);
+    white-space: nowrap;
+    text-decoration: none;
+    transition: all 0.15s;
+}
+
+.nav-bubble--center .nav-group .dd a:hover {
+    background: var(--bg-interactive);
+    color: var(--accent);
+}
+
+/* Parent icon highlight: hovering anywhere in the group tints the parent
+   accent; hovering a child tints it accent-hover. */
+.nav-bubble--center .nav-group.nav-group--hover > .nav-item {
+    background: var(--group-hover-bg, var(--bg-interactive));
+    color: var(--group-hover-text, var(--accent));
+}
+.nav-bubble--center .nav-group:has(.dd a:hover) > .nav-item {
+    color: var(--accent-hover, var(--accent));
+}
+
+/* Hover isolation: entering the centre column highlights only the hovered
+   item and drops the active state from the others. */
+.nav-bubble--center.nav-hovering .nav-item.active:not(:hover) {
+    color: var(--text-muted);
+}
+.nav-bubble--center.nav-hovering .nav-group.nav-group--hover > .nav-item.active {
+    color: var(--group-hover-text, var(--accent));
+}
+
+/* Right segment: icons anchored right, signature revealed right to left; right stays at 0,
+   so the anchor never depends on the element's own width while --rw animates. WAAPI owns
+   width on mode switch; max-width still drives the 38px collapse. */
+.nav-bubble--right {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    max-width: 124px;
+    width: var(--rw, 78px);  /* +2px, matching the padding compensation below, keeps the icon's distance
+   from the edge as it was before the overlay. */
+    height: 38px;
+    padding: 0 10px 0 14px;  /* +1px on both sides replaces the native border the overlay took over. */
+    overflow: hidden;
+    justify-content: flex-end;
+    gap: 0;
+    will-change: transform, max-width, width;
+    transition:
+        transform var(--seg-dur) ease,
+        max-width var(--seg-dur) ease,
+        height var(--seg-dur) ease,
+        padding var(--seg-dur) ease,
+        border-radius var(--seg-dur) ease;
+}
+
+/* Bundles ⌘K and search for animation. No box of its own — a flex child only, so FLIP
+   pins and releases one container and the icons stay in lockstep; flex-shrink:0 stops
+   the fixed-width bubble from squeezing it. */
+.nav-bubble--right .nav-right-icons {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    flex-shrink: 0;
+}
+
+#navbar.intro .nav-bubble--right {
+    transition:
+        transform var(--seg-dur) ease,
+        max-width 0.7s ease,
+        height 0.6s ease,
+        padding 0.6s ease,
+        border-radius 0.6s ease;
+}
+
+.nav-bubble--right button {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    width: 26px;
+    height: 100%;
+    padding: 5px 0;
+    border: none;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: round(up, calc(12.5px * var(--font-caption-ink-scale)), 1px);
+    transition: all 0.2s;
+}
+
+.nav-bubble--right button:hover { color: var(--accent); }
+
+.nav-bubble--right svg {
+    width: var(--nav-icon-size);
+    height: var(--nav-icon-size);
+    flex-shrink: 0;
+    transition: transform 0.7s ease;
+}
+
+.nav-bubble--right .shortcut {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 28px;
+    height: round(up, calc(18.5px * var(--font-caption-ink-scale)), 1px);
+    padding: 0;
+    font-size: round(up, calc(10.5px * var(--font-caption-ink-scale)), 1px);
+    line-height: 1;
+    color: var(--text-dim);
+    border: 1px solid var(--border-light);
+    border-radius: 4px;
+    opacity: 0;
+    white-space: nowrap;
+    overflow: hidden;
+/* No overall translation: ⌘K must not drift relative to the search SVG, and
+   it takes no ink offset either — flex centring alone aligns it, at the same
+   level as the search SVG. */
+    transition: opacity 1s ease;
+}
+
+/* Signature fade on first paint only; scrolling never replays it. */
+@keyframes rightSigReveal { from { opacity: 0; transform: translateX(8px); } to { opacity: 0.75; transform: translateX(0); } }
+#navbar.intro .nav-bubble--right .shortcut { animation: rightSigReveal 0.5s ease 0.5s both; }
+#navbar.nav-ready .nav-bubble--right .shortcut { opacity: 0.75; }
+
+/* First paint: the browse filter icon appears late, a light scale-and-fade. */
+#navbar.intro #navRight.browse #navFilterBtn { animation: rightFilterIn-ghost 0.35s ease 0.3s both; }
+
+/* Mode switch (entering browse): the divider and the grid button come in. The
+   bubble width is animated by the WAAPI pop in 04-mode-transition.js; these
+   rules only animate what is inside. */
+@keyframes rightDividerIn-ghost   { from { opacity: 0; } to { opacity: var(--div-op); } }
+@keyframes rightFilterIn-ghost    { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+
+/* Both start hidden while .nav-right-icons slides left, then fade and grow
+   from about 0.3s, once the container has half settled. */
+#navRight.browse #navDivider  { animation: rightDividerIn-ghost 0.3s ease 0.3s both; }
+#navRight.browse #navFilterBtn { animation: rightFilterIn-ghost 0.35s ease 0.35s both; }
+
+/* Left signature on hover: takes the accent colour. */
+.nav-bubble--left a:hover .labl { color: var(--accent); transition: color 0.2s ease; }
+.nav-bubble--left a .labl { transition: color 0.2s ease; }
+
+/* ⌘ uses --font-symbol, the system symbol font, which draws the glyph at full size:
+   --font-data would squeeze it into one monospace cell (measured 7.22 x 7.96 against
+   11.13 x 9.11) and no font-size fixes that. K keeps --font-data; the two are aligned
+   by their own role offsets, through CSS on first paint. */
+.nav-bubble--right .shortcut-cmd {
+    font-family: var(--font-symbol);
+    font-size: calc(1em / var(--font-caption-ink-scale, 1));
+    line-height: 1;
+    translate: 0 calc(-1 * var(--font-symbol-shift, 0em));
+}
+
+/* K keeps --font-data and no ink offset: the ⌘K pair is aligned by hand
+   through flex, at the same level as the search SVG. */
+.nav-bubble--right .shortcut-k {
+    font-family: var(--font-data);
+    font-size: calc(1em / var(--font-caption-ink-scale, 1));
+    line-height: 1;
+    margin-left: 0.35em;
+}
+
+/* Scrolled: the outer segments gather into circles with transform. left stays
+   fixed, which keeps Safari from batching the repaint. */
+#navbar.scrolled .nav-bubble--left {
+    max-width: 38px;
+    height: 38px;
+    padding: 0;
+    transform: translate(var(--collapse-left-tx, 0px), -50%);
+    overflow: hidden;
+}
+
+#navbar.scrolled .nav-bubble--right {
+    max-width: 38px;
+    height: 38px;
+    padding: 0 10px;         /* Same compensation as above, so the right-anchored icon keeps its distance
+   from the edge when collapsed. */
+    justify-content: flex-end;
+    transform: translate(var(--collapse-right-tx, 0px), -50%);
+    overflow: hidden;
+}
+
+#navbar.scrolled .nav-bubble--right button {
+    justify-content: flex-end;
+    padding: 5px 0;          /* Matches the expanded button, so the icon keeps its offset from the right. */
+}
+
+/* Collapsed: the decorative ⌘K leaves the flow, otherwise its invisible 28px pushes the
+   visible icon right inside the 38px circle. Browse mode hides search and the divider,
+   leaving only grid anchored at the same distance from the right as when expanded. */
+#navbar.scrolled .nav-bubble--right .shortcut { display: none; }
+#navbar.scrolled #navRight #navDivider { display: none; }
+#navbar.scrolled #navRight.browse #navSearchBtn { display: none; }
+
+/* @starting-style only fixes the bubble's origin (the small circle); right is unchanged and
+   the transform origin comes from the expanded state. */
+@starting-style {
+    .nav-bubble--left {
+        transform: translateY(-50%);
+        padding: 0;
+    }
+    .nav-bubble--right {
+        transform: translateY(-50%);
+        max-width: 38px; padding: 0 9px;
+    }
+    .nav-bubble--left a {
+        position: relative;
+        justify-content: flex-start;
+        overflow: hidden;
+    }
+    .nav-bubble--right button {
+        position: relative;
+    }
+    .nav-bubble--right svg {
+        transform: translateX(-4px);
+    }
+}
+
+/* Up to 960px: collapse, identical to the scrolled state — the circles gather
+   towards the centre column, which stays. left is fixed. */
+@media (max-width: 960px) {
+    .nav-bubble--left {
+        transform: translate(var(--collapse-left-tx, 0px), -50%);
+        width: 38px; min-width: 38px; max-width: 38px; height: 38px; padding: 0; overflow: hidden;
+    }
+    .nav-bubble--left a {
+        position: relative;
+        width: 100%;
+        justify-content: center;
+        overflow: hidden;
+    }
+    .nav-bubble--left .labl {
+        position: absolute; left: 0; top: 0; width: 0; height: 0; overflow: hidden;
+        clip-path: inset(0 100% 0 0); opacity: 0; margin: 0;
+    }
+    /* padding must match #navbar.scrolled's collapsed value: scrolling still toggles
+       .scrolled at this width, so a different padding animates the icon sideways. */
+    .nav-bubble--right {
+        transform: translate(var(--collapse-right-tx, 0px), -50%);
+        max-width: 38px; height: 38px; padding: 0 10px; overflow: hidden;
+    }
+    .nav-bubble--right button {
+        position: relative;
+    }
+    .nav-bubble--right .shortcut {
+        position: absolute; left: 0; top: 0; width: 0; height: 0; overflow: hidden;
+        max-width: 0; min-width: 0; opacity: 0; padding: 0; margin: 0; border-width: 0;
+    }
+    .search-modal { padding: 10vh 0; }
+    .search-modal__panel { width: calc(100% - 16px); }
+}
+
+/* prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+    .nav-bubble,
+    .nav-bubble--left .labl-wrap,
+    .nav-bubble--left .labl,
+    .nav-bubble--right .shortcut,
+    .nav-bubble--right #navSearchBtn,
+    .nav-bubble--right #navFilterBtn,
+    .nav-bubble--right svg {
+        transition: none !important;
+        animation: none !important;
+    }
+    /* Skips the animation and shows the element at once, overriding the default
+   opacity:0 / max-width:0. */
+    .nav-bubble--left .labl-wrap { max-width: var(--labl-w); }
+    .nav-bubble--right .shortcut { opacity: 0.75; }
+    #navRight:not(.browse) #navFilterBtn { visibility: hidden; opacity: 0; width: 0; }
+    @starting-style {
+        .nav-bubble--left { max-width: 512px; padding: 0 12px 0 0; transform: translateY(-50%); left: 0; }
+        .nav-bubble--right { width: 72px; padding: 0 9px; transform: translateY(-50%); }
+        .nav-bubble--left .labl { clip-path: inset(0 0 0 0); opacity: 1; }
+        .nav-bubble--right .shortcut { opacity: 1; }
+        .nav-bubble--right svg { transform: none; }
+    }
+}
+
+/* Search modal: the full-screen search dialog. */
+
+.search-modal {
+    position: fixed; inset: 0; z-index: 200;
+    display: flex; align-items: flex-start; justify-content: center;
+    padding: 15vh 0;
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: all 0.3s ease;
+}
+.search-modal.active { opacity: 1; visibility: visible; pointer-events: auto; }
+.search-modal__backdrop {
+    position: absolute; inset: 0;
+    background: var(--bg-overlay);
+    backdrop-filter: blur(var(--blur-amount));
+    -webkit-backdrop-filter: blur(var(--blur-amount));
+}
+.search-modal__panel {
+    position: relative; z-index: 1;
+    width: min(640px, calc(100% - 32px));
+    max-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    background: color-mix(in srgb, var(--glass-base) calc(var(--panel-alpha) * 100%), transparent);
+    backdrop-filter: blur(var(--panel-blur));
+    -webkit-backdrop-filter: blur(var(--panel-blur));
+    border-radius: var(--radius-xl);
+    box-shadow: var(--panel-shadow);
+    overflow: hidden;
+    transform: translateY(20px) scale(0.96);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.search-modal.active .search-modal__panel { transform: translateY(0) scale(1); }
+.search-modal__header {
+    flex-shrink: 0;
+    display: flex; align-items: center; gap: 8px;
+    padding: 14px 18px;
+    margin: 0;
+}
+.search-modal__results:has(> *) {
+    border-top: 1px solid var(--border-light);
+}
+.search-modal__input {
+    flex: 1; border: none; background: transparent;
+    color: var(--text-primary); font-size: 17px;
+    font-family: var(--font-body);
+    font-weight: var(--font-body-weight, 400);
+    font-variation-settings: 'BEVL' var(--font-body-bevl, 100);
+    outline: none;
+    height: 32px;
+    line-height: normal;
+    padding: 0;
+    margin: 0;
+    caret-color: var(--accent);
+}
+.search-modal__input::placeholder { color: var(--text-dim); }
+.search-modal__close {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 50%;
+    border: none; background: transparent;
+    color: var(--text-muted); cursor: pointer; transition: all 0.2s;
+}
+.search-modal__close:hover { background: var(--bg-interactive); color: var(--text-primary); }
+.search-modal__close svg { width: 20px; height: 20px; }
+.search-modal__results {
+    flex: 1 1 auto;
+    align-self: stretch;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    scroll-snap-type: y proximity;
+}
+.search-modal__results:empty {
+    display: none;
+}
+.search-modal__results.has-overflow-bottom {
+    mask-image: linear-gradient(to bottom, black calc(100% - 32px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 32px), transparent 100%);
+}
+.search-modal__results::-webkit-scrollbar {
+    display: none;
+}
+.search-modal__results .search-dropdown {
+    position: static; opacity: 1; visibility: visible;
+    pointer-events: auto; transform: none; box-shadow: none; border: none; padding: 0;
+}
+.search-modal__results .search-item {
+    width: 100%;
+    box-sizing: border-box;
+    scroll-snap-align: start;
+}
+
+/* Mode shapes for the right column. Default: [⌘K][search]. Browse: [⌘K][search] | [grid],
+   the divider gap visually even rather than equal. --rw smooths the bubble width; the
+   scrolled state clips it to 38px, anchored on the rightmost element. */
+#navRight {
+    --rw: 76px;
+}
+#navRight.browse {
+    --rw: 122px;              /* +2px, matching the padding compensation: the content box is unchanged (⌘K 28 + search 26 + divider 1.5 + grid 26 + 16 of gaps ≈ 97.5). */
+    padding: 0 10px 0 14px;  /* +1px on both sides, same compensation. */
+    gap: 0;                   /* ⌘K sits tight against search; the divider margin carries the spacing. */
+}
+
+/* At rest the DOM order is always shortcut / search / divider / filter; order
+   sets the visual order. */
+#navRight .shortcut  { order: 1; }
+#navRight #navSearchBtn { order: 2; }
+#navRight #navDivider { order: 3; }
+#navRight #navFilterBtn { order: 4; }
+/* Browse preview: [⌘K][search] | [grid], grid still rightmost. */
+#navRight.browse .shortcut  { order: 1; }
+#navRight.browse #navSearchBtn { order: 2; }
+#navRight.browse #navDivider { order: 3; }
+#navRight.browse #navFilterBtn { order: 4; }
+
+/* Mode switch: the transform transition on .nav-right-icons and the filter is
+   what FLIP releases against. 0.5s, no overshoot. */
+#navRight .shortcut {
+    transition:
+        transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 0.4s ease;   /* Matches search, without the overshoot. */
+}
+#navRight #navSearchBtn {
+    transition:
+        all 0.2s,                                   /* Keeps the hover background and colour transition. */
+        transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 0.35s ease;
+}
+/* Smooth transition for the container and the filter. */
+#navRight .nav-right-icons {
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+#navRight #navFilterBtn {
+    transition:
+        transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 0.35s ease;
+}
+
+/* Hidden filter (outside browse): leaves the flow so it cannot leave phantom
+   spacing behind. In browse it shows as a 26px round button. */
+#navRight:not(.browse) #navFilterBtn {
+    display: none;
+}
+
+/* Right column divider, shown in browse between [⌘K][search] and [grid]. Always the grey
+   line-round shape: navbar.html hard-codes data-nav-divider="line-round", no UI to change
+   it. Weight, opacity and colour come from the CSS variable defaults on #navRight. */
+#navRight {
+    --div-w: 1.5px;
+    --div-h: 16px;
+    --div-op: 1;
+    /* Same mix ratio and opacity as the nav border, inheriting --panel-border on
+   pages other than home and post. */
+    --div-color: var(--panel-border);
+}
+#navRight #navDivider {
+    align-self: center;
+    flex-shrink: 0;
+    position: relative;
+    width: var(--div-w);
+    height: var(--div-h);
+    margin: 0 8px;            /* Carries the spacing browse needs beyond the tight ⌘K/search pair: 8px either
+   side of the divider, which lands the content at exactly 98px. */
+    border: none;
+    background: var(--div-color);
+    opacity: var(--div-op);
+    transition: opacity 0.25s ease, background 0.25s ease,
+                width 0.25s ease, height 0.25s ease, border-radius 0.25s ease,
+                border 0.25s ease, filter 0.25s ease, transform 0.25s ease;
+}
+/* Outside browse the divider is hidden. */
+#navRight:not(.browse) #navDivider {
+    display: none;
+}
+/* The only shape: grey line-round, rounded at both ends. */
+#navRight[data-nav-divider="line-round"] #navDivider {
+    width: var(--div-w); height: 16px; border-radius: calc(var(--div-w) / 2);
+}
+
+/* Nav filter panel: the category and tag dropdown. */
+
+/* Category filter button: a compact icon button with no shortcut text. */
+#navFilterBtn {
+    width: 26px;
+    padding: 4px 0;
+    justify-content: center;
+}
+#navFilterBtn.active {
+    color: var(--accent);
+}
+#navFilterBtn.active::before {
+    opacity: 1;
+}
+
+/* Dropdown panel: an overlay, so it does not push content. */
+.nav-filter-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9990;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.nav-filter-panel--open {
+    pointer-events: auto;
+    opacity: 1;
+}
+
+.nav-filter-panel__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+}
+
+.nav-filter-panel__content {
+    position: absolute;
+    top: 72px;
+    right: 24px;
+    width: 360px;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    padding: 18px;
+    border-radius: var(--radius-lg);
+    background: color-mix(in srgb, var(--glass-base) calc(var(--panel-alpha) * 100%), transparent);
+    backdrop-filter: blur(var(--panel-blur));
+    -webkit-backdrop-filter: blur(var(--panel-blur));
+    box-shadow: var(--panel-shadow);
+    transform: translateY(-8px) scale(0.97);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nav-filter-panel--open .nav-filter-panel__content {
+    transform: translateY(0) scale(1);
+}
+
+.nav-filter-panel__section {
+    margin-bottom: 16px;
+}
+.nav-filter-panel__section:last-child {
+    margin-bottom: 0;
+}
+
+.nav-filter-panel__title {
+    display: block;
+    font-size: round(up, calc(11.5px * var(--font-caption-ink-scale)), 1px);
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    font-family: var(--font-data);
+}
+
+/* Category grid */
+.nav-filter-panel__cat-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.nav-filter-cat {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-light);
+    background: color-mix(in srgb, var(--glass-base) calc(var(--row-alpha) * 100%), transparent);
+    color: var(--text-muted);
+    font-size: round(up, calc(13px * var(--font-body-ink-scale)), 1px);
+    transition: all 0.15s;
+}
+.nav-filter-cat:hover {
+    border-color: var(--row-border-hover);
+    color: var(--accent);
+    background: color-mix(in srgb, var(--glass-base) calc(var(--row-alpha) * 100%), transparent);
+}
+.nav-filter-cat.active {
+    background: var(--accent);
+    color: #ffffff;
+    text-shadow: 0 1px 2px var(--accent-edge);
+    border-color: var(--accent);
+}
+
+/* Tag cloud */
+.nav-filter-panel__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.nav-filter-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-subtle);
+    background: transparent;
+    color: var(--text-dim);
+    font-size: round(up, calc(12px * var(--font-body-ink-scale)), 1px);
+    transition: all 0.15s;
+}
+.nav-filter-tag:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+.nav-filter-tag.active {
+    background: color-mix(in srgb, var(--glass-light) calc(0.12 * 100%), transparent);
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+/* Narrow screens: centre the panel. */
+@media (max-width: 600px) {
+    .nav-filter-panel__content {
+        right: 50%;
+        transform: translate(50%, -8px) scale(0.97);
+        width: calc(100vw - 32px);
+    }
+    .nav-filter-panel--open .nav-filter-panel__content {
+        transform: translate(50%, 0) scale(1);
+    }
+}
+
+/* Theme FAB */
+#theme-fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--glass-base) calc(var(--glass-l1-alpha) * 100%), transparent);
+    backdrop-filter: var(--glass-l1-filter);
+    -webkit-backdrop-filter: var(--glass-l1-filter);
+    border: 1px solid var(--panel-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 9999;
+    color: var(--text-muted);
+    transition: background var(--duration-normal), color var(--duration-normal);
+    line-height: 1;
+}
+#theme-fab svg {
+    display: block;
+    width: var(--icon-md);
+    height: var(--icon-md);
+}
+#theme-fab:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+/* Read-mode FAB: toggles between clear glass and paper. */
+#read-fab {
+    position: fixed;
+    bottom: 24px;
+    right: 76px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--glass-base) calc(var(--glass-l1-alpha) * 100%), transparent);
+    backdrop-filter: var(--glass-l1-filter);
+    -webkit-backdrop-filter: var(--glass-l1-filter);
+    border: 1px solid var(--panel-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 9999;
+    color: var(--text-muted);
+    transition: background var(--duration-normal), color var(--duration-normal);
+    line-height: 1;
+}
+#read-fab svg {
+    width: var(--icon-md);
+    height: var(--icon-md);
+    flex-shrink: 0;
+}
+#read-fab .read-icon--paper { display: none; }
+#read-fab .read-icon--clear { display: block; }
+html[data-read-mode="paper"] #read-fab .read-icon--clear { display: none; }
+html[data-read-mode="paper"] #read-fab .read-icon--paper { display: block; }
+html[data-read-mode="paper"] #read-fab {
+    color: var(--accent);
+    background: var(--accent-soft);
+}
+#read-fab:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+html[data-read-mode="paper"] #read-fab:hover {
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
+/* Theme Picker */
+.theme-picker {
+    position: fixed;
+    bottom: 76px;
+    right: 24px;
+    z-index: 9998;
+    display: none;
+    flex-direction: column;
+    gap: 0;
+    padding: 14px;
+    border-radius: var(--radius-lg);
+    background: var(--bg-nav);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--panel-border);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    animation: theme-picker-in 0.2s ease-out;
+}
+
+.theme-picker.show {
+    display: flex;
+}
+
+@keyframes theme-picker-in {
+    from { opacity: 0; transform: translateY(10px) scale(0.95); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.theme-picker__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 4px 10px; /* Balances the 14px container header so the text reads as centred. */
+    border-bottom: 1px solid var(--border-light);
+    margin-bottom: 2px; /* 2px margin + 6px column padding = 8px, matching the 8px padding-top of the
+   Dark row below. */
+}
+
+/* Two-way slider: OS or manual. */
+.theme-sync-toggle {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 48px;
+    height: 18px;
+    border-radius: 9px;
+    background: color-mix(in srgb, var(--bg-hover) 50%, transparent);
+    border: 1px solid var(--border-light);
+    cursor: pointer;
+    user-select: none;
+    margin-top: -2px; /* Nudge that centres it against the text on the left. */
+}
+
+.theme-sync-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+
+.toggle-slider {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 6px;
+    font-family: var(--font-display-mono);
+    font-size: 8px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    color: var(--text-dim);
+}
+
+.toggle-icon-os, .toggle-icon-blog {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    transition: color 0.2s;
+    line-height: 1; /* Cancels the drop the font's line-height introduces. */
+}
+
+.toggle-thumb {
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    width: 22px;
+    height: 14px;
+    background: var(--bg-base);
+    border-radius: 7px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1;
+}
+
+/* Follow system: the default, unselected state, on the left. */
+.theme-sync-toggle input:not(:checked) + .toggle-slider .toggle-icon-os {
+    color: var(--text-primary);
+}
+
+/* Pinned manually: the selected state, on the right. */
+.theme-sync-toggle input:checked + .toggle-slider .toggle-thumb {
+    transform: translateX(22px);
+}
+.theme-sync-toggle input:checked + .toggle-slider .toggle-icon-blog {
+    color: var(--text-primary);
+}
+
+.theme-picker__label {
+    font-family: var(--font-display-mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+}
+
+.theme-picker__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.theme-picker__col {
+    background: transparent;
+    border: none;
+    padding: 6px 2px;
+}
+
+.theme-picker__col--light {
+    padding-bottom: 8px;
+}
+
+.theme-picker__col--dark {
+    border-top: 1px solid var(--border-light);
+    padding-top: 8px;
+}
+
+.theme-picker__col-title {
+    font-size: 10.5px;
+    font-family: var(--font-display-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    line-height: 1.3;
+}
+
+.theme-picker__col-title .col-title-main {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.theme-picker__col-title .col-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+}
+
+.theme-picker__col-title .col-icon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.theme-picker__col--light .col-icon {
+    color: #f59e0b;
+}
+
+.theme-picker__col--dark .col-icon {
+    color: #818cf8;
+}
+
+.theme-picker__col-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 5px;
+}
+
+/* Base class for the theme option buttons: fully transparent, inheriting the
+   card radius, with a monospace decorative label. */
+.theme-picker__cell {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 8px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: var(--font-display-mono);
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+    width: 100%;
+    box-sizing: border-box;
+    background: transparent;
+/* The label must not use var(--text-primary): the swatch carries data-theme="<name>", so
+   that theme's rules would resolve it to the swatch's own theme and read illegibly against
+   the page. color: inherit takes the panel colour, which is the page theme. */
+    color: inherit;
+    font-weight: 400;
+    text-align: left;
+}
+
+/* Per-theme swatch colours: light 25/75, dark 15/85, alpha 0.2. */
+.theme-picker__cell[data-theme="forest-light"] { --cell-theme-border: rgba(233, 239, 223, 0.20); }
+.theme-picker__cell[data-theme="summer-light"]   { --cell-theme-border: rgba(192, 224, 241, 0.20); }
+.theme-picker__cell[data-theme="cyanic-light"]  { --cell-theme-border: rgba(202, 232, 229, 0.20); }
+.theme-picker__cell[data-theme="violet-light"] { --cell-theme-border: rgba(225, 206, 251, 0.20); }
+.theme-picker__cell[data-theme="golden-light"]       { --cell-theme-border: rgba(253, 231, 194, 0.20); }
+.theme-picker__cell[data-theme="sakura-light"]       { --cell-theme-border: rgba(255, 218, 231, 0.20); }
+
+.theme-picker__cell[data-theme="oceans-dark"]   { --cell-theme-border: rgba(96, 117, 124, 0.20); }
+.theme-picker__cell[data-theme="frozen-dark"]        { --cell-theme-border: rgba(101, 114, 125, 0.20); }
+.theme-picker__cell[data-theme="indigo-dark"]  { --cell-theme-border: rgba(99, 109, 131, 0.20); }
+.theme-picker__cell[data-theme="stream-dark"]    { --cell-theme-border: rgba(100, 108, 126, 0.20); }
+.theme-picker__cell[data-theme="purple-dark"]        { --cell-theme-border: rgba(106, 106, 131, 0.20); }
+.theme-picker__cell[data-theme="coffee-dark"]      { --cell-theme-border: rgba(113, 109, 111, 0.20); }
+
+/* Light option: 75% near-white, 25% theme tint, alpha 0.2. */
+.theme-picker__col--light .theme-picker__cell {
+    border: 1px solid var(--cell-theme-border);
+}
+
+.theme-picker__col--light .theme-picker__cell:hover {
+    background: var(--bg-hover);
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-1px);
+}
+
+.theme-picker__col--light .theme-picker__cell:hover .theme-picker__name {
+    color: var(--accent);
+}
+
+/* Dark option: 85% light grey, 15% theme tint, alpha 0.2. */
+.theme-picker__col--dark .theme-picker__cell {
+    border: 1px solid var(--cell-theme-border);
+}
+
+.theme-picker__col--dark .theme-picker__cell:hover {
+    background: var(--bg-hover);
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-1px);
+}
+
+.theme-picker__col--dark .theme-picker__cell:hover .theme-picker__name {
+    color: var(--accent);
+}
+
+/* Active state: one highlight, weight stays 400. */
+.theme-picker__cell.active {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 400;
+    box-shadow: 0 0 0 1px var(--accent);
+}
+
+.theme-picker__cell.active .theme-picker__name {
+    color: var(--accent);
+}
+
+/* Disabled: themes locked out while following the system. */
+.theme-picker__cell.disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    filter: grayscale(100%);
+}
+
+.theme-picker__cell.disabled:hover {
+    background: transparent;
+    border-color: var(--cell-theme-border);
+    color: inherit;
+    transform: none;
+}
+
+.theme-picker__cell.disabled:hover .theme-picker__name {
+    color: inherit;
+}
+
+.theme-picker__swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.10);
+}
+
+.theme-picker__swatch--oceans-dark          { background: linear-gradient(135deg, #0A1628 50%, #64D8CB 50%); }
+.theme-picker__swatch--frozen-dark               { background: linear-gradient(135deg, #2E3440 50%, #88C0D0 50%); }
+.theme-picker__swatch--indigo-dark         { background: linear-gradient(135deg, #1A1B26 50%, #7AA2F7 50%); }
+.theme-picker__swatch--stream-dark           { background: linear-gradient(135deg, #1F1F28 50%, #7E9CD8 50%); }
+.theme-picker__swatch--purple-dark               { background: linear-gradient(135deg, #161622 50%, #A78BFA 50%); }
+.theme-picker__swatch--coffee-dark             { background: linear-gradient(135deg, #161412 50%, #D4A373 50%); }
+.theme-picker__swatch--forest-light        { background: linear-gradient(135deg, #F5F0E3 50%, #A7C080 50%); }
+.theme-picker__swatch--cyanic-light         { background: linear-gradient(135deg, #FDF6E3 50%, #2AA198 50%); }
+.theme-picker__swatch--violet-light        { background: linear-gradient(135deg, #EFF1F5 50%, #8839EF 50%); }
+.theme-picker__swatch--summer-light          { background: linear-gradient(135deg, #F0F7FF 50%, #0284C7 50%); }
+.theme-picker__swatch--golden-light             { background: linear-gradient(135deg, #FFFDF2 50%, #F59E0B 50%); }
+.theme-picker__swatch--sakura-light             { background: linear-gradient(135deg, #FFF0F3 50%, #FF6B9D 50%); }
+
+.theme-picker__name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* As with .theme-picker__cell: inherit the panel colour, which is the page
+   theme, not the swatch's own. */
+    color: inherit;
+    font-family: var(--font-display-mono);
+    letter-spacing: 0.02em;
+    transition: color 0.15s ease;
+}
+
+/* Chromium rebuild of the glass on navbar, search, filter and FAB; only .chromium
+   activates it, layers per glass.css, mode picked by 14-backdrop.js. #navbar is fixed, so
+   every bubble and dropdown resolves to static — the clone stays constant, scrolling is free. */
+
+/* Three bubbles: scrolling gathers them into circles via transform, which the
+   three layers do not interfere with. */
+.chromium .nav-bubble {
+    /* position must be absolute: each bubble is placed by its own modifier
+       (.nav-bubble--left / --center / --right) at (0,1,0), which this (0,2,0)
+       rule would override. Writing relative drops them back into the flex flow
+       and the whole navbar shifts. */
+    position: absolute;
+    --glass-blur-fallback: var(--glass-l1-blur);
+    --glass-tint: var(--nav-bg);
+}
+
+/* Centre column dropdown */
+.chromium .nav-bubble--center .nav-group .dd {
+    position: absolute;
+    --glass-blur-fallback: var(--glass-l2-blur);
+    --glass-tint: var(--bg-card);
+}
+
+/* Search dialog: the backdrop owns the scene B full-screen blur and the --bg-overlay dim.
+   The panel must not mount scene B a second time, or the cloned wallpaper covers the dim
+   and the panel reads as a glowing hole. */
+.chromium .search-modal__backdrop {
+    position: absolute;
+    --glass-blur-fallback: var(--blur-amount);
+    --glass-tint: var(--bg-overlay);
+}
+
+/* Nav filter panel: backdrop and content */
+.chromium .nav-filter-panel__backdrop {
+    position: absolute;
+    --glass-blur-fallback: 2px;
+    --glass-tint: rgba(0, 0, 0, 0.25);
+}
+.chromium .nav-filter-panel__content {
+    position: absolute;
+    --glass-blur-fallback: var(--glass-l1-blur);
+    --glass-tint: var(--bg-nav);
+}
+
+/* Theme FAB and picker: fixed, so they resolve to static. */
+.chromium #theme-fab,
+.chromium #read-fab {
+    position: fixed;
+    --glass-blur-fallback: var(--glass-l1-blur);
+    --glass-tint: color-mix(in srgb, var(--glass-base) calc(var(--glass-l1-alpha) * 100%), transparent);
+}
+/* Carries the FAB's hover background, which the !important strip removes from
+   the element itself. */
+.chromium #theme-fab:hover > .g-tint,
+.chromium #read-fab:hover > .g-tint {
+    --glass-tint: var(--bg-hover);
+}
+/* Read mode: in paper the !important strip removes #read-fab's background too,
+   and the hover rule would paint it --bg-hover, so both states pin back to
+   --accent-soft. */
+html.chromium[data-read-mode="paper"] #read-fab > .g-tint,
+html.chromium[data-read-mode="paper"] #read-fab:hover > .g-tint {
+    --glass-tint: var(--accent-soft);
+}
+.chromium .theme-picker {
+    position: fixed;
+    --glass-blur-fallback: var(--panel-blur);
+    --glass-tint: color-mix(in srgb, var(--glass-base) calc(var(--panel-alpha) * 100%), transparent);
+}

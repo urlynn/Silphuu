@@ -1,0 +1,119 @@
+/* Tokyo Night Day / Sorakado Ao - semantic layer.
+   High-vitality anime sky blue (light theme). */
+
+[data-theme="summer-light"] {
+    /* Accent */
+  --accent: #0284C7;
+
+  /* Accent 2 (secondary accent for two-tone theme - plan C warm amber) */
+  --accent-2: #D97706;
+  --accent-2-hover: #B45309;
+  --accent-2-soft: color-mix(in srgb, var(--accent-2) 14%, transparent);
+  --accent-2-edge: rgba(180, 83, 9, 0.4);
+
+  /* Glass system (hex base) */
+  --glass-tint: #F0F7FF;
+  --glass-light: #0284C7;
+  --glass-dark: #000000;
+  
+
+  --shadow-sm: 0 2px 6px rgba(2, 132, 199, 0.06);
+
+  /* Background */
+  --bg-body: #F0F7FF;
+  --bg-base: #F0F7FF;
+  --bg-glass-alt: rgba(240, 247, 255, 0.80);
+  --bg-nav: rgba(240, 247, 255, 0.85);
+  --bg-code: rgba(224, 242, 254, 0.70);
+  --bg-chroma: rgba(224, 242, 254, 0.70);
+  --bg-card: rgba(2, 132, 199, 0.04);
+  --bg-input: rgba(2, 132, 199, 0.04);
+  --bg-overlay: color-mix(in srgb, var(--glass-dark) 35%, transparent);
+
+  /* Surface */
+  --bg-subtle: color-mix(in srgb, var(--glass-light) calc(var(--surface-alpha) * 100%), transparent);
+  --bg-hover: color-mix(in srgb, var(--glass-light) 10%, transparent);
+  --bg-interactive: color-mix(in srgb, var(--glass-light) 8%, transparent);
+
+  /* Text */
+  --text-primary: #404C60;
+  --text-muted: #586579;
+  --text-dim: #77849A;
+  --timeline-line: color-mix(in srgb, var(--text-primary) 18%, transparent);
+  --timeline-node: color-mix(in srgb, var(--text-primary) 35%, transparent);
+
+  /* Accent (auto-derived) */
+  --accent-hover: #6366F1;
+  --accent-soft: color-mix(in srgb, var(--accent) 14%, transparent);
+
+  /* Border */
+  --border-subtle: color-mix(in srgb, var(--glass-light) 8%, transparent);
+
+  /* Shadow */
+  --shadow-card: 0 4px 14px rgba(2, 132, 199, 0.08);
+
+  /* Hover states */
+  --hover-bg: color-mix(in srgb, var(--accent) 8%, transparent);
+  --hover-text: #0284C7;
+  --hover-border: rgba(14, 165, 233, 0.20);
+  --hover-blur: 12px;
+  --hover-bg-active: color-mix(in srgb, var(--accent) 15%, transparent);
+  --hover-text-active: #4338CA;
+
+  /* Nav */
+  --nav-bg: rgba(0, 0, 0, 0.08);
+
+  /* Layout */
+  --sidebar-radius: 10px;
+  --blur-amount: 20px;
+
+  /* Group hover */
+  --group-hover-bg: color-mix(in srgb, var(--glass-light) 8%, transparent);
+  --group-hover-text: var(--accent);
+
+  /* Comment form */
+  --cmt-form-bg: #FFFFFF;
+  --cmt-input-color: var(--text-primary);
+  --cmt-input-placeholder: var(--text-muted);
+  --cmt-textarea-color: var(--text-primary);
+  --cmt-textarea-placeholder: var(--text-muted);
+  --cmt-textarea-focus: var(--text-primary);
+  --cmt-input-focus: var(--text-primary);
+  --cmt-submit-bg: var(--accent);
+
+
+  /* Chroma syntax highlighting */
+  --chroma-keyword: #0284C7;
+  --chroma-function: #2563EB;
+  --chroma-string: #0D9488;
+  --chroma-comment: #94A3B8;
+  --chroma-number: #EA580C;
+  --chroma-operator: #0284C7;
+  --chroma-punctuation: #475569;
+  --chroma-tag: #E11D48;
+  --chroma-deleted: #DC2626;
+  --chroma-inserted: #0D9488;
+
+  /* Decorative shapes: plan C warm amber accents */
+  --shape-1: #0284C7;
+  --shape-2: #D97706;
+  --shape-3: #38BDF8;
+  --shape-4: #FDBA74;
+  --shape-5: #0369A1;
+  --shape-6: #7DD3FC;
+  --shape-7: #BAE6FD;
+  --shape-8: #E0F2FE;
+  --shape-9: #0C4A6E;
+  --shape-10: #F97316;
+}
+
+/* summer-light (ao) only: render the "new" capsule as a solid pinned badge */
+[data-theme="summer-light"] .badge-top-left.badge-new {
+    background: var(--accent);
+    color: #fff;
+    text-shadow: 0 1px 2px var(--accent-edge);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+[data-theme="summer-light"] .badge-top-left.badge-new svg {
+    color: #fff;
+}

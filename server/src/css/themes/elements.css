@@ -1,0 +1,234 @@
+/* Common Dark - non-article pages */
+/* Extends base.css :root variables with concrete element styling.
+   Load on pages WITHOUT .theme-article (home, category, guestbook, admin, etc.) */
+
+/* Typography */
+/* Only set p/li; let span inherit from parent so accent/hover colors work */
+p,
+li {
+    color: var(--text-primary);
+}
+
+/* Links */
+a {
+    color: var(--accent);
+    transition: color 0.2s;
+}
+a:hover {
+    color: var(--accent-hover);
+}
+
+/* Selection */
+::selection {
+    background: var(--accent);
+    color: var(--bg-body);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--bg-hover);
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--bg-hover);
+}
+
+/* Form inputs (global dark) */
+input,
+textarea,
+select {
+    color: var(--text-primary);
+    background: var(--bg-input);
+    border-color: var(--form-border);
+}
+input::placeholder,
+textarea::placeholder {
+    color: var(--text-dim);
+}
+
+/* Guestbook form */
+/* The form card itself is the L1A glass shell (glass.css overlay border,
+   legacy .glass wrapper removed); restore the padding and margin it provided. */
+.guestbook-form .cmt-form-card {
+    margin-bottom: 16px;
+    padding: 20px 24px;
+    border-radius: var(--radius-xl);
+}
+.guestbook-form .cmt-form-tabs {
+    gap: 8px;
+    margin-bottom: 10px;
+    padding: 0;
+    border-bottom: none;
+}
+.guestbook-form .cmt-form-third {
+    padding: 8px 12px;
+    /* Safari flex form controls do not shrink: the label is an inline flex item
+       and needs an explicit min-width: 0 to fit one third of the row */
+    min-width: 0;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-subtle);
+    border-radius: 8px;
+}
+.guestbook-form .cmt-form-third .cmt-form-tab-input {
+    border: none !important;
+    background: transparent !important;
+    color: var(--text-primary);
+    padding: 0;
+    box-shadow: none !important;
+}
+.guestbook-form .cmt-form-third .cmt-form-tab-input:focus {
+    color: var(--text-primary);
+}
+.guestbook-form .cmt-form-third .cmt-form-tab-input::placeholder {
+    color: var(--text-dim);
+}
+.guestbook-form .cmt-textarea {
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border-subtle) !important;
+    background: var(--bg-subtle) !important;
+    color: var(--text-primary);
+    font-size: 14px;
+    min-height: 90px;
+}
+.guestbook-form .cmt-textarea::placeholder {
+    color: var(--text-dim);
+}
+.guestbook-form .cmt-form-bar {
+    justify-content: space-between;
+    margin-top: 8px;
+    border-top: none;
+    padding: 0;
+}
+.guestbook-form .cmt-tool-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 5px;
+    border: none;
+    background: none;
+    outline: none;
+    cursor: pointer;
+    color: var(--text-dim);
+}
+.guestbook-form .cmt-submit-btn {
+    padding: 8px 24px;
+    border-radius: 8px;
+    border: none;
+    background: var(--accent);
+    color: #ffffff;
+    text-shadow: 0 1px 2px var(--accent-edge);
+    font-size: 14px;
+    cursor: pointer;
+
+    /* Pairs with .cmt-submit-btn in cmt.css: that uses 6px-based asymmetric
+       padding, while the guestbook is 8px-based, so the vertical shifts
+       must stay in sync or the guestbook baseline drifts by 0.08px. */
+    padding-top:    calc(8px - var(--font-caption-shift, 0em));
+    padding-bottom: calc(8px + var(--font-caption-shift, 0em));
+}
+.guestbook-form .cmt-submit-btn:hover {
+    background: var(--accent-hover);
+}
+.guestbook-form .cmt-form-right {
+    margin-left: auto;
+}
+.guestbook-form .cmt-preview {
+    color: var(--text-muted);
+    border-top: 1px solid var(--border-subtle);
+}
+.guestbook-form .cmt-preview-title {
+    color: var(--text-dim);
+}
+.guestbook-form .cmt-preview h1,
+.guestbook-form .cmt-preview h2,
+.guestbook-form .cmt-preview h3 {
+    color: var(--text-primary);
+}
+
+/* Declarative permission control (single static source of truth) */
+/* Hide admin controls for non-admins (non-admin state only; admin-state
+   elements keep their native display layout and inline styles) */
+html:not(.is-admin) body:not(.is-admin) .admin-control:not(.owner-control) {
+    display: none !important;
+}
+/* Hide owner-control by default for non-authors/non-admins */
+html:not(.is-admin) body:not(.is-admin) .owner-control {
+    display: none !important;
+}
+:is(html.is-admin, body.is-admin) .owner-control,
+.cmt-item.is-owner .owner-control,
+.profile-card.is-owner .owner-control {
+    display: inline-flex !important;
+}
+
+/* SW content-update full-screen overlay refresh */
+.sw-update-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-overlay);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+}
+.sw-update-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 28px 36px;
+    border-radius: var(--radius-lg);
+    background: color-mix(in srgb, var(--glass-base) calc(var(--glass-l2-alpha) * 100%), transparent);
+    backdrop-filter: var(--glass-l2-filter);
+    -webkit-backdrop-filter: var(--glass-l2-filter);
+    border: 1px solid var(--panel-border);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+.sw-update-box p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-primary);
+}
+.sw-update-spin {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 3px solid var(--border-medium);
+    border-top-color: var(--accent);
+    animation: sw-update-spin 0.9s linear infinite;
+}
+@keyframes sw-update-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Chromium fallback: glass replication for the SW update overlay.
+   Markup is injected by 12-lifecycle.js (contentUpdateOverlay); variables here
+   are driven by 14-backdrop.js (fixed -> static mode). */
+.chromium .sw-update-overlay {
+    position: fixed;
+    --glass-blur-fallback: 24px;
+    --glass-tint: var(--bg-overlay);
+}
+.chromium .sw-update-box {
+    position: relative;
+    --glass-blur-fallback: var(--glass-l2-blur);
+    --glass-tint: color-mix(in srgb, var(--glass-base) calc(var(--glass-l2-alpha) * 100%), transparent);
+}
+
+/* Disable scroll anchoring: when the top nav switches pages, the appearing
+   profile_card (display: none -> block) changes the layout height and the
+   browser's default scroll anchoring would push the viewport down; disabled
+   keeps the viewport at the top. */
+html { overflow-anchor: none; }

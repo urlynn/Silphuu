@@ -1,0 +1,319 @@
+{{define "editor.html"}}
+{{template "base_layout" .}}
+{{end}}
+
+{{define "head_extra"}}
+    <link rel="stylesheet" href="{{asset "css/admin.bundle.css"}}">
+    <link rel="stylesheet" href="{{asset "css/editor.bundle.css"}}">
+    <style>
+        /* Force-hide underlying fixed elements to avoid the macOS GPU compositor
+           overlap bug (which freezes light/dark switching) */
+        #navbar, .footer, .scroll-progress, .theme-picker { display: none !important; }
+    </style>
+    <script src="{{asset "js/editor.bundle.js"}}"></script>
+{{end}}
+
+{{define "content"}}
+    {{/* Admin side always does full page refreshes, no htmx boost (same convention as
+       admin.html's .admin-page[hx-boost:inherited=false]): a boosted save carries HX-Request,
+       the server replies 200 + empty body + HX-Redirect, and htmx swaps the empty body in —
+       deleting the whole #content-wrapper. */}}
+    {{/* enctype must be urlencoded, NEVER multipart/form-data: the form has no named file
+       field (images upload via fetch separately) and CommitPresets contains "post", so a
+       multipart save would be misread as an article-image upload -> 500 "no such file". */}}
+    <form method="POST" action="{{.Action}}" class="editor-form" id="editor-form" hx-boost:inherited="false">
+        <input type="hidden" name="old_path" value="{{.OldPath}}">
+        
+        <!-- Header (Top Actions + Meta) -->
+        <div class="editor-header">
+            <div class="editor-top">
+                <div class="editor-top-left">
+                    <a href="{{.BackURL}}" class="editor-btn editor-btn-secondary" title="{{.UI.common.action.back}}">
+                        {{svg "arrow-left"}}
+                        {{.UI.common.action.back}}
+                    </a>
+                    <input type="text" name="slug" class="editor-title-input" id="editor-title" placeholder="{{.UI.editor.field.slug}}" value="{{.Slug}}" required>
+                    {{if .Flash}}<span style="color: var(--danger-red); font-size: 13px;">{{.Flash}}</span>{{end}}
+                    <span id="editor-save-status" style="font-size: 12px; color: var(--text-dim); margin-left: 10px;"></span>
+                </div>
+                <div class="editor-top-right">
+                    <button type="submit" class="editor-btn editor-btn-primary" id="editor-submit-btn">
+                        {{svg "save"}}
+                        {{.UI.common.action.save}}
+                    </button>
+                </div>
+            </div>
+            
+            <div class="editor-meta-bar">
+                <div class="editor-field-inline">
+                    <select name="category">
+                        {{range .CategoryOptions}}<option value="{{.Key}}" {{if eq .Key $.CatKey}}selected{{end}}>{{.Name}}</option>
+                        {{end}}
+                    </select>
+                </div>
+                <div class="editor-field-inline editor-meta-tags">
+                    <input type="text" name="tags" placeholder="{{.UI.editor.field.tags}}" value="{{.TagsStr}}">
+                </div>
+                <div class="editor-field-inline editor-meta-summary">
+                    <input type="text" name="summary" placeholder="{{.UI.editor.field.summary}}" value="{{.Summary}}">
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Body (Dual Pane) -->
+        <div class="editor-body">
+            <!-- Left Pane: Editor -->
+            <div class="editor-pane editor-pane-left">
+                <div class="editor-toolbar">
+                    <button type="button" class="editor-tb-btn" onclick="insertFmt('**', '**')" title="加粗">
+                        {{svg "bold"}}
+                    </button>
+                    <button type="button" class="editor-tb-btn" onclick="insertFmt('*', '*')" title="斜体">
+                        {{svg "italic"}}
+                    </button>
+                    <button type="button" class="editor-tb-btn" onclick="insertFmt('~~', '~~')" title="删除线">
+                        {{svg "strikethrough"}}
+                    </button>
+                    <div class="editor-tb-divider"></div>
+                    <button type="button" class="editor-tb-btn" onclick="insertFmt('### ', '')" title="标题">
+                        {{svg "heading"}}
+                    </button>
+                    <button type="button" class="editor-tb-btn" onclick="insertFmt('> ', '')" title="引用">
+                        {{svg "blockquote"}}
+                    </button>
+                    <button type="button" class="editor-tb-btn" onclick="insertFmt('```\n', '\n```')" title="代码块">
+                        {{svg "code"}}
+                    </button>
+                    <div class="editor-tb-divider"></div>
+                    <button type="button" class="editor-tb-btn" onclick="insertFmt('[', '](url)')" title="链接">
+                        {{svg "link-chain-diagonal"}}
+                    </button>
+                    <button type="button" class="editor-tb-btn" id="tb-img-btn" title="上传图片">
+                        {{svg "image"}}
+                    </button>
+                    <input type="file" id="editor-img-input" accept="image/*" style="display:none;">
+                </div>
+                <textarea name="body" class="editor-textarea" id="editor-ta" placeholder="{{.UI.editor.pane.markdown_ph}}">{{.Body}}</textarea>
+            </div>
+            
+            <!-- Right Pane: Preview -->
+            <div class="editor-pane">
+                <div class="editor-preview" id="editor-preview"></div>
+            </div>
+        </div>
+
+        <!-- Bottom Status Bar -->
+        <div class="editor-statusbar">
+            <span id="editor-stats">0 字 · 约 0 分钟阅读</span>
+            <span class="editor-copyright">© {{author}}</span>
+        </div>
+    </form>
+{{end}}
+
+{{define "scripts"}}
+    <script>
+        var ta = document.getElementById('editor-ta');
+        var preview = document.getElementById('editor-preview');
+        var stats = document.getElementById('editor-stats');
+        var isEdit = {{.IsEdit}};
+        var postId = '{{.OldPath}}' || 'new';
+
+        // 1. Marked.js & Prism.js initialization
+        if (typeof marked !== 'undefined') {
+            marked.setOptions({
+                gfm: true,
+                breaks: true,
+                highlight: function(code, lang) {
+                    if (Prism.languages[lang]) {
+                        return Prism.highlight(code, Prism.languages[lang], lang);
+                    } else {
+                        return code;
+                    }
+                }
+            });
+        }
+
+        // 2. Render & autosave
+        // Suppress scroll syncing during render — see the comment inside render()
+        var _suppressSync = false;
+
+        function render() {
+            var md = ta.value;
+            // Local draft cache (auto-save in new-post mode only)
+            if (!isEdit) {
+                localStorage.setItem('draft_post_' + postId, md);
+            }
+            
+            // Remember the preview's scroll ratio before re-rendering: assigning
+            // preview.innerHTML resets preview.scrollTop to 0, which the sync logic would
+            // misread as "user scrolled to top" and write ta.scrollTop to 0 as well
+            // ("editor auto-scrolls up"). So: suppress sync + restore the ratio after.
+            var pvRange = preview.scrollHeight - preview.clientHeight;
+            var pvPct = pvRange > 0 ? preview.scrollTop / pvRange : 0;
+            _suppressSync = true;
+
+            if (typeof marked !== 'undefined' && typeof DOMPurify !== 'undefined') {
+                var html = marked.parse(md);
+                preview.innerHTML = DOMPurify.sanitize(html);
+            } else {
+                preview.innerHTML = "<p style='color:var(--danger-red)'>Markdown parser not loaded.</p>";
+            }
+
+            requestAnimationFrame(function () {
+                var r = preview.scrollHeight - preview.clientHeight;
+                if (r > 0 && pvPct > 0) preview.scrollTop = pvPct * r;
+                _suppressSync = false;
+            });
+
+            // Word count
+            var text = md.replace(/[#*`~\[\]()>!_-]/g, '').replace(/\s+/g, '');
+            var count = text.length;
+            var readTime = Math.max(1, Math.ceil(count / 300));
+            stats.textContent = count + ' 字 · 约 ' + readTime + ' 分钟阅读';
+        }
+        ta.addEventListener('input', render);
+
+        // Restore draft
+        if (!isEdit) {
+            var draft = localStorage.getItem('draft_post_' + postId);
+            if (draft && draft !== ta.value && confirm("检测到本地草稿，是否恢复？")) {
+                ta.value = draft;
+            }
+        }
+        render(); // Initial render
+
+        // 3. Synced scrolling (precise ratio) — two failure modes cause "auto-scroll to top":
+        //  (1) scroll events fire asynchronously — a synchronous boolean guard
+        //  reset before the event dispatched, so ta↔preview ping-pongs scrollTop; lock
+        //  by source and unlock via requestAnimationFrame. (2) without overflow,
+        //  scrollHeight - clientHeight = 0 -> pct = NaN -> view jumps to top; both sides
+        //  must check the denominator > 0 before syncing.
+        var _lockSrc = null;   // 'ta' | 'preview' | null — the side currently driving the sync
+        function syncScroll(src, from, to) {
+            if (_suppressSync) return;                  // no sync during render re-runs
+            if (_lockSrc && _lockSrc !== src) return;   // the other side is driving; ignore
+            var fromRange = from.scrollHeight - from.clientHeight;
+            if (fromRange <= 0) return;                 // no overflow -> no sync, and do not write scrollTop
+            _lockSrc = src;
+            var toRange = to.scrollHeight - to.clientHeight;
+            if (toRange > 0) to.scrollTop = (from.scrollTop / fromRange) * toRange;
+            requestAnimationFrame(function () { _lockSrc = null; });
+        }
+        ta.addEventListener('scroll', function () { syncScroll('ta', ta, preview); });
+        preview.addEventListener('scroll', function () { syncScroll('preview', preview, ta); });
+
+        // 4. Quick formatting insertion
+        window.insertFmt = function(prefix, suffix) {
+            var start = ta.selectionStart;
+            var end = ta.selectionEnd;
+            var text = ta.value;
+            var selected = text.substring(start, end);
+            var replacement = prefix + selected + suffix;
+            ta.value = text.substring(0, start) + replacement + text.substring(end);
+            ta.selectionStart = start + prefix.length;
+            ta.selectionEnd = ta.selectionStart + selected.length;
+            ta.focus();
+            render();
+        };
+
+        // 6. Image upload (button and paste)
+        var imgBtn = document.getElementById('tb-img-btn');
+        var imgInput = document.getElementById('editor-img-input');
+        var saveStatus = document.getElementById('editor-save-status');
+
+        if (imgBtn && imgInput) {
+            imgBtn.addEventListener('click', function() { imgInput.click(); });
+            imgInput.addEventListener('change', function() {
+                handleImageUpload(imgInput.files[0]);
+                imgInput.value = '';
+            });
+        }
+        ta.addEventListener('paste', function(e) {
+            var items = e.clipboardData.items;
+            var file = null;
+            for (var i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf('image') === 0) {
+                    file = items[i].getAsFile();
+                    break;
+                }
+            }
+            if (file) {
+                e.preventDefault();
+                handleImageUpload(file);
+            }
+        });
+
+        function handleImageUpload(file) {
+            if (!file) return;
+            saveStatus.textContent = '图片上传中...';
+            var fd = new FormData();
+            // URLCommit("post") is correct here — CommitPresets only has
+            // post/comment/photo/background and "post" IS the article-image preset; an
+            // unknown category made every upload fail. The field name must be 'file':
+            // that is the contract of the generic ProcessMediaPipeline entry.
+            fd.append('file', file);
+
+            fetch(window.SITE_URLS.commit.uploadImg, { method: 'POST', body: fd })
+                .then(r => r.json().then(data => {
+                    if (!r.ok) throw new Error(data.error || 'upload failed');
+                    return data;
+                }))
+                .then(data => {
+                    if (data.url) {
+                        insertFmt('![image](', data.url + ')');
+                        saveStatus.textContent = '图片已插入';
+                        setTimeout(function(){ saveStatus.textContent = ''; }, 3000);
+                    }
+                })
+                .catch(err => {
+                    alert('图片上传失败: ' + err.message);
+                    saveStatus.textContent = '上传失败';
+                });
+        }
+
+        // 7. Form submit clears the draft
+        document.getElementById('editor-form').addEventListener('submit', function() {
+            if (!isEdit) {
+                localStorage.removeItem('draft_post_' + postId);
+            }
+            saveStatus.textContent = '正在保存...';
+        });
+
+        // 8. Intercept the global Theme FAB and repurpose it as a sandboxed, editor-only
+        // color-mode toggle
+        (function initThemeFab() {
+            var globalThemeFab = document.getElementById('theme-fab');
+            var editorForm = document.getElementById('editor-form');
+            if (!globalThemeFab || !editorForm) {
+                setTimeout(initThemeFab, 50);
+                return;
+            }
+            
+            // Initialize the editor's eye-friendly color scheme (initial state from the global mode)
+            var currentGlobal = document.documentElement.dataset.theme || '';
+            var isLight = currentGlobal.indexOf('light') > -1;
+            var editorTheme = isLight ? 'forest-light' : 'frozen-dark';
+            editorForm.setAttribute('data-theme', editorTheme);
+            
+            // Clone the node to strip its native event listeners
+            var newThemeFab = globalThemeFab.cloneNode(true);
+            globalThemeFab.parentNode.replaceChild(newThemeFab, globalThemeFab);
+            
+            newThemeFab.title = "切换护眼深/浅色模式 (独立配色)";
+            newThemeFab.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var currentEditor = editorForm.getAttribute('data-theme') || 'forest-light';
+                var targetTheme = currentEditor.indexOf('dark') > -1 ? 'forest-light' : 'frozen-dark';
+                
+                // Only mutate editorForm; never pollute document.documentElement or localStorage
+                editorForm.setAttribute('data-theme', targetTheme);
+                
+                // Force Safari and Chrome to refresh the GPU compositing layer, or the
+                // top bar keeps its old colour
+                editorForm.style.transform = 'translateZ(0)';
+                setTimeout(function() { editorForm.style.transform = ''; }, 50);
+            });
+        })();
+    </script>
+{{end}}

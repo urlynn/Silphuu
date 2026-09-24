@@ -1,0 +1,590 @@
+/* Friend links. */
+
+/* Main column width on the friends page. */
+.main-content.friend-main {
+    max-width: 800px;
+}
+
+.friend-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+/* L3 widget level: a solid entry inside the glass — full blur, solid base, a single clean
+   fill, and hover border highlight, outer glow and tinted glow carried by ::before's
+   opacity.
+
+   The card body must not paint. box-shadow, resting and hover alike, lives on the ::after
+   pseudo-element so a hover repaints nothing on the card itself; leaving box-shadow on the
+   body makes backdrop-filter re-rasterise its surface and the rounded mask snaps, flashing
+   a right-angled dirty rect. overflow is opened up to match, because ::after's glow has to
+   escape the card. See docs/GOTCHAS.md §overlay-border-no-composite. */
+.friend-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    padding: 14px 12px;
+    border-radius: var(--radius-lg);
+    border: none !important;
+    overflow: visible;
+    text-decoration: none;
+    min-height: 40px;
+    line-height: 1;
+    --card-border: var(--friend-border);
+    --card-border-hover: var(--friend-border-hover);
+    background: color-mix(in srgb, var(--glass-base) calc(var(--friend-alpha) * 100%), transparent);
+    backdrop-filter: blur(var(--friend-blur));
+    -webkit-backdrop-filter: blur(var(--friend-blur));
+    /* No background-color or box-shadow transition on the card body: repainting its own
+       layer every frame flashes a right-angled dirty rect on a backdrop-filtered rounded
+       card. */
+}
+
+.friend-card::after {
+    content: '';
+    display: block;
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 1px solid var(--friend-border);
+    box-sizing: border-box;
+    pointer-events: none;
+    z-index: 2;
+    opacity: 1;
+    background: transparent;
+    box-shadow: var(--friend-shadow);
+    /* The shadow switches instantly: core L1C's transition: none is the rule here. Fading
+       it frame by frame unions the dirty rect with the card body's and flashes right
+       angles on the backdrop. */
+    transition: none;
+}
+
+/* Pure-CSS entry on DOM insertion (htmx's .htmx-settling cannot key it: 1ms settle delay,
+   absent on direct load). Glass never animates opacity — Safari withholds the backdrop
+   layer while it runs — so the fade runs on the non-glass children instead. */
+
+/* Translate only: a fractional scale() re-rasterises the card text as the animation ends,
+   and Chromium keeps the subpixel drop that WebKit quantises away —
+   see docs/GOTCHAS.md §friend-card-entry-no-scale. */
+@keyframes friend-card-in {
+    from {
+        transform: translateY(14px);
+    }
+}
+@keyframes friend-card-fade {
+    from {
+        opacity: 0;
+    }
+}
+
+.friend-card {
+    animation: friend-card-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) calc(var(--i, 0) * 30ms) backwards;
+}
+.friend-card > :not(.g-blur):not(.g-tint):not(.g-noise) {
+    animation: friend-card-fade 0.35s cubic-bezier(0.16, 1, 0.3, 1) calc(var(--i, 0) * 30ms) backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .friend-card,
+    .friend-card > :not(.g-blur):not(.g-tint):not(.g-noise),
+    .friend-card::before,
+    .friend-card::after {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+/* Hover glow via tokens.css's --friend-glow-*. The gradient is always present and hover
+   only changes opacity, so it stays on the compositor with no repaint — do not interpolate
+   background-image through @property, that repaints on the main thread every frame. */
+.friend-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--friend-glow-bg);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1;
+    transition: opacity 0.28s ease;
+}
+.friend-card:hover::before,
+body.force-hover .friend-card::before {
+    opacity: var(--friend-glow-hover-opacity);
+}
+
+/* Hover: the outer glow lives on the ::after overlay together with the border highlight,
+   so the card body repaints nothing — it must have no :hover paint rule. The ring colour
+   switches instantly, and the outer glow rides its own .hg-glow layer. */
+.friend-card:hover::after,
+body.force-hover .friend-card::after {
+    border-color: var(--friend-border-hover);
+}
+
+/* Platform badge. */
+.friend-card-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 7px;
+    font-size: 10px;
+    letter-spacing: 0.2px;
+    border-radius: var(--radius-full);
+    z-index: 4;
+    color: var(--badge-color, var(--accent));
+    background: color-mix(in srgb, var(--badge-color, var(--accent)) 14%, transparent);
+    transition: opacity 0.16s ease-out,
+                transform 0.20s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.friend-card:hover .friend-card-badge {
+    opacity: 0;
+    transform: translateX(6px);
+    transition: opacity 0.08s ease-out,
+                transform 0.12s ease-out;
+}
+
+/* Tag colour picker: a pill that expands on hover. */
+#friend-color-wrap {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+#friend-color-wrap .friend-color-palette {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-subtle, rgba(128,128,128,0.08));
+    padding: 4px;
+    border-radius: 20px;
+    border: 1px solid var(--border-light);
+    overflow: hidden;
+    width: 28px; /* collapsed: 18 + 8 + 2 */
+    height: 28px;
+    transition: width 0.3s cubic-bezier(0.25, 1, 0.5, 1), padding 0.3s ease, background 0.3s ease;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+#friend-color-wrap .friend-color-palette:hover,
+#friend-color-wrap .friend-color-palette:focus-within {
+    width: 226px; /* 8*18 + 7*8 + 12*2 + 2 = 144 + 56 + 24 + 2 = 226px */
+    padding: 4px 12px;
+    background: var(--bg-nav);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+#friend-color-wrap .friend-color-dot {
+    flex-shrink: 0;
+    transform: scale(0.85);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+#friend-color-wrap .friend-color-dot:hover {
+    transform: scale(1);
+}
+#friend-color-wrap .friend-color-dot.is-active {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 2px var(--bg-card), 0 0 0 3px var(--dot-color) !important;
+}
+
+.friend-color-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--dot-color);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    outline: none;
+    flex-shrink: 0;
+}
+
+.friend-color-dot:hover {
+    transform: scale(1.18);
+}
+
+.friend-color-dot.is-active {
+    transform: scale(1.18);
+    box-shadow: 0 0 0 2px var(--bg-card), 0 0 0 4px var(--dot-color);
+}
+
+/* Default layer: icon, title, one-line description. */
+.friend-card-default {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    z-index: 2;
+    min-width: 0;
+    transition: opacity 0.16s ease-out,
+                transform 0.20s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.friend-card:hover .friend-card-default {
+    opacity: 0;
+    transform: translateX(-6px);
+    transition: opacity 0.10s ease-out,
+                transform 0.14s ease-out;
+}
+
+/* Icon badge. */
+.friend-card-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: var(--radius-full);
+    background: var(--bg-subtle);
+    border: none !important;
+    box-shadow: none !important;
+    transition: transform var(--duration-normal) ease;
+}
+
+.friend-card-icon svg {
+    display: block;
+    width: 22px;
+    height: 22px;
+    color: var(--accent);
+}
+
+/* Right-hand content. padding-right stays 0 and the card's own 12px padding supplies the
+   gap, so the text-to-border distance on the right matches the icon-to-border distance on
+   the left. */
+.friend-card-info {
+    flex: 1;
+    min-width: 0;
+    padding-right: 0;
+}
+
+.friend-card-header {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 2px;
+}
+
+.friend-card-title {
+    font-size: 14px;
+    color: var(--text-primary);
+    letter-spacing: -0.2px;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin: 0;
+}
+
+.friend-card-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.4;
+    /* Truncates only once the text overflows, which keeps the two sides symmetric. */
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    margin: 0;
+}
+
+/* Overlay: an always-present transparent base at inset 0, whose text slides into place. */
+.friend-card-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px 14px;
+    background: transparent;
+    opacity: 0;
+    transition: opacity 0.18s ease-out;
+    z-index: 3;
+    pointer-events: none;
+}
+
+.friend-card:hover .friend-card-overlay {
+    opacity: 1;
+    transition: opacity 0.22s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.friend-card-overlay-title,
+.friend-card-overlay-desc {
+    transform: translateX(8px);
+    transition: transform 0.16s ease-out;
+}
+
+.friend-card:hover .friend-card-overlay-title,
+.friend-card:hover .friend-card-overlay-desc {
+    transform: translateX(0);
+    transition: transform 0.28s cubic-bezier(0.25, 1, 0.5, 1) 0.02s;
+}
+
+.friend-card-overlay-title {
+    margin: 0;
+    font-size: 14px;
+    color: var(--accent);
+    letter-spacing: -0.2px;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 5px;
+}
+
+.friend-card-overlay-title svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    color: var(--accent);
+}
+
+.friend-card-overlay-desc {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-muted);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Responsive. */
+@media (max-width: 900px) {
+    .friend-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 560px) {
+    .main-content.friend-main {
+        max-width: 720px;
+    }
+    .friend-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* Chromium fallback: the friend-card glass replica. .friend-card-overlay is left alone —
+   an in-card hover layer whose backdrop samples the already-blurred parent surface, so a
+   second blur is invisible. The tinted glow rides the ::before opacity layer on both engines. */
+.chromium .friend-card {
+    position: relative;
+    overflow: visible !important;
+    --glass-blur-fallback: var(--friend-blur);
+    --glass-tint: color-mix(in srgb, var(--glass-base) calc(var(--friend-alpha) * 100%), transparent);
+}
+
+/* On Chromium the card's hover fill brightens in step. */
+html[data-theme$="-dark"] .chromium .friend-card:hover > .g-tint,
+html[data-theme$="-dark"] body.force-hover .chromium .friend-card > .g-tint {
+    background-color: color-mix(in srgb, var(--glass-base) calc(var(--friend-alpha-hover) * 100%), transparent);
+}
+
+/* Friend modal and SVG preview. */
+.friend-modal-card {
+    max-width: 460px;
+}
+
+.friend-field-row {
+    display: flex;
+    gap: 10px;
+}
+
+.friend-field-row .modal-field {
+    flex: 1;
+    min-width: 0;
+}
+
+#friend-form .modal-confirm {
+    margin-top: 14px; /* 10px gap + 14px = 24px, matching modal-card's 24px bottom padding */
+}
+
+.friend-svg-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: -4px; /* Cancels the 10px gap, which reads as too much space around a plain text line. */
+}
+
+.friend-svg-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.78rem;
+}
+
+.friend-svg-label {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.friend-svg-hint {
+    color: var(--text-dim);
+    font-size: 0.72rem;
+}
+
+.friend-svg-input-row {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+}
+
+.friend-svg-textarea {
+    flex: 1;
+    min-width: 0;
+    resize: vertical;
+    min-height: 72px;
+    font-family: var(--font-mono, monospace);
+    font-size: 0.75rem;
+    line-height: 1.4;
+}
+
+.friend-svg-preview-wrap {
+    width: 72px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.friend-svg-preview-box {
+    width: 72px;
+    height: 72px;
+    border-radius: var(--radius-md, 8px);
+    border: 1px dashed var(--border-light);
+    background: var(--bg-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    box-sizing: border-box;
+    padding: 10px;
+}
+
+.friend-svg-preview-box svg {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.friend-svg-preview-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.35;
+}
+
+.friend-svg-preview-empty svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Friend edit mode and actions, entered by an admin long-press. */
+.friend-card.is-pressing {
+    transform: scale(0.98);
+}
+
+.friend-actions {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    z-index: 5;
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.9);
+    transition: opacity var(--duration-fast, 0.2s) var(--ease-out, ease), transform var(--duration-fast, 0.2s) var(--ease-out, ease);
+}
+
+.friend-grid.is-edit-mode .friend-actions,
+#friend-grid.is-edit-mode .friend-actions {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1);
+}
+
+.friend-grid.is-edit-mode .friend-card,
+#friend-grid.is-edit-mode .friend-card {
+    cursor: pointer;
+    outline: 1.5px dashed var(--accent);
+    outline-offset: -2px;
+}
+
+.friend-grid.is-edit-mode .friend-card-badge,
+#friend-grid.is-edit-mode .friend-card-badge {
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+.friend-grid.is-edit-mode .friend-card:hover .friend-card-default,
+#friend-grid.is-edit-mode .friend-card:hover .friend-card-default {
+    opacity: 1;
+    transform: none;
+}
+
+.friend-grid.is-edit-mode .friend-card:hover .friend-card-overlay,
+#friend-grid.is-edit-mode .friend-card:hover .friend-card-overlay {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.friend-action-btn {
+    background: var(--bg-nav, rgba(0, 0, 0, 0.2));
+    border: 1px solid var(--border-light);
+    cursor: pointer;
+    color: var(--text-dim);
+    padding: 5px;
+    line-height: 1;
+    border-radius: var(--radius-sm, 6px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: color var(--duration-fast), background var(--duration-fast), border-color var(--duration-fast);
+}
+
+.friend-action-btn:hover {
+    color: var(--accent);
+    background: var(--hover-bg);
+    border-color: var(--accent);
+}
+
+.friend-action-btn--del:hover {
+    color: var(--danger-red);
+    background: var(--hover-bg);
+    border-color: var(--danger-red);
+}
+
+.friend-action-btn svg {
+    width: 13px;
+    height: 13px;
+    display: block;
+}
+
+/* Floating friend edit bar, shown on long-press with the pill shifted down so it does not
+   cover the card. */
+
+/* Friend card badge (github / docs.rs and the like). Asymmetric padding lifts the text's
+   ink centre to the middle of the pill. The role is body, not caption: the badge declares
+   no font-family and inherits --font-body from body, so it takes --font-body-shift (the
+   other pills' text really is caption). */
+.friend-card-badge {
+    padding-top:    calc(2px - var(--font-body-shift, 0em));
+    padding-bottom: calc(2px + var(--font-body-shift, 0em));
+}

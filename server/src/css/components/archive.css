@@ -1,0 +1,373 @@
+/* Archive panel: a three-level timeline with an SVG bezier curve. */
+
+.archive-panel {
+    position: relative;
+    --tw: 2rem;
+}
+
+.ap-year-block {
+    position: relative;
+    margin-bottom: 2rem;
+    padding: var(--space-5) var(--space-4) var(--space-4);
+    border-radius: var(--radius-xl);
+    border: none !important;
+    background: color-mix(in srgb, var(--glass-base) calc(var(--panel-alpha) * 100%), transparent);
+    backdrop-filter: blur(var(--panel-blur));
+    -webkit-backdrop-filter: blur(var(--panel-blur));
+    box-shadow: var(--panel-shadow);
+    overflow: hidden;
+}
+
+.ap-year-block::after {
+    content: '';
+    display: block;
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 1px solid var(--panel-border);
+    box-sizing: border-box;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 1;
+    background: transparent;
+
+}
+
+.ap-year-header {
+    display: flex;
+    align-items: center;
+    min-height: var(--tw);
+}
+
+.ap-col {
+    width: var(--tw);
+    flex-shrink: 0;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ap-node {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    z-index: 2;
+    transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.ap-year-node {
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--timeline-node);
+    background: var(--timeline-node);
+    top: calc(50% - 6px);
+}
+
+.ap-year-label {
+    padding-left: 0.75rem;
+    display: flex;
+    align-items: center;
+    /* align-items: center + line-height: 1 is the ink alignment precondition: a centred
+       box means a centred ink centre, and the shift table was measured against exactly
+       that. Baseline alignment puts the ink on the baseline and the table cannot apply. */
+    line-height: 1;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+/* The archive's labels read in one font: the CJK units are their own .ap-unit elements so
+   the template can keep the numerals separable, but every slot resolves to --font-caption.
+   The split stays because a preset may map data and caption to different families. */
+.ap-unit {
+    font-family: var(--font-caption);
+    font-weight: var(--font-caption-weight, 400);
+    font-variation-settings: 'BEVL' var(--font-caption-bevl, 100);
+}
+
+/* Digit-to-unit gap: one LemiMuhe space at this size is 3.0px, and the two glyphs' own side
+   bearings leave them reading as one blob, so 2px of margin restores about one space. */
+.ap-num + .ap-unit {
+    margin-left: 2px;
+}
+
+.ap-h1 {
+    /* One font for the whole label; the units are .ap-unit elements carrying the same role. */
+    font-family: var(--font-caption);
+    font-size: 18px;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1;
+    display: inline;
+}
+.ap-count {
+    /* One font for the whole label; the units are .ap-unit elements carrying the same role. */
+    font-family: var(--font-caption);
+    font-size: 12px;
+    color: var(--text-dim);
+    white-space: nowrap;
+}
+
+/* The digit slots inherited the UA heading default (bold 700) while .ap-unit declared 400,
+   and MapleMono is a variable font, so that read as real bold. The slots now carry the
+   caption role, so they take its weight. */
+.ap-h1,
+.ap-h2,
+.ap-count {
+    font-weight: var(--font-caption-weight, 400);
+}
+
+/* Months. */
+.ap-months-area {
+    padding-left: var(--tw);
+}
+
+.ap-month-block {
+    position: relative;
+    margin-bottom: 0.5rem;
+}
+.ap-month-header {
+    display: flex;
+    align-items: center;
+    min-height: 1.5rem;
+}
+
+.ap-month-node {
+    width: 8px;
+    height: 8px;
+    background: var(--timeline-line);
+    top: calc(50% - 4px);
+}
+
+.ap-month-label {
+    padding-left: 0.75rem;
+    display: flex;
+    align-items: center;
+    line-height: 1; /* Same as .ap-year-label: the ink alignment precondition, centre plus line-height 1. */
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.ap-h2 {
+    /* One font for the whole label; the units are .ap-unit elements carrying the same role. */
+    font-family: var(--font-caption);
+    font-size: 15px;
+    color: var(--text-muted);
+    margin: 0;
+    line-height: 1;
+    display: inline;
+}
+
+/* Posts. */
+.ap-posts-area {
+    padding-left: var(--tw);
+    padding-right: calc(0.5rem + 0.375rem);
+}
+
+.ap-post-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.ap-post-row {
+    display: flex;
+    align-items: center;
+    min-height: 2.25rem;
+    position: relative;
+    border-radius: 10px;
+    padding: 0 8px;
+    margin: 0 -8px;
+    border: 1px solid transparent;
+    transform: translate3d(0, 0, 0);
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                background 0.2s ease,
+                border-color 0.2s ease,
+                box-shadow 0.2s ease;
+}
+.ap-post-row:hover,
+.ap-post-row.force-row-hover {
+    transform: translate3d(6px, 0, 0);
+    /* The same clean bubble as elsewhere: no heavy border, no frosted glass. */
+    background: var(--bg-hover);
+    border-color: transparent;
+    box-shadow: none;
+}
+
+.ap-post-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    line-height: 1;
+    text-decoration: none;
+    color: inherit;
+    flex: 1;
+    min-width: 0;
+    padding: 4px 6px 4px 0;
+    margin: 0 0 0 -4px;
+}
+
+.ap-post-node {
+    width: 6px;
+    height: 6px;
+    background: var(--timeline-line);
+    top: calc(50% - 3px);
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.18s ease, box-shadow 0.18s ease;
+}
+.ap-post-row:hover .ap-post-node,
+.ap-post-row.force-row-hover .ap-post-node,
+.ap-post-row.is-energized .ap-post-node,
+.ap-post-node.is-lit {
+    background: var(--accent);
+    box-shadow: 0 0 5px 1px color-mix(in srgb, var(--accent) calc(0.45 * 100%), transparent);
+    transform: translateX(-50%) scale(1.2);
+}
+.ap-date {
+    flex-shrink: 0;
+    font-size: 12px;
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+    /* No fallback stacks: each character may have exactly one possible font. The CJK units
+       are split out by the template into .ap-unit elements carrying --font-caption. */
+    font-family: var(--font-data);
+    transition: color 0.18s ease;
+}
+
+.ap-category {
+    flex-shrink: 0;
+    color: var(--accent);
+    background: var(--accent-soft);
+    display: flex;
+    contain: layout;
+    transition: background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+.ap-post-row:hover .ap-category {
+    color: #fff;
+    background: var(--accent);
+    text-shadow: 0 1px 2px var(--accent-edge);
+}
+
+.ap-title {
+    flex: 1;
+    min-width: 0;
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* line-height: 1 makes this line box exactly the font size, and ink — a descender —
+       extends past its bottom edge, which overflow: hidden clips. 3px padding gives
+       clipping room; equal negative margins cancel it, so layout and flex centring
+       are unchanged. */
+    padding-top: 3px;
+    padding-bottom: 3px;
+    margin-top: -3px;
+    margin-bottom: -3px;
+    transition: color 0.18s ease, text-shadow 0.18s ease;
+}
+.ap-post-row:hover .ap-title,
+.ap-post-row.is-energized .ap-title {
+    color: var(--accent);
+}
+
+.ap-tag {
+    flex-shrink: 0;
+    font-family: var(--font-caption);
+    font-size: round(up, calc(11px * var(--font-caption-ink-scale)), 1px);
+    color: var(--text-dim);
+    transition: color 0.15s ease;
+    text-decoration: none;
+}
+.ap-tag::before {
+    content: '#';
+    opacity: 0.6;
+    margin-right: 1px;
+}
+.ap-post-row:hover .ap-tag {
+    color: var(--text-dim);
+}
+
+/* SVG dashes and highlight. */
+.ap-highlight-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    overflow: visible;
+    clip-path: inset(0 0 100% 0);
+    animation: timeline-grow 1.5s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+}
+@keyframes timeline-grow {
+    to { clip-path: inset(0 0 0 0); }
+}
+.ap-dash-line {
+    stroke: var(--timeline-line);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+    stroke-dasharray: 6 5;
+}
+.ap-highlight {
+    stroke: var(--accent);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+.ap-highlight.active {
+    opacity: 1;
+}
+
+@media (max-width: 768px) {
+    .archive-panel {
+        --tw: 1.5rem;
+    }
+    .ap-node,
+    .ap-col,
+    .ap-highlight-svg {
+        display: none;
+    }
+    .ap-months-area,
+    .ap-posts-area {
+        padding-left: 0.5rem;
+    }
+    .ap-post-row {
+        min-height: 2rem;
+    }
+}
+
+
+/* Each rule follows the font the element actually uses. .ap-h1/.ap-h2/.ap-count are
+   composite blocks whose leaves are display: inline — translate does nothing to an
+   untransformable element, so only the block is compensated, with data. Knowingly
+   imprecise: the CJK units inherit data's offset; splitting .ap-num/.ap-unit would
+   disturb the tuned 18px line-height geometry. */
+.ap-post-link .ap-date {
+    translate: 0 calc(-1 * var(--font-data-num-shift, 0em));
+}
+.ap-post-link .ap-title {
+    translate: 0 calc(-1 * var(--font-body-shift, 0em));
+}
+.ap-post-link .ap-tag {
+    translate: 0 calc(-1 * var(--font-caption-shift, 0em));
+}
+.ap-year-label .ap-h1,
+.ap-year-label .ap-count,
+.ap-month-label .ap-h2,
+.ap-month-label .ap-count {
+    translate: 0 calc(-1 * var(--font-caption-shift, 0em));
+}
+
+/* Chromium fallback: the ap-year-block glass replica. .ap-post-row's hover blur is left
+   alone — it samples the already-blurred parent surface, so a second blur is invisible. */
+.chromium .ap-year-block {
+    position: relative;
+    --glass-blur-fallback: var(--panel-blur);
+    --glass-tint: color-mix(in srgb, var(--glass-base) calc(var(--panel-alpha) * 100%), transparent);
+}

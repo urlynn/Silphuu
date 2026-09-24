@@ -1,0 +1,48 @@
+{{define "sponsor_card"}}
+{{/* Public sponsor card · single source of truth partial (shared by the sponsor page and
+     the admin font workshop preview; enforced component-extraction principle).
+     Input dict: S=sponsor entry (Date/Nick/Amount/Msg)  I=index
+                Admin=render edit/delete buttons (admin page only)
+                Nick/Amount/Msg/Date=display copy — supplied by the caller:
+                  · the sponsor page passes $s's real values
+                  · the admin font workshop passes entries from config/preview_fixtures.json
+                    (one fixture per card)
+                The edit button's data-* always uses S's real values, so the admin edit
+                flow is never affected by display copy. */}}
+<div class="sponsor-public-card" data-backdrop-scene="b" data-hover-glow data-hover-sweep>
+    {{template "hover_layers" (dict "glow" true "sweep" true)}}
+    <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div>
+    <div class="g-tint"></div><div class="g-noise"></div>
+    {{if .Admin}}
+    <div class="sponsor-public-actions admin-control">
+        <button type="button" class="sponsor-public-action-btn sponsor-edit-btn"
+            data-index="{{.I}}"
+            data-date="{{.S.Date}}"
+            data-nick="{{.S.Nick}}"
+            data-amount="{{.S.Amount}}"
+            data-msg="{{.S.Msg}}"
+            title="{{.UI.common.action.edit}}">
+            {{svg "edit"}}
+        </button>
+        <form method="POST" action="{{ URLCommit "sponsor/delete" }}" style="display:inline;margin:0;">
+            <input type="hidden" name="index" value="{{.I}}">
+            <input type="hidden" name="redirect" value="{{ URLSponsor }}">
+            <button type="submit" class="sponsor-public-action-btn sponsor-public-action-btn--del" onclick="return confirm('{{.UI.common.action.delete}}？')" title="{{.UI.common.action.delete}}">{{svg "close"}}</button>
+        </form>
+    </div>
+    {{end}}
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;">
+        <span data-ink-exempt style="font-size:1rem;line-height:var(--font-display-i18n-ink-height, 0.858em);color:var(--text-primary);font-family:var(--font-display-i18n);">{{split_script .Nick}}</span>
+        <span style="font-size:15px;line-height:1;color:var(--accent);font-family:var(--font-data);font-weight:var(--font-data-weight, 500);font-variant-numeric:tabular-nums;">¥<span style="margin-left:2px;">{{.Amount}}</span></span>
+    </div>
+    <div style="flex:1;min-height:1.5em;">
+        {{if .Msg}}
+        <p style="font-size:0.85rem;color:var(--text-muted);line-height:1.5;">{{.Msg}}</p>
+        {{end}}
+    </div>
+    <div class="sponsor-card-date">
+        {{svg "calendar"}}
+        <span class="sponsor-card-date-text">{{if .Date}}{{.Date}}{{else}}-{{end}}</span>
+    </div>
+</div>
+{{end}}

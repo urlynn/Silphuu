@@ -1,0 +1,141 @@
+{
+  "_comment": "admin 字体预览夹具（单一内容源）—— 同时驱动预览渲染与 admin 字体子集的字符收集。规则：① 每个会渲染的文本必须写成 {text, role}，role 必填且 != native，否则 walkUILeaves 静默不收录；② 数字/日期/布尔/URL 写裸值，会被自动忽略；③ 叶子 dict 内不能再挂子节点（命中 text+role 后立即 return）。",
+
+  "identity": {
+    "nickname":   { "text": "Your Name", "role": "heading" },
+    "home_motto": { "text": "把这里换成你的个人签名", "role": "body" }
+  },
+
+  "article": {
+    "id": 1,
+    "slug": "font-preview",
+    "title":      { "text": "字体预览示例 · 从排版看字形的层次", "role": "heading" },
+    "category":   { "text": "教程", "role": "caption" },
+    "date":       "2026-09-19T10:30:00+08:00",
+    "updated_at": "2026-09-19T18:05:00+08:00",
+    "words": 1280,
+    "views": 4321,
+    "summary": { "text": "同一款字体在不同字号与字重下呈现的气质并不相同：正文追求长时间阅读的舒适，标题则需要一眼抓住视线。", "role": "body" },
+    "content": { "text": "## 字形的层次\n\n同一款字体在不同字号、字重下呈现的气质并不相同。正文追求**长时间阅读的舒适**，标题则需要*一眼抓住视线*。\n\n中英混排是最常见的场景 —— `0ms 实时`、`CSSOM 变量`、`README.md`、`v1.2.3`。数字与标点也该经得起细看：1,234.56 元、2026-09-19、「引号」、破折号——以及省略号……\n\n### 列表\n\n- 无序项：字距与行距的呼吸感\n- 无序项：标点挤压与悬挂\n- 无序项：中英之间的自动间距\n\n1. 有序项：先看骨架\n2. 有序项：再看细节\n3. 有序项：最后看整体\n\n> 引用块用来检验左侧竖线与文字的关系，\n> 以及多行引用时的行高表现。\n\n### 代码\n\n```go\nfunc main() {\n    fmt.Println(\"Hello, 字体!\")\n}\n```\n\n| 角色 | 字体 | 用途 |\n| --- | --- | --- |\n| body | 系统默认 Sans | 正文 |\n| data | 系统默认 Mono | 数据 |", "role": "body" },
+    "tags": [
+      { "text": "字体子集", "role": "caption" },
+      { "text": "排版", "role": "caption" }
+    ]
+  },
+
+  "latest": {
+    "id": 2,
+    "slug": "font-preview-latest",
+    "title":    { "text": "卡片标题示例：最近更新的一篇", "role": "subheading" },
+    "category": { "text": "随笔", "role": "caption" },
+    "date":     "2026-09-12T21:40:00+08:00",
+    "words": 860,
+    "views": 1290,
+    "summary": { "text": "这里是一段用于卡片预览的摘要文字，长度适中，便于观察两行截断后的行距与省略效果。", "role": "body" },
+    "tags": [
+      { "text": "随笔", "role": "caption" },
+      { "text": "记录", "role": "caption" }
+    ]
+  },
+
+  "archive": {
+    "year": 2026,
+    "months": [
+      {
+        "month": 9,
+        "posts": [
+          {
+            "id": 1,
+            "slug": "font-preview",
+            "title":    { "text": "字体预览示例 · 从排版看字形的层次", "role": "subheading" },
+            "category": { "text": "教程", "role": "caption" },
+            "date":     "2026-09-19T10:30:00+08:00",
+            "tags": [
+              { "text": "字体子集", "role": "caption" }
+            ]
+          },
+          {
+            "id": 2,
+            "slug": "font-preview-latest",
+            "title":    { "text": "卡片标题示例：最近更新的一篇", "role": "subheading" },
+            "category": { "text": "随笔", "role": "caption" },
+            "date":     "2026-09-12T21:40:00+08:00",
+            "tags": [
+              { "text": "记录", "role": "caption" }
+            ]
+          }
+        ]
+      },
+      {
+        "month": 8,
+        "posts": [
+          {
+            "id": 3,
+            "slug": "font-preview-archive",
+            "title":    { "text": "归档条目示例 · 更早的一篇", "role": "subheading" },
+            "category": { "text": "软件", "role": "caption" },
+            "date":     "2026-08-30T09:15:00+08:00",
+            "tags": [
+              { "text": "工具", "role": "caption" }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+
+  "comments": [
+    {
+      "id": "1",
+      "nick":    { "text": "Your Name", "role": "cmt" },
+      "date":    "2026-08-29 07:00",
+      "likes":   12,
+      "ua":      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+      "content": { "text": "欢迎大家在评论区和留言板交流互动！博客已全面升级为 0ms 实时 CSSOM 变量驱动与阿里妈妈可变圆角字体。", "role": "cmt" }
+    },
+    {
+      "id":      "2",
+      "rid":     "1",
+      "nick":    { "text": "访客小拉拉肥", "role": "cmt" },
+      "date":    "2026-08-29 07:10",
+      "likes":   5,
+      "ua":      "Mozilla/5.0 (iPhone; CPU iPhone OS 19_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/19.0 Mobile/15E148 Safari/604.1",
+      "content": { "text": "前排围观！新版字体的排版和层次感比以前清晰太多了，赞一个～", "role": "cmt" }
+    }
+  ],
+
+  "sponsors": [
+    {
+      "nick":   { "text": "七月七なな", "role": "display_i18n" },
+      "amount": { "text": "66.66", "role": "data" },
+      "msg":    { "text": "小小心意  没多少  别嫌弃", "role": "body" },
+      "date":   { "text": "2026-09-14", "role": "data" }
+    },
+    {
+      "nick":   { "text": "LuxRyne958", "role": "display_i18n" },
+      "amount": { "text": "20", "role": "data" },
+      "msg":    { "text": "谢谢作者大大 请你喝奶茶", "role": "body" },
+      "date":   { "text": "2026-07-06", "role": "data" }
+    }
+  ],
+
+  "stats": {
+    "today_pv": 1280,
+    "today_uv": 340,
+    "total_pv": 48920,
+    "total_uv": 12340
+  },
+
+  "taxonomy": {
+    "categories": [
+      { "text": "教程", "role": "caption" },
+      { "text": "软件", "role": "caption" },
+      { "text": "随笔", "role": "caption" }
+    ],
+    "tags": [
+      { "text": "字体子集", "role": "caption" },
+      { "text": "排版", "role": "caption" },
+      { "text": "性能优化", "role": "caption" }
+    ]
+  }
+}

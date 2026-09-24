@@ -1,0 +1,621 @@
+/* Post list. */
+.post-list {
+    display: flex;
+    flex-direction: column;
+    /* gap cannot be used here because it does not transition. When the list shrinks, the
+       gap holds until the wrapper is removed from the DOM, so the bottom card stalls near
+       the end and then jumps. .card-row-wrapper's margin-bottom transitions instead. */
+    border-radius: var(--radius-lg);
+}
+
+/* Card spacing is a transitionable margin, which pairs with the margin-bottom transition
+   setupCardAnimations applies when it removes a wrapper, so the list collapses smoothly
+   and the cards below rise with it. */
+.card-row-wrapper {
+    margin-bottom: 10px;
+}
+.card-row-wrapper:last-child {
+    margin-bottom: 0;
+}
+
+.post-item {
+    position: relative;
+    display: block;
+    padding: 18px 22px;
+    overflow: visible;
+    background: color-mix(in srgb, var(--glass-base) calc(var(--card-alpha) * 100%), transparent);
+    backdrop-filter: blur(var(--card-blur));
+    -webkit-backdrop-filter: blur(var(--card-blur));
+    border: none !important;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--card-shadow);
+    transition: transform 0.22s var(--card-ease);
+    color: inherit;
+}
+.post-item::before {
+    content: '';
+    display: block;
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 1px solid var(--card-border);
+    box-sizing: border-box;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 1;
+    background: transparent;
+
+}
+/* Hover: the border highlight lives on the ::before overlay (glass.css L1C) and the outer
+   glow on its own .hg-glow layer; the card body must have no :hover paint rule. The resting
+   transparent placeholder shadow stays — a static declaration keeps WebKit's paint bounds stable. */
+
+.post-item.empty-card {
+    border: none !important;
+    background: color-mix(in srgb, var(--glass-base) calc(var(--panel-alpha) * 100%), transparent);
+    backdrop-filter: blur(var(--panel-blur));
+    -webkit-backdrop-filter: blur(var(--panel-blur));
+    box-shadow: var(--panel-shadow);
+    cursor: default;
+}
+.post-item.empty-card::before {
+    border: 1px solid var(--panel-border);
+}
+.post-item.empty-card:hover {
+    transform: none;
+}
+
+.post-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+    font-weight: 400;
+    letter-spacing: 0.3px;
+    line-height: 1;
+    position: relative;
+    z-index: 2;
+}
+
+.post-cat {
+    background: var(--accent);
+    color: #ffffff;
+    text-shadow: 0 1px 2px var(--accent-edge);
+}
+.post-cat:hover {
+    background: var(--accent-hover);
+    color: #ffffff;
+    text-shadow: 0 1px 2px var(--accent-edge);
+}
+
+/* Its font-family comes from body, not content.css (bundled for article pages only, while
+   post_card also renders on home/posts/search), so the compensation is --font-body-shift.
+   Ancestor scope is deliberate: a bare class rule cannot say which container it sits in. */
+.post-meta-date {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+.post-meta .post-meta-date {
+    translate: 0 calc(-1 * var(--font-body-shift, 0em));
+}
+
+.post-title {
+    font-family: var(--font-subheading);
+    font-size: 18px;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    letter-spacing: -0.2px;
+    transition: color 0.22s var(--card-ease-title, cubic-bezier(0.16, 1, 0.3, 1));
+}
+.post-item:not(.empty-card):hover .post-title {
+    color: var(--accent);
+}
+
+.post-summary {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Post item tags. */
+.post-item-tags {
+    display: flex;
+    /* align-items was left at its default of stretch, which pulled the children to the full
+       container height. That breaks the assumption behind the ink calibration — a centred
+       box means a centred ink centre — and makes the single-line test skip the whole row. */
+    align-items: center;
+    gap: 4px;
+    margin-top: 6px;
+    position: relative;
+    z-index: 2;
+    min-height: calc(11.5px + 6px);
+}
+
+/* Post layout. */
+.post-layout {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    justify-content: center;
+    width: 100%;
+    max-width: 1388px;   /* 270+24+800+24+270: at or above this width the three columns cap out and the side margins absorb the rest. */
+    margin: 0 auto;
+}
+
+.post-sidebar {
+    flex: 1 1 0;          /* Shrinks in proportion with the centre column. */
+    max-width: 270px;     /* exactly 270 at 1920px wide */
+    min-width: 0;         /* Must be allowed to shrink, or narrow screens overflow. */
+    position: sticky;
+    top: 72px;
+    padding: 20px 16px;
+    border-radius: var(--radius-lg);
+}
+
+.sidebar-title {
+    font-size: round(up, calc(12.5px * var(--font-body-ink-scale)), 1px);
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+.sidebar-title-link {
+    display: block;
+    color: var(--text-dim);
+    transition: color 0.15s;
+}
+.sidebar-title-link:hover {
+    color: var(--accent);
+}
+
+.sidebar-link {
+    display: block;
+    padding: 6px 10px;
+    border-radius: var(--sidebar-radius);
+    color: var(--text-muted);
+    font-size: 14px;
+    transition: all 0.2s;
+    margin-bottom: 2px;
+}
+.sidebar-link:hover {
+    background: var(--hover-bg);
+    backdrop-filter: blur(var(--hover-blur));
+    -webkit-backdrop-filter: blur(var(--hover-blur));
+    border: 1px solid var(--hover-border);
+    color: var(--hover-text);
+}
+.sidebar-link.active {
+    background: var(--hover-bg-active);
+    backdrop-filter: blur(var(--hover-blur));
+    -webkit-backdrop-filter: blur(var(--hover-blur));
+    border: 1px solid var(--hover-border);
+    color: var(--hover-text-active);
+}
+
+/* Category accordion. */
+.cat-group {
+    margin-bottom: 2px;
+}
+
+.cat-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    border-radius: var(--sidebar-radius);
+    transition: background 0.15s;
+    color: inherit;
+    cursor: pointer;
+    border: 1px solid transparent;
+    user-select: none;
+}
+.cat-header:hover {
+    background: transparent;
+    border-color: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.cat-arrow {
+    color: var(--text-dim);
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+    transition: transform 0.2s ease;
+}
+.cat-arrow svg {
+    width: 13px;
+    height: 13px;
+    display: block;
+}
+.cat-arrow.open {
+    transform: rotate(90deg);
+}
+
+.cat-name {
+    flex: 1;
+    font-size: round(up, calc(13px * var(--font-body-ink-scale)), 1px);
+    color: var(--text-muted);
+    letter-spacing: 0.3px;
+    position: relative;
+    transition: color 0.2s;
+}
+.cat-name::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -2px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.22s cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+.cat-header:hover .cat-name {
+    color: var(--accent);
+}
+.cat-header:hover .cat-name::after {
+    transform: scaleX(1);
+}
+
+.cat-count {
+    font-size: round(up, calc(11px * var(--font-body-ink-scale)), 1px);
+    color: var(--text-dim);
+    flex-shrink: 0;
+}
+
+.cat-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease, opacity 0.15s ease;
+    opacity: 0;
+}
+.cat-body.open {
+    max-height: 400px;
+    opacity: 1;
+}
+
+/* Card cover link for hx-boost: fills entire card, overlays content */
+.card-cover {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+
+.cat-post {
+    display: flex;
+    align-items: center;
+    padding: 2px 22px 2px calc(8px + 13px + 6px);
+    border-radius: var(--sidebar-radius);
+    color: var(--text-muted);
+    font-size: round(up, calc(13px * var(--font-body-ink-scale)), 1px);
+    line-height: 1;
+    transition: color 0.15s, background 0.15s, box-shadow 0.15s;
+    margin-bottom: 1px;
+}
+.cat-post:hover {
+    background: var(--bg-hover);
+    color: var(--accent-hover);
+}
+
+.cat-post-title {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: var(--font-body);
+    padding: 3px 0; /* 3px of descender room inside the overflow: hidden border box, so glyphs are not clipped. */
+}
+
+/* Selected state. */
+.cat-post.active {
+    position: relative;
+    color: var(--accent);
+}
+.cat-post.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 4px;
+    bottom: 4px;
+    width: 3px;
+    border-radius: 2px; /* rounded at both ends */
+    background: var(--accent);
+    transition: background 0.15s;
+}
+
+/* Selected and hovered. */
+.cat-post.active:hover {
+    color: var(--accent-hover);
+}
+.cat-post.active:hover::before {
+    background: var(--accent-hover);
+}
+
+.cat-post-date {
+    flex-shrink: 0;
+    font-size: 11px;
+    color: var(--text-dim);
+    min-width: 4.2em;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-family: var(--font-data);
+    line-height: 1.35; /* 1.925px of leading above and below, so the monospace text does not read as too heavy. */
+}
+.cat-post:hover .cat-post-date {
+    color: var(--text-muted); /* On hover the date only brightens and keeps its neutral colour, leaving the title the only accented element. */
+}
+
+a.toc-item {
+    display: block;
+    padding: 4px 0;
+    font-size: round(up, calc(13px * var(--font-body-ink-scale)), 1px);
+    color: var(--text-dim);
+    line-height: 1.4;
+    transition: color 0.15s;
+}
+a.toc-item:hover {
+    color: var(--accent);
+}
+a.toc-item[data-level="2"] {
+    padding-left: 16px;
+    font-size: round(up, calc(12.5px * var(--font-body-ink-scale)), 1px);
+}
+a.toc-item[data-level="3"] {
+    padding-left: 28px;
+    font-size: round(up, calc(12px * var(--font-body-ink-scale)), 1px);
+}
+
+.toc-empty {
+    font-size: round(up, calc(13px * var(--font-body-ink-scale)), 1px);
+    color: var(--text-dim);
+}
+
+.post-sidebar-right {
+    flex: 1 1 0;
+    max-width: 270px;
+    min-width: 0;
+}
+
+/* Below 1168px — the point where the sidebars reach 200 and the body 720, that is
+   200+200+720+48 — the sidebars are hidden and the body goes single-column and centred,
+   capped at an 800px measure. */
+@media (max-width: 1168px) {
+    .post-sidebar,
+    .post-sidebar-right {
+        display: none;
+    }
+    .post-center {
+        flex: 1 1 auto;
+        min-width: 0;
+        max-width: 800px;
+    }
+}
+
+/* Single post article. */
+
+/* Post list page-switch animations. */
+
+/* The page-switch animation is driven by setupCardAnimations in main.js: a clone of the
+   outgoing card fades out while the incoming one flies in. view-transition-name is not
+   used — it creates a compositing layer that isolates the children's backdrop-filter and
+   makes blur(40px) do nothing at all. Without it, backdrop-filter works permanently,
+   animation included. htmx's own view transitions are disabled in main.js, so no
+   ::view-transition rules remain. */
+
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+/* Arc glide animations and wrappers. */
+
+/* Card row wrapper: the JS drives every animation here. */
+.card-row-wrapper {
+    width: 100%;
+    height: auto;
+    position: relative;
+    overflow: visible;
+}
+
+/* The empty-state card. */
+.empty-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dim);
+    font-size: 15px;
+    border: 1px dashed var(--border-light);
+    background: var(--bg-subtle);
+}
+
+/* Card light sweep. The card's overflow: visible is deliberate — its glow and badge sit
+   outside it — so the sweep builds its own clipping layer and the band crosses it with a
+   transform, which stays on the compositor. Never animate left; that lays out every frame. */
+.post-item-sweep {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 20;
+}
+.post-item-sweep::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.08),
+        rgba(255, 255, 255, 0.15),
+        rgba(255, 255, 255, 0.08),
+        transparent
+    );
+    transform: translateX(-150%) skewX(-25deg);
+    will-change: transform;
+}
+.anim-arc-new .post-item-sweep::before,
+.anim-damped-new .post-item-sweep::before {
+    animation: light-sweep 1.1s ease-in-out both;
+    animation-delay: calc(var(--i, 0) * 0.08s + 0.2s);
+}
+
+@keyframes light-sweep {
+    from { transform: translateX(-150%) skewX(-25deg); }
+    to   { transform: translateX(150%) skewX(-25deg); }
+}
+
+/* Text enters in a cascade. */
+.post-item .post-title,
+.post-item .post-summary,
+.post-item .tag {
+    will-change: transform, opacity;
+}
+
+.anim-arc-new .post-title,
+.anim-damped-new .post-title {
+    animation: text-slide-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: calc(var(--i, 0) * 0.08s + 0.3s);
+}
+
+.anim-arc-new .post-summary,
+.anim-damped-new .post-summary {
+    animation: text-slide-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: calc(var(--i, 0) * 0.08s + 0.38s);
+}
+
+.anim-arc-new .tag,
+.anim-damped-new .tag {
+    animation: tag-scale-in 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+    animation-delay: calc(var(--i, 0) * 0.08s + 0.45s);
+}
+
+@keyframes text-slide-up {
+    0% {
+        transform: translate3d(0, 10px, 0);
+        opacity: 0;
+    }
+    100% {
+        transform: translate3d(0, 0, 0);
+        opacity: 1;
+    }
+}
+
+@keyframes tag-scale-in {
+    0% {
+        transform: scale(0.85);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1.0);
+        opacity: 1;
+    }
+}
+
+/* 1. Arc glide. */
+.anim-arc-new {
+    animation: arc-cover-in 1.0s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    animation-delay: calc(var(--i, 0) * 0.08s);
+}
+@keyframes arc-cover-in {
+    0% {
+        transform: translate3d(var(--fly-x), 60px, 0px);
+        opacity: 0;
+    }
+    50% {
+        transform: translate3d(var(--tx-stack), var(--ty-stack), 0px);
+        opacity: 1;
+    }
+    100% {
+        transform: translate3d(0px, 0px, 0px);
+        opacity: 1;
+    }
+}
+
+/* 2. Gradual damped glide. */
+.anim-damped-new {
+    animation: damped-cover-in 1.2s cubic-bezier(0.1, 0.9, 0.2, 1) both;
+    animation-delay: calc(var(--i, 0) * 0.08s);
+}
+@keyframes damped-cover-in {
+    0% {
+        transform: translate3d(var(--fly-x), 80px, 0px);
+        opacity: 0;
+    }
+    30% {
+        transform: translate3d(var(--tx-stack), var(--ty-stack), 0px);
+        opacity: 1;
+    }
+    100% {
+        transform: translate3d(0px, 0px, 0px);
+        opacity: 1;
+    }
+}
+
+/* 3. ASlide, used by the archive page: rows fade in from top to bottom. */
+/* .ap-post-link slides in from the left. */
+.aslide-enter {
+    animation: aslide-in 0.42s cubic-bezier(0.4, 0, 0.2, 1) both;
+    animation-delay: calc(var(--i, 0) * 0.05s);
+}
+@keyframes aslide-in {
+    0%   { transform: translateX(-60px); opacity: 0; }
+    100% { transform: translateX(0); opacity: 1; }
+}
+/* .ap-col, .ap-year-header and .ap-month-header just fade, following the rows top to
+   bottom. */
+.aslide-fade {
+    animation: aslide-fade-in 0.42s cubic-bezier(0.4, 0, 0.2, 1) both;
+    animation-delay: calc(var(--i, 0) * 0.05s);
+}
+@keyframes aslide-fade-in {
+    0%   { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+/* The outgoing card's clone is absolutely positioned over the incoming one during a page
+   switch, so this needs a positioning context. */
+#browse-body-area {
+    position: relative;
+}
+
+/* Bottom stats card: only the title and the counts slide in; the category nav and tag
+   filter stay still, and the card shell with its backdrop-filter does not move — only
+   the text inside fades. */
+.browse-header__title-wrap.bh-text-in {
+    animation: bh-text-in 0.4s ease both;
+}
+@keyframes bh-text-in {
+    0%   { transform: translate3d(-10px, 0, 0); opacity: 0; }
+    100% { transform: translate3d(0, 0, 0);     opacity: 1; }
+}
+
+
+/* Chromium fallback: the post-item glass replica. */
+.chromium .post-item {
+    position: relative;
+    --glass-blur-fallback: var(--card-blur);
+    --glass-tint: color-mix(in srgb, var(--glass-base) calc(var(--card-alpha) * 100%), transparent);
+}
+/* The fill stays constant on hover: only the border and the outer glow change. */

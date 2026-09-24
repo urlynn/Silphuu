@@ -1,0 +1,1067 @@
+
+/* Comment section */
+.cmt-section {
+    padding: 0 36px 36px;
+}
+
+/* Header row */
+.cmt-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    line-height: 1;
+}
+.cmt-header svg {
+    display: block;
+/* No per-icon offset here: comment.svg declares data-ink-center and the single
+   svg[data-icon][data-ink-center] rule in icons.css applies the measured value.
+   A hand-written transform must not coexist with it — translate and transform
+   are separate properties and would stack, double-compensating. */
+    width: var(--icon-md);
+    height: var(--icon-md);
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+/* Scoped to the header row: ink compensation is per font role and the container sets the
+   role, so a bare class selector would hand this shift to anything else reusing the name. */
+.cmt-header .cmt-title {
+    font-size: 17px;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+    translate: 0 calc(-1 * var(--font-body-shift));
+}
+.cmt-header .cmt-count {
+    font-family: var(--font-data);
+    font-weight: var(--font-data-weight, 500);
+    font-variation-settings: 'BEVL' var(--font-data-bevl, 100);
+    font-size: 15px;
+    color: var(--text-muted);
+    translate: 0 calc(-1 * var(--font-data-shift, 0em));
+}
+
+/* Form card: a solid canvas, no transparency, no blur, no glow, no shadow. */
+.cmt-form-card {
+    border: 1px solid var(--form-border) !important;
+    border-radius: 10px;
+    background: var(--form-bg);
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    margin-bottom: 20px;
+    position: relative;
+/* Must outrank .profile-card (z-index: 1): this z-index creates the stacking context
+   that the sticker panel and upload overlay live in — without it the comment cards that
+   follow in the DOM paint over them. 2 is enough; the panel opens below, never over the navbar. */
+    z-index: 2;
+    transition: border-color 0.22s ease;
+}
+/* Focus: the whole card border takes the accent, shadow stays off. */
+.cmt-form-card:focus-within {
+    border-color: var(--accent) !important;
+}
+
+/* The overlay border is hidden in this mode so the glass rules cannot double it. */
+.cmt-form-card::after {
+    display: none;
+}
+
+/* Guestbook: the form card becomes a glass shell. */
+.guestbook-form .cmt-form-card {
+    border: none !important;
+    background: color-mix(in srgb, var(--glass-base) calc(var(--panel-alpha) * 100%), transparent);
+    backdrop-filter: blur(var(--panel-blur)) !important;
+    -webkit-backdrop-filter: blur(var(--panel-blur)) !important;
+    box-shadow: var(--panel-shadow) !important;
+    transition: none; /* Focus state does not animate. */
+}
+.guestbook-form .cmt-form-card::after {
+    display: block; /* Restores the overlay border. */
+}
+.guestbook-form .cmt-form-card:focus-within {
+    border-color: transparent !important;
+}
+.guestbook-form .cmt-form-card:focus-within::after {
+    border-color: var(--accent) !important;
+}
+
+/* Close button in reply mode */
+.cmt-close-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 2;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    border: 1px solid var(--border-light);
+    border-radius: 5px;
+    background: var(--cmt-form-bg);
+    color: var(--text-dim);
+    font-size: 12px;
+    cursor: pointer;
+    padding: 0;
+}
+.cmt-close-btn svg {
+    display: block;
+    width: var(--icon-sm);
+    height: var(--icon-sm);
+}
+.cmt-close-btn:hover {
+    background: var(--bg-hover);
+    border-color: var(--danger-red);
+    color: var(--danger-red);
+}
+
+/* Input row: nickname and email, half each. */
+/* No right padding: the third field runs out to the card's edge, and the width that frees
+   is split three ways by the 1fr tracks, so all three grow by a third of it. */
+.cmt-form-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: center;
+    padding: 10px 0 6px 16px;
+    border-bottom: 1px dashed var(--border-subtle);
+}
+.cmt-form-half,
+.cmt-form-third {
+    display: flex;
+    align-items: center;
+    /* One line box for the row: the icon is pinned to line-height 1, and a form control
+       keeps its own `normal` unless told otherwise, so without this the two centres differ. */
+    line-height: 1;
+    gap: 6px;
+    cursor: text;
+    padding: 2px 0;
+    min-width: 0;
+}
+.cmt-form-half span,
+.cmt-form-third span {
+    font-size: 13px;
+    color: var(--text-dim);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+/* The svg() helper emits no width or height, so an icon here falls back to the 300x150
+   default and blows the track out. --icon-sm pins it the way every other component does. */
+.cmt-form-third svg {
+    display: block;
+    width: var(--icon-sm);
+    height: var(--icon-sm);
+    flex-shrink: 0;
+}
+/* The icon box, so an icon and a bare one render at the same width. */
+.cmt-field-icon {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    line-height: 1;
+}
+/* A button does not inherit colour, and the label around it asks for the text cursor. */
+button.cmt-field-icon {
+    cursor: pointer;
+    color: inherit;
+}
+button.cmt-field-icon:hover {
+    color: var(--accent);
+}
+/* Field text is the field's own name in the placeholder. The input has no border of its
+   own — the guestbook's sits on the label — so nothing here needs to move the box. */
+.cmt-form-half .cmt-form-tab-input,
+.cmt-form-third .cmt-form-tab-input {
+    border: none !important;
+    outline: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 4px 4px;
+    font-size: 13px;
+    /* A form control does not inherit the row's line-height; without this its box stays
+       taller than the icon's and the two centres miss each other. */
+    line-height: 1;
+    color: var(--cmt-input-color);
+    font-family: var(--font-cmt);
+    font-weight: var(--font-cmt-weight, 400);
+    font-variation-settings: 'BEVL' var(--font-cmt-bevl, 100);
+    flex: 1;
+    min-width: 0;
+    /* No ink translate on this row: align-items already puts the icon and this box on one
+       centre, and shifting the box would carry its caret off that centre with it. */
+}
+.cmt-form-half .cmt-form-tab-input:focus,
+.cmt-form-third .cmt-form-tab-input:focus {
+    color: var(--cmt-input-focus);
+}
+.cmt-form-half .cmt-form-tab-input::placeholder,
+.cmt-form-third .cmt-form-tab-input::placeholder {
+    color: var(--cmt-input-placeholder);
+    font-size: 12px;
+}
+.cmt-form-tab-gap {
+    flex: none;
+    width: 20px;
+    margin: 0 8px;
+}
+
+/* Textarea */
+.cmt-textarea {
+    width: 100%;
+    border: none !important;
+    outline: none !important;
+    background: transparent !important;
+    padding: 10px 18px;
+    font-size: 14px;
+    color: var(--cmt-textarea-color);
+    font-family: var(--font-cmt);
+    font-weight: var(--font-cmt-weight, 400);
+    font-variation-settings: 'BEVL' var(--font-cmt-bevl, 100);
+    resize: vertical;
+    box-sizing: border-box;
+    min-height: 90px;
+    line-height: 1.6;
+}
+.cmt-textarea::placeholder {
+    color: var(--cmt-textarea-placeholder);
+}
+.cmt-textarea:focus {
+    color: var(--cmt-textarea-focus);
+}
+
+/* The copy sits in a sibling element rather than the placeholder attribute so it can carry
+   markup (<del> for the strike). placeholder=" " on the field drives :placeholder-shown,
+   which is what hides the overlay once the field has text. */
+.cmt-field-wrap {
+    position: relative;
+}
+
+.cmt-placeholder {
+    position: absolute;
+    inset: 0;
+    padding: 10px 18px;
+    font-family: var(--font-cmt);
+    font-weight: var(--font-cmt-weight, 400);
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--cmt-textarea-placeholder);
+    pointer-events: none;
+}
+
+.cmt-textarea:not(:placeholder-shown) + .cmt-placeholder {
+    display: none;
+}
+
+/* Bottom toolbar: icons, character count, submit button. */
+.cmt-form-bar {
+    display: flex;
+    align-items: center;
+    padding: 8px 18px 12px;
+    gap: 10px;
+    border-top: 1px solid var(--border-light);
+}
+.cmt-form-tools {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.cmt-tool-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 5px;
+    border: none;
+    background: none;
+    outline: none;
+    font-family: inherit;
+    font-size: 12px;
+    color: var(--text-dim);
+    cursor: pointer;
+    /* Enumerated, not `all`: `all` also transitions the inherited `visibility`, and a
+       `visibility` transition reports `visible` mid-flight, so the icon paints through an
+       ancestor's hidden gate — see docs/GOTCHAS.md §visibility-transition-escape */
+    transition: color 0.15s, background-color 0.15s;
+    user-select: none;
+    line-height: 1;
+}
+.cmt-tool-icon svg {
+    display: block;
+    width: var(--icon-md);
+    height: var(--icon-md);
+}
+.cmt-tool-icon:hover {
+    background: none;
+    color: var(--accent);
+}
+.cmt-form-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-left: auto;
+}
+.cmt-char-count {
+/* Font role and ink shift, applied through CSS on first paint rather than JS,
+   so nothing jumps once fonts.ready resolves. */
+    font-family: var(--font-body);
+    translate: 0 calc(-1 * var(--font-body-shift, 0em));
+    font-size: 12px;
+    color: var(--text-dim);
+    white-space: nowrap;
+    user-select: none;
+    transition: color 0.15s;
+}
+.cmt-submit-btn {
+    /* Makes the inner text a flex item so it can be aligned on its own, see
+   .cmt-submit-label. */
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 20px;
+    border-radius: 7px;
+    border: none;
+    background: var(--cmt-submit-bg);
+    color: #ffffff;
+    text-shadow: 0 1px 2px var(--accent-edge);
+    font-size: 13px;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+}
+/* The submit label is ink-aligned inside the pill: the shift lands on the text
+   only, the pill background stays put. */
+.cmt-submit-label {
+    translate: 0 calc(-1 * var(--font-body-shift, 0em));
+}
+.cmt-submit-btn:hover {
+    background: var(--accent-hover);
+}
+.cmt-preview {
+    padding: 12px 16px;
+    margin-bottom: 0;
+    border-top: 1px dashed var(--border-subtle);
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--text-muted);
+    min-height: 80px;
+    font-family: var(--font-cmt);
+    font-weight: var(--font-cmt-weight, 400);
+    font-variation-settings: 'BEVL' var(--font-cmt-bevl, 100);
+}
+.cmt-preview-title {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+}
+.cmt-preview h1, .cmt-preview h2, .cmt-preview h3 { color: var(--text-primary); margin:12px 0 6px; }
+.cmt-preview h1 { font-size:19px; } .cmt-preview h2 { font-size:18px; } .cmt-preview h3 { font-size:16px; }
+.cmt-preview p { margin-bottom:8px; }
+.cmt-preview a { color: var(--accent); }
+
+/* Glass inner layer: wraps the fixed header and the live list; the form lives outside it
+   (JS moves it next to the comment being replied to). The glass hangs on this persistent
+   layer, which the morph never destroys, so the header does not flash. */
+.cmt-section .cmt-glass-panel {
+    position: relative;
+    padding: 16px 20px;
+    border-radius: var(--radius-xl);
+    background: color-mix(in srgb, var(--glass-base) calc(var(--article-alpha, var(--panel-alpha)) * 100%), transparent);
+    backdrop-filter: blur(var(--article-blur, var(--panel-blur)));
+    -webkit-backdrop-filter: blur(var(--article-blur, var(--panel-blur)));
+    border: none !important;
+    box-shadow: var(--panel-shadow);
+}
+
+[data-read-mode="paper"] .cmt-section .cmt-glass-panel {
+    --article-alpha: 0.88;
+}
+/* The section is a plain layout container again; the dynamic container carries
+   no glass of its own, so the two do not stack. */
+.cmt-section.cmt-wrap-glass {
+    padding: 0 36px 36px;
+    border: none;
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+.cmt-section #cmt-comment-area {
+    padding: 0;
+    border: none;
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-radius: 0;
+}
+
+/* List header: count and sorting. */
+.cmt-list {
+    position: relative;
+}
+/* Guestbook: the list container, a vertical stack of glass cards. */
+.gb-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.gb-list .profile-card {
+    position: relative;
+    padding: 16px 20px;
+    margin-bottom: 0;
+    text-align: left;
+    border-radius: var(--radius-lg);
+}
+/* Plays on DOM insertion — htmx's .htmx-settling cannot key it at its 1ms settle delay.
+   The animation may only move transform, and the fade must happen on a non-glass child
+   layer — see docs/GOTCHAS.md §glass-enter-no-opacity.
+
+   Translate only: a fractional scale() re-rasterises the bubble text as the animation ends,
+   and Chromium keeps the subpixel drop that WebKit quantises away —
+   see docs/GOTCHAS.md §friend-card-entry-no-scale. */
+@keyframes gb-card-in {
+    from {
+        transform: translateY(14px);
+    }
+}
+@keyframes gb-card-fade {
+    from {
+        opacity: 0;
+    }
+}
+.gb-list .profile-card {
+    animation: gb-card-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) calc(var(--i, 0) * 30ms + 40ms) backwards;
+}
+.gb-list .profile-card > :not(.g-blur):not(.g-tint):not(.g-noise) {
+    animation: gb-card-fade 0.35s cubic-bezier(0.16, 1, 0.3, 1) calc(var(--i, 0) * 30ms + 40ms) backwards;
+}
+
+/* Comment entries render immediately: the section loads dynamically and the spinner is
+   its animation; a staggered fade on top makes the morph rebuild flicker. Sorting FLIP
+   and the count odometer stay — they animate a change, not an entrance. */
+
+@media (prefers-reduced-motion: reduce) {
+    .gb-list .profile-card,
+    .gb-list .profile-card > :not(.g-blur):not(.g-tint):not(.g-noise) {
+        animation: none !important;
+    }
+}
+.cmt-list-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 12px;
+}
+.cmt-list-title {
+    font-size: 16px;
+    color: var(--text-primary);
+    letter-spacing: -0.2px;
+}
+.cmt-sort {
+    display: flex;
+    gap: 2px;
+}
+.cmt-sort-link {
+    font-size: 12px;
+    color: var(--text-dim);
+    text-decoration: none;
+    padding: 3px 8px;
+    border-radius: 4px;
+    transition: all 0.15s;
+}
+.cmt-sort-link:hover {
+    color: var(--text-muted);
+    background: var(--bg-subtle);
+}
+.cmt-sort-link.active {
+    color: var(--accent);
+}
+
+/* Comment item */
+.cmt-item {
+    display: flex;
+    gap: 12px;
+    padding: 0 0 10px;
+    border-bottom: none;
+    position: relative;
+}
+.cmt-item:last-child {
+    border-bottom: none;
+}
+.cmt-item-reply {
+    margin-left: 3em;  /* Nested replies indent by 3em. */
+    padding-left: 14px;
+    position: relative;
+}
+/* The commenter's picture. .cmt-item already lays out a leading slot (flex + 12px gap). */
+.cmt-item > .cmt-avatar {
+    flex: none; display: block;
+    width: 40px; height: 40px;
+    object-fit: cover; border-radius: 50%;
+/* The meta row's first track is as tall as the action buttons (an 18px icon plus 4px of
+   padding either side = 26px), so the 14px nickname line sits centred in it and its box top
+   lands 6px below the item's top. The picture is pulled down by the same 6px, otherwise its
+   top edge floats above the nickname's. */
+    margin-top: 6px;
+}
+.cmt-item-main {
+    flex: 1;
+    min-width: 0;
+}
+.cmt-item-meta {
+    display: grid;
+    grid-template-columns: auto auto 1fr auto;
+    grid-template-rows: auto auto;
+    align-items: center;
+    column-gap: 8px;
+    line-height: 1;
+}
+.cmt-nick {
+    font-family: var(--font-cmt);
+    font-weight: var(--font-cmt-weight, 600);
+    font-variation-settings: 'BEVL' var(--font-cmt-bevl, 100);
+    font-size: 14px;
+    color: var(--accent);
+/* No translate compensation: equal line boxes (line-height: 1) already make the centres
+   coincide, and role shifts from the mixed cmt/data row would fight each other. */
+    line-height: 1;
+    translate: none;
+}
+.cmt-date {
+    font-size: 12px;
+    color: var(--text-dim);
+    font-family: var(--font-data);
+    font-weight: var(--font-data-weight, 500);
+    font-variation-settings: 'BEVL' var(--font-data-bevl, 100);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    /* As above: no translate, the line box does the aligning. */
+    line-height: 1;
+    translate: none;
+}
+.cmt-date b { font-weight: inherit; }
+.cmt-date i { font-style: normal; line-height: 1; }
+/* Relative time: the unit and the number share a flex row, gap supplies the
+   spacing the old wrapNum markup had. */
+.cmt-date time {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    line-height: 1;
+}
+.cmt-ua {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    font-family: var(--font-caption);
+    font-weight: var(--font-caption-weight, 400);
+    font-variation-settings: 'BEVL' var(--font-caption-bevl, 100);
+    font-size: round(up, calc(11.5px * var(--font-caption-ink-scale)), 1px);
+    color: var(--text-dim);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+/* No shift on the parent: it would drag the separator dot along with the text. wrapUA
+   (main.go) wraps each UA segment in <i>, so segments are compensated individually
+   and the dot stays centred. */
+    translate: none;
+}
+.cmt-ua b { font-weight: inherit; }
+/* UA segments shift through the CSS font-role channel: wrapUA wraps each in <i>, so
+   the shift lands on <i> and the parent stays put. --font-caption-shift is this row's
+   role — do not hard-code pixels. */
+.cmt-ua i {
+    font-style: normal;
+    translate: 0 calc(-1 * var(--font-caption-shift, 0em));
+}
+/* UA separator: the same pure CSS dot as footer-sep — no text, no ink — spaced
+   by the flex gap on .cmt-ua. */
+.cmt-ua-sep {
+    width: 1.5px;
+    height: 1.5px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+/* The dot matches this row's optical line, which is pure Latin; Latin ink sits
+   systematically below the CJK calibration line the caption shift targets — measured
+   0.354px over the inherited 13px = 0.0272em. Re-measure if the font or size changes. */
+    transform: none;
+    translate: 0 0.0272em;
+}
+.cmt-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    grid-column: 4;
+    grid-row: 1;
+    align-self: center;
+}
+/* Scoped to the comment body slot, the one place the role is known. */
+.cmt-item-main .cmt-content {
+    font-size: 14px;
+    font-family: var(--font-cmt);
+    font-weight: var(--font-cmt-weight, 400);
+    font-variation-settings: 'BEVL' var(--font-cmt-bevl, 100);
+    color: var(--text-muted);
+    line-height: 1.65;
+    word-break: break-word;
+    translate: 0 calc(-1 * var(--font-cmt-shift));
+}
+.cmt-content p {
+    margin-bottom: 6px;
+}
+.cmt-content > p:first-child {
+    margin-top: 0;
+}
+.cmt-content p:last-child {
+    margin-bottom: 0;
+}
+.cmt-content a {
+    color: var(--accent);
+}
+.cmt-content a:hover {
+    text-decoration: underline;
+}
+.cmt-content picture {
+    display: block;
+    margin: 6px 0;
+}
+.cmt-content picture img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+}
+/* Stickers scale to 128px. */
+/* Old shortcodes constrain max-width; new ones set width outright. */
+.cmt-content img[src*="/static/sticker/"] {
+    max-width: 64px;
+    max-height: 64px;
+    width: auto;
+    height: auto;
+    vertical-align: middle;
+    margin: 4px 0;
+}
+.sticker-inline {
+    width: 64px !important;
+    height: 64px !important;
+    max-width: none !important;
+    max-height: none !important;
+    object-fit: contain;
+    vertical-align: middle;
+}
+.sticker-inline.sticker-lg {
+    width: 128px !important;
+    height: 128px !important;
+    max-width: none !important;
+    max-height: none !important;
+}
+
+/* Sticker panel: a standalone popover, so it never affects the comment layout. */
+.cmt-sticker-panel {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 100;
+    /* Writing canvas family: solid, opaque, shadowless — as .modal-card and
+   .cmt-form-card. */
+    background: var(--form-bg);
+    border: 1px solid var(--form-border);
+    border-radius: 10px;
+    padding: 10px;
+    margin-top: 4px;
+    width: 574px;
+}
+
+/* Avatar dialog: the same standalone popover family as the sticker panel. */
+.cmt-avatar-dialog {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 100;
+    background: var(--form-bg);
+    border: 1px solid var(--form-border);
+    border-radius: 10px;
+    padding: 10px;
+    margin-top: 4px;
+    width: 320px;
+}
+.cmt-avatar-dialog.open {
+    display: block;
+}
+.cmt-avatar-dialog-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+.cmt-avatar-dialog-close {
+    border: none;
+    background: none;
+    padding: 0 2px;
+    font-family: inherit;
+    font-size: 16px;
+    line-height: 1;
+    color: var(--text-dim);
+    cursor: pointer;
+}
+.cmt-avatar-dialog-close:hover {
+    color: var(--accent);
+}
+.cmt-avatar-url {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid var(--form-border);
+    border-radius: 6px;
+    background: var(--bg-subtle);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 12px;
+}
+.cmt-avatar-preview {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+    min-height: 48px;
+}
+.cmt-avatar-preview-img {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+.cmt-avatar-preview-msg {
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--text-dim);
+}
+.cmt-avatar-dialog-bar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 10px;
+}
+.cmt-avatar-dialog-ghost,
+.cmt-avatar-dialog-primary {
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+}
+.cmt-avatar-dialog-ghost {
+    border: 1px solid var(--form-border);
+    background: none;
+    color: var(--text-muted);
+}
+.cmt-avatar-dialog-primary {
+    border: none;
+    background: var(--accent);
+    color: #ffffff;
+}
+/* Guestbook sticker panel: inherits L0B from the base class, no variant needed. */
+/* Sticker group navigation */
+.cmt-sticker-groups {
+    display: flex;
+    gap: 6px;
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--border-subtle);
+    overflow-x: auto;
+}
+.gb-sticker-panel .cmt-sticker-groups {
+    border-bottom-color: var(--border-subtle);
+}
+/* Size toggle, rightmost in the group tab bar. */
+/* Animated or static toggle. */
+.sticker-mode-btn {
+    flex-shrink: 0;
+    margin-left: auto;
+    width: 32px;
+    height: 32px;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    background: none;
+    cursor: pointer;
+    font-size: 11px;
+    color: var(--text-dim);
+    font-family: inherit;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.sticker-mode-btn:hover {
+    background: var(--bg-subtle);
+    color: var(--text-muted);
+}
+.sticker-mode-btn.active {
+    border-color: var(--accent);
+    color: var(--text-muted);
+}
+.gb-sticker-panel .sticker-mode-btn {
+    color: var(--text-dim);
+}
+.gb-sticker-panel .sticker-mode-btn:hover {
+    background: var(--bg-subtle);
+    color: var(--text-dim);
+}
+.gb-sticker-panel .sticker-mode-btn.active {
+    border-color: var(--accent);
+    color: var(--text-muted);
+}
+.sticker-size-btn {
+    flex-shrink: 0;
+    /* No margin-left: auto — the mode button is already rightmost. */
+    width: 32px;
+    height: 32px;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    background: none;
+    cursor: pointer;
+    font-size: 11px;
+    color: var(--text-dim);
+    font-family: inherit;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.sticker-size-btn:hover {
+    background: var(--bg-subtle);
+    color: var(--text-muted);
+}
+.gb-sticker-panel .sticker-size-btn {
+    color: var(--text-dim);
+}
+.gb-sticker-panel .sticker-size-btn:hover {
+    background: var(--bg-subtle);
+    color: var(--text-dim);
+}
+.cmt-sticker-group-tab {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    padding: 3px;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    background: none;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.cmt-sticker-group-tab img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 3px;
+    display: block;
+}
+.cmt-sticker-group-tab.active {
+    border-color: var(--accent);
+}
+.cmt-sticker-group-tab:hover {
+    border-color: var(--accent);
+}
+/* Sticker grid: eight columns, three rows tall, scrolls past that. */
+.cmt-sticker-group-body {
+    max-height: 204px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* Reserves the scrollbar gutter so the stickers stay symmetric. */
+    scrollbar-gutter: stable both-edges;
+}
+.cmt-sticker-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 6px;
+}
+.cmt-sticker-item {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: contain;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.cmt-sticker-item:hover {
+    transform: scale(1.1);
+    box-shadow: var(--shadow-card);
+}
+.gb-tool-icon:hover {
+    background: var(--bg-hover);
+}
+
+.cmt-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+.cmt-like,
+.cmt-reply {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 13px;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 5px;
+    transition: all 0.15s;
+    line-height: 1;
+}
+/* Like count: .cmt-like declares no font-family and neither does the comment container
+   chain, so it inherits body and takes --font-body-shift. */
+.cmt-like .cmt-like-cnt {
+    translate: 0 calc(-1 * var(--font-body-shift, 0em));
+}
+.cmt-like svg,
+.cmt-reply svg {
+    display: block;
+/* Equal ink height: a filled 1024-unit glyph inks about 54% of its box, so an
+   18px box gives ≈9.7px, matching the ≈9.5px of the outlined bin at 14px. */
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+.cmt-like:hover,
+.cmt-like.liked {
+    color: var(--danger-red);
+}
+.cmt-reply:hover {
+    color: var(--danger-red);
+}
+.cmt-del-btn {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 5px;
+    transition: all 0.15s;
+    line-height: 1;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    font-size: 13px;
+}
+:is(html.is-admin, body.is-admin) .cmt-del-btn,
+.cmt-item.is-owner .cmt-del-btn,
+.profile-card.is-owner .cmt-del-btn {
+    display: inline-flex !important;
+}
+.cmt-del-btn svg {
+    width: 14px;
+    height: 14px;
+    display: block;
+}
+.cmt-del-btn:hover {
+    /* Tints the icon only; the background stays, and the red does not drift with
+   the theme. */
+    color: var(--danger-red);
+}
+/* Guestbook: delete button absolute (no actions row) */
+.profile-card > .cmt-del-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 5;
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+.profile-card:hover > .cmt-del-btn,
+.profile-card > .cmt-del-btn:focus {
+    opacity: 1;
+}
+
+.cmt-empty {
+    text-align: center;
+    padding: 24px 0;
+    font-size: 13px;
+    color: var(--text-dim);
+}
+
+.cmt-loading-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 32px 0;
+    color: var(--text-dim);
+    font-size: 13px;
+/* Anti-flash delay, as in lazy-image.css: after a page swap the comment fetch usually
+   hits the service worker cache in under 150ms, so a 150ms hold keeps the placeholder
+   invisible on a cache hit. */
+    animation: cmt-ph-delay-show 0.01s 0.15s backwards;
+}
+
+@keyframes cmt-ph-delay-show {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.cmt-spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--border-light);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: cmtSpin 0.6s linear infinite;
+    flex-shrink: 0;
+}
+
+@keyframes cmtSpin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .cmt-section {
+        padding: 0 18px 24px;
+    }
+}
+
+
+
+/* Chromium rebuild of the comment glass. .gb-list .profile-card sets background, border
+   and backdrop-filter with !important and wins at equal specificity (0,2,0), so the strip
+   never applies — [data-backdrop-scene] raises this to (0,3,1). */
+.chromium .cmt-section .cmt-glass-panel {
+    position: relative;
+    --glass-blur-fallback: var(--article-blur, var(--panel-blur));
+    --glass-tint: color-mix(in srgb, var(--glass-base) calc(var(--article-alpha, var(--panel-alpha)) * 100%), transparent);
+}
+.chromium .gb-list .profile-card[data-backdrop-scene] {
+    position: relative;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    --glass-blur-fallback: var(--panel-blur);
+    --glass-tint: color-mix(in srgb, var(--glass-base) calc(var(--panel-alpha) * 100%), transparent);
+}
+
+/* Asymmetric padding instead of translate: Safari drops fractional translations. The
+   guestbook override in themes/elements.css uses 8px vertically — the two must move
+   together or the guestbook drifts by 0.08px. */
+.cmt-submit-btn {
+    padding-top:    calc(6px - var(--font-caption-shift, 0em));
+    padding-bottom: calc(6px + var(--font-caption-shift, 0em));
+}
+.cmt-submit-btn > * {
+    translate: none !important;
+}

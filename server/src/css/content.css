@@ -1,0 +1,140 @@
+/* Content Area Styles (Article + Comments) */
+
+/* Typography by Content Type */
+
+/* Body text — shared by article and comments */
+.article-content {
+    font-family: var(--font-article);
+    font-weight: var(--font-article-weight, 400);
+    font-variation-settings: 'BEVL' var(--font-article-bevl, 100);
+}
+.cmt-content {
+    /* 2026-09-18: was var(--font-cmt, var(--font-article)) — the same architecture bug as
+       "unconfigured comment font silently falls back to the article font (=SharkHealthNunito)":
+       it masked missing config. Now uses var(--font-cmt) directly; when missing, the
+       tokens.css system font stack takes over and stays visible. Matches components/cmt.css. */
+    font-family: var(--font-cmt);
+    font-weight: var(--font-cmt-weight, 400);
+    font-variation-settings: 'BEVL' var(--font-cmt-bevl, 100);
+}
+
+/* Unified rule for article emphasis elements (headings / inline bold): */
+.article-content h1, .article-content h2, .article-content h3,
+.article-content h4, .article-content h5, .article-content h6 {
+    font-family: var(--font-subheading);
+    color: var(--text-primary);
+    font-weight: var(--font-subheading-weight, 600);
+    font-variation-settings: 'BEVL' var(--font-subheading-bevl, 100);
+    -webkit-text-stroke: 0.2px currentColor;
+    paint-order: stroke fill;
+}
+
+.article-content strong,
+.article-content b {
+    font-weight: 600;
+    -webkit-text-stroke: 0.2px currentColor;
+    paint-order: stroke fill;
+}
+
+/* AaZongYiYuan is rounded; use looser letter-spacing than geometric fonts */
+.article-content h1 { letter-spacing: 0; }
+.article-content h2 { letter-spacing: 0; }
+.article-content h3, .article-content h4 { letter-spacing: 0; }
+
+/* Blockquotes — serif contrast for editorial feel */
+.article-content blockquote {
+    font-family: var(--font-serif);
+    font-weight: var(--font-serif-weight, 400);
+    font-variation-settings: 'BEVL' var(--font-serif-bevl, 100);
+    font-size: 1.02em;
+    line-height: 1.7;
+    color: var(--text-muted);
+    border-left: 3px solid var(--accent-soft);
+    padding: 8px 18px;
+    margin: 16px 0;
+    background: var(--bg-subtle);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+/* Optional blockquote italics (body[data-quote-style="italic"]) */
+body[data-quote-style="italic"] .article-content blockquote {
+    font-style: italic;
+}
+
+/* Code Blocks (unified — article style as reference) */
+.article-content pre, .cmt-content pre, .cmt-preview pre {
+    background: var(--bg-chroma);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 14px 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    font-size: 14px;
+    line-height: 1.5;
+    border: 1px solid var(--border-light);
+}
+
+/* Inline code */
+.article-content code, .cmt-content code, .cmt-preview code {
+    font-family: var(--font-mono);
+    font-weight: var(--font-mono-weight, 400);
+    font-variation-settings: 'BEVL' var(--font-mono-bevl, 100);
+    font-size: 0.88em;
+    word-break: break-all;
+}
+
+/* Article code blocks / inline code: same unified rule as headings / inline */
+.article-content pre,
+.article-content code {
+    font-family: var(--font-mono);
+    font-weight: var(--font-mono-weight, 400);
+    font-variation-settings: 'BEVL' var(--font-mono-bevl, 100);
+    -webkit-text-stroke: 0.2px currentColor;
+    paint-order: stroke fill;
+}
+
+/* Nested code inside pre (code blocks, not inline) */
+.article-content pre code, .cmt-content pre code, .cmt-preview pre code {
+    background: none;
+    padding: 0;
+    word-break: normal;
+    white-space: pre;
+}
+
+/* Light theme overrides for code blocks */
+:is([data-theme$="-light"]) .article-content pre,
+:is([data-theme$="-light"]) .cmt-content pre,
+:is([data-theme$="-light"]) .cmt-preview pre {
+    background: var(--bg-chroma);
+    border: 1px solid var(--border-subtle);
+}
+
+:is([data-theme$="-light"]) .article-content code,
+:is([data-theme$="-light"]) .cmt-content code,
+:is([data-theme$="-light"]) .cmt-preview code {
+    background: var(--bg-subtle);
+    padding: 1px 4px;
+    border-radius: 3px;
+}
+
+:is([data-theme$="-light"]) .article-content pre code,
+:is([data-theme$="-light"]) .cmt-content pre code,
+:is([data-theme$="-light"]) .cmt-preview pre code {
+    background: none;
+    padding: 0;
+}
+/* Dates & Stats */
+/* Article meta (.article-date/.article-updated/.article-words/.article-views) is set to
+   --font-caption by article-meta.css, not to the data font here;
+   .cat-post-date is owned exclusively by post-sidebar.css at 11px, avoiding an
+   override-induced 13px anomaly */
+.cmt-date, .ap-date, .post-meta-date {
+    font-family: var(--font-data);
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.article-content img, .cmt-content img, .cmt-preview img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-md);
+}

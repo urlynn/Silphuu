@@ -1,0 +1,166 @@
+/* Code block syntax highlighting token colors (Chroma, server-side highlighting).
+   Background: goldmark renders with goldmark-highlighting + chromahtml.WithClasses(true)
+   (main.go), i.e. the server emits the .chroma classes and this CSS supplies the colors.
+   --chroma-* variables are defined per theme (tokens.css --palette-*-chroma-*).
+   2026-09-16: moved from assets/css/themes/page-article.css. That location was only in
+   articleCSSFiles, so only article-page code blocks were colored while comment-area
+   (comment bundle) and admin-preview blocks were monochrome; coreCSSFiles makes it site-wide. */
+
+/* Chroma (Everforest Light) */
+.chroma .k,
+.chroma .kc,
+.chroma .kd,
+.chroma .kp,
+.chroma .kr,
+.chroma .kt { color: var(--chroma-keyword); }
+
+.chroma .na,
+.chroma .nc,
+.chroma .nd,
+.chroma .ne,
+.chroma .nf,
+.chroma .fm,
+.chroma .nx { color: var(--chroma-function); }
+
+.chroma .s,
+.chroma .sa,
+.chroma .sb,
+.chroma .sc,
+.chroma .dl,
+.chroma .sd,
+.chroma .s2,
+.chroma .sh,
+.chroma .si,
+.chroma .sx,
+.chroma .sr,
+.chroma .s1,
+.chroma .ss { color: var(--chroma-string); }
+
+.chroma .c,
+.chroma .ch,
+.chroma .cm,
+.chroma .cp,
+.chroma .cpf,
+.chroma .c1,
+.chroma .cs,
+.chroma .go { color: var(--chroma-comment); }
+
+.chroma .m,
+.chroma .mb,
+.chroma .mf,
+.chroma .mh,
+.chroma .mi,
+.chroma .il,
+.chroma .mo,
+.chroma .l { color: var(--chroma-number); }
+
+.chroma .o,
+.chroma .ow { color: var(--chroma-operator); }
+
+.chroma .p,
+.chroma .n,
+.chroma .nb,
+.chroma .bp,
+.chroma .ni,
+.chroma .nl,
+.chroma .nn,
+.chroma .nv,
+.chroma .vc,
+.chroma .vg,
+.chroma .vi,
+.chroma .vm { color: var(--chroma-punctuation); }
+
+.chroma .kn,
+.chroma .nt,
+.chroma .gd { color: var(--chroma-tag); }
+
+.chroma .gi { color: var(--chroma-inserted); }
+
+.chroma .gr,
+.chroma .gt { color: var(--chroma-deleted); }
+
+:is([data-theme$="-light"]) .chroma .ge { font-style: italic; }
+.chroma .gh { color: var(--chroma-punctuation); }
+.chroma .gp { color: var(--chroma-punctuation); }
+.chroma .gu { color: var(--chroma-comment); }
+
+.chroma .se { color: var(--chroma-number); }
+.chroma .ld { color: var(--chroma-string); }
+.chroma .py { color: var(--chroma-punctuation); }
+
+/* Prism token colors for the editor preview: self-built light/dark pairs from the site's own
+   variables, shared by front end and editor (the CDN prism-tomorrow is dark-only, unreadable on light backgrounds).
+   Selectors get an `html[data-theme]` prefix to raise specificity: the CDN theme loads via head_extra after the bundle, so at equal specificity it would win. */
+html[data-theme] {
+    --tok-comment: #7d8590;
+    --tok-keyword: #ff7b72;
+    --tok-string:  #a5d6ff;
+    --tok-number:  #79c0ff;
+    --tok-func:    #d2a8ff;
+    --tok-builtin: #ffa657;
+    --tok-punct:   #8b949e;
+    --tok-tag:     #7ee787;
+    --tok-attr:    #79c0ff;
+    --tok-regex:   #a5d6ff;
+}
+html[data-theme$="-light"] {
+    --tok-comment: #6e7781;
+    --tok-keyword: #cf222e;
+    --tok-string:  #0a3069;
+    --tok-number:  #0550ae;
+    --tok-func:    #8250df;
+    --tok-builtin: #953800;
+    --tok-punct:   #57606a;
+    --tok-tag:     #116329;
+    --tok-attr:    #0550ae;
+    --tok-regex:   #0a3069;
+}
+html[data-theme] .token.comment,
+html[data-theme] .token.prolog,
+html[data-theme] .token.doctype,
+html[data-theme] .token.cdata { color: var(--tok-comment); font-style: italic; }
+html[data-theme] .token.punctuation,
+html[data-theme] .token.operator { color: var(--tok-punct); background: none; }
+html[data-theme] .token.keyword,
+html[data-theme] .token.atrule,
+html[data-theme] .token.important { color: var(--tok-keyword); }
+html[data-theme] .token.string,
+html[data-theme] .token.char,
+html[data-theme] .token.attr-value { color: var(--tok-string); }
+html[data-theme] .token.number,
+html[data-theme] .token.boolean,
+html[data-theme] .token.constant { color: var(--tok-number); }
+html[data-theme] .token.function,
+html[data-theme] .token.method { color: var(--tok-func); }
+html[data-theme] .token.builtin,
+html[data-theme] .token.class-name,
+html[data-theme] .token.property { color: var(--tok-builtin); }
+html[data-theme] .token.tag,
+html[data-theme] .token.selector { color: var(--tok-tag); }
+html[data-theme] .token.attr-name { color: var(--tok-attr); }
+html[data-theme] .token.regex,
+html[data-theme] .token.variable { color: var(--tok-regex); }
+html[data-theme] .token.namespace { opacity: 0.7; }
+
+/* Theme-aware Prism code block background/border for the editor preview.
+   The CDN theme gave pre[class*="language-"] a #2d2d2d dark background, producing dark
+   code blocks in light mode. Override with theme variables and raise specificity:
+   the html[data-theme] prefix gives (0,2,1) > the CDN's (0,1,1). */
+html[data-theme] pre[class*="language-"],
+html[data-theme] code[class*="language-"] {
+    background: var(--bg-chroma);
+    color: var(--text-primary);
+    text-shadow: none;
+}
+html[data-theme] pre[class*="language-"] {
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 14px 0;
+    overflow-x: auto;
+}
+html[data-theme] :not(pre) > code[class*="language-"] {
+    background: var(--bg-subtle);
+    padding: 1px 4px;
+    border-radius: 3px;
+}

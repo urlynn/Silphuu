@@ -1,0 +1,103 @@
+/* Sunny Light — Semantic Layer (Layer 2) */
+/* Modern, energetic, youthful bright yellow theme. */
+
+[data-theme="golden-light"] {
+    /* Accent (theme primary color) */
+  --accent: #F59E0B;
+
+  /* Glass hex base */
+  --glass-tint: #FFFDF2;
+  --glass-light: #2D3142;
+  --glass-dark: #000000;
+  
+
+  /* Modern compact micro-shadow with light warm-graphite hue */
+  --shadow-sm: 0 2px 6px rgba(45, 49, 66, 0.06);
+
+  /* Background */
+  --bg-body: #FFFDF2;
+  --bg-base: #FFFDF2;
+  --bg-glass-alt: rgba(255, 253, 242, 0.80);
+  --bg-nav: rgba(255, 253, 242, 0.85);
+  --bg-code: rgba(255, 248, 220, 0.70);
+  --bg-chroma: rgba(255, 248, 220, 0.70);
+  --bg-card: rgba(45, 49, 66, 0.04);
+  --bg-input: rgba(0, 0, 0, 0.03);
+  --bg-overlay: color-mix(in srgb, var(--glass-dark) 30%, transparent);
+
+  /* Surface */
+  --bg-subtle: color-mix(in srgb, var(--glass-light) calc(var(--surface-alpha) * 100%), transparent);
+  --bg-hover: color-mix(in srgb, var(--glass-light) 8%, transparent);
+  --bg-interactive: color-mix(in srgb, var(--glass-light) 6%, transparent);
+
+  /* Text */
+  --text-primary: #474C55;
+  --text-muted: #5F646E;
+  --text-dim: #818690;
+  --timeline-line: color-mix(in srgb, var(--text-primary) 18%, transparent);
+  --timeline-node: color-mix(in srgb, var(--text-primary) 35%, transparent);
+
+  /* Accent (auto-derived) */
+  --accent-hover: #D97706;
+  --accent-soft: color-mix(in srgb, var(--accent) 18%, transparent);
+
+  /* Border */
+  --border-subtle: color-mix(in srgb, var(--glass-light) 7%, transparent);
+
+  /* Shadow */
+  --shadow-card: 0 4px 14px rgba(45, 49, 66, 0.07);
+
+  /* Hover states */
+  --hover-bg: color-mix(in srgb, var(--accent) 12%, transparent);
+  --hover-text: var(--accent);
+  --hover-border: color-mix(in srgb, var(--accent) 20%, transparent);
+  --hover-blur: 12px;
+  --hover-bg-active: color-mix(in srgb, var(--accent) 16%, transparent);
+  --hover-text-active: #D97706;
+
+  /* Nav */
+  --nav-bg: rgba(0, 0, 0, 0.08);
+
+  /* Layout */
+  --sidebar-radius: 10px;
+  --blur-amount: 20px;
+
+  /* Group hover */
+  --group-hover-bg: color-mix(in srgb, var(--glass-light) 6%, transparent);
+  --group-hover-text: var(--accent);
+
+  /* Comment form */
+  --cmt-form-bg: #FFFFFF;
+  --cmt-input-color: var(--text-primary);
+  --cmt-input-placeholder: var(--text-muted);
+  --cmt-textarea-color: var(--text-primary);
+  --cmt-textarea-placeholder: var(--text-muted);
+  --cmt-textarea-focus: var(--text-primary);
+  --cmt-input-focus: var(--text-primary);
+  --cmt-submit-bg: var(--accent);
+
+
+  /* Chroma syntax highlighting */
+  --chroma-keyword: #D97706;
+  --chroma-function: #2563EB;
+  --chroma-string: #16A34A;
+  --chroma-comment: #94A3B8;
+  --chroma-number: #EA580C;
+  --chroma-operator: #0284C7;
+  --chroma-punctuation: #334155;
+  --chroma-tag: #DC2626;
+  --chroma-deleted: #DC2626;
+  --chroma-inserted: #16A34A;
+
+  /* Decorative shapes */
+  --shape-1: #F59E0B;
+  --shape-2: #F97316;
+  --shape-3: #10B981;
+  --shape-4: #06B6D4;
+  --shape-5: #8B5CF6;
+  --shape-6: #FBBF24;
+  --shape-7: #34D399;
+  --shape-8: #38BDF8;
+  --shape-9: #A78BFA;
+  --shape-10: #FCD34D;
+}

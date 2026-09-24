@@ -1,0 +1,70 @@
+{{define "head"}}
+{{/* hx-head="merge": the page bundles live in each page's head_extra, so the bundles of the
+     page being left have to come back out of the head. "append" kept them, which let a later
+     bundle's equal-specificity rule win on the page you moved to. */}}
+<head hx-head="merge">
+    <script id="head-theme-script" hx-preserve="true">(function(){var d=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;var o=localStorage.getItem('blog-theme');if(o){localStorage.setItem(o.includes('-dark')?'blog-theme-dark':'blog-theme-light',o);localStorage.removeItem('blog-theme');}var s=localStorage.getItem('blog-theme-sync')!=='false';var t=s?(d?(localStorage.getItem('blog-theme-dark')||'indigo-dark'):(localStorage.getItem('blog-theme-light')||'forest-light')):(localStorage.getItem('blog-theme-override')||'forest-light');document.documentElement.dataset.theme=t;document.documentElement.dataset.readMode=localStorage.getItem('blog-read-mode')||'clear';document.documentElement.dataset.baseUrl='{{.BaseURL}}';window.BLOG_CONFIG=Object.assign(window.BLOG_CONFIG||{},{baseURL:'{{.BaseURL}}'});if(document.cookie.includes('is_admin=1'))document.documentElement.classList.add('is-admin');})()</script>
+    <script id="head-site-urls" hx-preserve="true">window.SITE_URLS = {{siteURLsJSON}};</script>
+    <script id="head-chromium-script" hx-preserve="true">/* Chrome-family engine -> <html class="chromium">: the switch for the CSS-filter backdrop-filter replication (strict UA isolation, not @supports, to avoid catching Safari 18+/Firefox 125+) */
+    if (/(chrome|chromium|crios|edg|opr)/i.test(navigator.userAgent)) document.documentElement.classList.add('chromium');</script>
+    <script id="head-visit-script" hx-preserve="true">
+        /* Must run before any element renders: distinguish first visit / in-site navigation */
+        if (sessionStorage.getItem('blog-visited')) document.documentElement.dataset.visited = '1';
+        sessionStorage.setItem('blog-visited', '1');
+    </script>
+    <script id="head-scroll-restore-script" hx-preserve="true">
+        /* Never save or restore the scroll position. With scrollRestoration='auto' the
+           browser carries the previous page's scroll into the new page (Safari worst):
+           entering a post from the home second screen lands mid-article first — scrolling
+           is fully application-controlled instead (navbar.js + 12-lifecycle.js).
+           Cost: no automatic scroll restore on back/forward. */
+        if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    </script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google" content="notranslate">
+    <meta name="translation" content="notranslate">
+    <title>{{.Title}}</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="{{asset "css/core.bundle.css"}}" id="core-bundle-css" hx-preserve="true">
+    <style id="ink-vars-style" hx-preserve="true">{{inkVarsInline}}</style>
+    <script id="page-resources-js" hx-preserve="true">window.__PAGE_RESOURCES__ = {{pageResourcesInline}};</script>
+    <script src="{{asset "js/core.bundle.js"}}" id="core-bundle-js" hx-preserve="true" defer></script>
+    <script type="speculationrules" id="head-speculation-rules" hx-preserve="true">
+    {
+        "prerender": [
+            {
+                "where": {
+                    "and": [
+                        { "href_matches": "/post/*" },
+                        { "not": { "href_matches": "/admin/action/post/*" } },
+                        { "not": { "href_matches": "/post/new" } }
+                    ]
+                },
+                "eagerness": "moderate"
+            }
+        ],
+        "prefetch": [
+            {
+                "where": {
+                    "and": [
+                        { "href_matches": "/*" },
+                        { "not": { "href_matches": "/admin/*" } },
+                        { "not": { "href_matches": "/admin/action/post/*" } },
+                        { "not": { "href_matches": "/post/new" } }
+                    ]
+                },
+                "eagerness": "conservative"
+            }
+        ]
+    }
+    </script>
+    {{block "head_extra" .}}{{end}}
+    {{/* Site customisation layer: the deployment's own src/css/site.css, inlined so that it
+         is the last stylesheet in <head> with no request of its own. The engine ships no such
+         file; scripts/init-site.sh copies the example site's. Its last position is an
+         invariant the runtime enforces (keepSiteLayerLast), because htmx's head merge appends
+         the incoming page's bundles behind it — see docs/GOTCHAS.md §site-layer-order. */}}
+    <style id="site-css" hx-preserve="true">{{siteCSSInline}}</style>
+</head>
+{{end}}

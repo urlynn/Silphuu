@@ -1,0 +1,54 @@
+{{define "posts.html"}}{{template "base_layout" .}}{{end}}
+
+{{define "body_attrs"}} class="page-browse{{if .IsArchive}} page-browse--archive{{else if .CurrentCat}} page-browse--category{{else}} page-browse--list{{end}}"{{end}}
+
+{{define "body_class"}}page-browse{{if .IsArchive}} page-browse--archive{{else if .CurrentCat}} page-browse--category{{else}} page-browse--list{{end}}{{end}}
+
+{{define "content"}}
+
+<div id="browse-body-area">
+{{if .IsArchive}}
+<div class="archive-panel">
+    {{range .ArchiveGroups}}
+    {{template "archive_year_block" (dict "G" . "UI" $.UI "Cats" $.CategoryAliases)}}
+    {{end}}
+    <svg class="ap-highlight-svg" aria-hidden="true">
+        <path class="ap-dash-line"/>
+        <path class="ap-highlight"/>
+    </svg>
+</div>
+{{else if .Posts}}
+{{/* /posts pre-renders every card — the tag-independent superset — and the browser hides the
+     ones without the #<tag> fragment's tag (see src/js/parts/03-nav-filter.js). The empty
+     card is pre-rendered for the same single-implementation reason as in search.html. */}}
+<div class="post-list-container post-list"{{if .IsList}} id="postsListResults"{{end}}>
+    {{range $i, $p := .Posts}}
+    {{template "post_card" (dict "P" $p "I" $i "Cats" $.CategoryAliases "ShowDate" true "ShowTags" true)}}
+    {{end}}
+    {{if .IsList}}<div id="postsListEmpty" style="display:none">{{template "post_empty_card" (dict "Msg" .UI.posts.list.empty)}}</div>{{end}}
+</div>
+{{else}}
+<div class="post-list-container post-list">
+    {{template "post_empty_card" (dict "Msg" .UI.posts.list.empty)}}
+</div>
+{{end}}
+
+{{template "posts_header" .}}
+</div>
+
+<script>
+// Page-switch animation scheme is final: direction RIGHT-ONLY + rhythm damped
+// (progressive damping, direct overlay); no toggle button anymore.
+// main.js's setupCardAnimations / playCardEntrance read these two attributes to drive
+// the animation.
+document.documentElement.setAttribute('data-anim-direction', 'right-only');
+document.documentElement.setAttribute('data-anim-rhythm', 'damped');
+</script>
+{{end}}
+
+{{define "head_extra"}}
+<link rel="stylesheet" href="{{asset "css/browse.bundle.css"}}">
+<script src="{{asset "js/browse.bundle.js"}}" defer></script>
+{{end}}
+
+{{define "scripts"}}{{end}}

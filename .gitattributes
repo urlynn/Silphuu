@@ -1,0 +1,15 @@
+*.css linguist-vendored
+*.js linguist-vendored
+*.html linguist-vendored
+
+server/src/css/components/nav.css linguist-vendored=false
+server/src/css/components/home-section.css linguist-vendored=false
+server/src/css/components/hero.css linguist-vendored=false
+server/src/css/components/glass.css linguist-vendored=false
+server/src/css/components/archive.css linguist-vendored=false
+
+server/src/js/parts/13-ink-transition.js linguist-vendored=false
+server/src/js/status.js linguist-vendored=false
+server/src/js/timeline.js linguist-vendored=false
+
+server/templates/home.html linguist-vendored=false

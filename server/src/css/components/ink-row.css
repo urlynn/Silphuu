@@ -1,0 +1,15 @@
+/* Ink alignment system (fully algorithm-driven, no selector enumeration,
+   in-memory hooks with zero flicker) */
+
+/* Layout helper: flex centring */
+.ink-row {
+    display: flex;
+    align-items: center;
+    line-height: 1;
+}
+
+.ink-row svg {
+    display: block;
+    flex-shrink: 0;
+}
+

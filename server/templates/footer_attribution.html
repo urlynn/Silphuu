@@ -1,0 +1,11 @@
+{{define "footer_attribution"}}{{/*
+  Attribution line — the project's only visible credit.
+
+  Own file rather than inlined in footer.html: footer.html is the file a deployment
+  copies to restyle the footer, and an inlined credit would ride along into that copy.
+
+  Own copyright / filing number / donation note -> templates/footer_content.html
+  Different project identity                    -> ProjectName, ProjectURL in project.go
+  Different footer layout                       -> copy templates/footer.html, keep its
+                                                  call to this partial
+*/}}<span class="footer-sep"></span>Powered by <a class="footer-powered-link" href="{{projectURL}}" target="_blank" rel="noopener noreferrer">{{projectName}}</a>{{end}}

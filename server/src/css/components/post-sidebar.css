@@ -1,0 +1,300 @@
+/* Post layout (shared across browse list and article pages) */
+.post-layout {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    justify-content: center;
+    width: 100%;
+    max-width: 1388px;   /* 270+24+800+24+270: at/above this width the three columns lock to the top and side whitespace absorbs the rest, no shrinking */
+    margin: 0 auto;
+}
+
+.post-sidebar {
+    flex: 1 1 0;          /* shrinks in proportion with the center column */
+    max-width: 270px;     /* exactly 270 at 1920 */
+    min-width: 0;         /* critical: allows shrinking, otherwise overflows on narrow screens */
+    position: sticky;
+    top: 72px;
+    padding: 20px 16px;
+    border-radius: var(--radius-lg);
+    background: color-mix(in srgb, var(--glass-base) calc(var(--panel-alpha) * 100%), transparent);
+    backdrop-filter: blur(var(--panel-blur));
+    -webkit-backdrop-filter: blur(var(--panel-blur));
+    border: none !important;
+    box-shadow: var(--panel-shadow);
+}
+
+/* Chromium fallback: post-sidebar glass replication. position:sticky is auto-detected
+   as raf mode by 14-backdrop.js (sticky rect.top is piecewise non-linear, so per-frame
+   rect reads are required). Child hover blurs (.sidebar-link, .cat-header) are left alone: they sample the parent's already-blurred surface, and cloning bg-shapes per link would explode clone-layer count. */
+.chromium .post-sidebar {
+    position: sticky;
+    --glass-blur-fallback: var(--panel-blur);
+    --glass-tint: color-mix(in srgb, var(--glass-base) calc(var(--panel-alpha) * 100%), transparent);
+}
+
+.sidebar-title {
+    font-size: round(up, calc(12.5px * var(--font-body-ink-scale)), 1px);
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+.sidebar-title-link {
+    display: block;
+    color: var(--text-dim);
+    transition: color 0.15s;
+}
+.sidebar-title-link:hover {
+    color: var(--accent);
+}
+
+.sidebar-link {
+    display: block;
+    padding: 6px 10px;
+    border-radius: var(--sidebar-radius);
+    color: var(--text-muted);
+    font-size: 14px;
+    transition: all 0.2s;
+    margin-bottom: 2px;
+}
+.sidebar-link:hover {
+    background: var(--hover-bg);
+    backdrop-filter: blur(var(--hover-blur));
+    -webkit-backdrop-filter: blur(var(--hover-blur));
+    border: 1px solid var(--hover-border);
+    color: var(--hover-text);
+}
+.sidebar-link.active {
+    background: var(--hover-bg-active);
+    backdrop-filter: blur(var(--hover-blur));
+    -webkit-backdrop-filter: blur(var(--hover-blur));
+    border: 1px solid var(--hover-border);
+    color: var(--hover-text-active);
+}
+
+/* Category accordion */
+.cat-group {
+    margin-bottom: 2px;
+}
+
+.cat-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    /* Ink compensation precondition (same as .browse-header__tags-head): leaves
+       must use line-height:1, otherwise line-box center != ink center and glyph
+       shifts systematically overshoot/undershoot. */
+    line-height: 1;
+    border-radius: var(--sidebar-radius);
+    transition: background 0.15s;
+    color: inherit;
+    cursor: pointer;
+    border: 1px solid transparent;
+    user-select: none;
+}
+.cat-header:hover {
+    background: transparent;
+    border-color: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.cat-arrow {
+    color: var(--text-dim);
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+    transition: transform 0.2s ease;
+}
+.cat-arrow svg {
+    width: 13px;
+    height: 13px;
+    display: block;
+}
+.cat-arrow.open {
+    transform: rotate(90deg);
+}
+
+.cat-name {
+    flex: 1;
+    font-size: round(up, calc(13px * var(--font-body-ink-scale)), 1px);
+    color: var(--text-muted);
+    letter-spacing: 0.3px;
+    position: relative;
+    transition: color 0.2s;
+}
+.cat-name::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -2px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.22s cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+.cat-header:hover .cat-name {
+    color: var(--accent);
+}
+.cat-header:hover .cat-name::after {
+    transform: scaleX(1);
+}
+
+.cat-header .cat-count {
+    font-family: var(--font-data);
+    font-weight: var(--font-data-weight, 500);
+    font-variation-settings: 'BEVL' var(--font-data-bevl, 100);
+    font-size: round(up, calc(11px * var(--font-data-ink-scale, 1)), 1px);
+    color: var(--text-dim);
+    flex-shrink: 0;
+    translate: 0 calc(-1 * var(--font-data-shift, 0em));
+}
+
+/* Ink compensation (inherited from body).
+   .cat-header / .cat-post are both flex + align-items:center +
+   line-height:1, satisfying the precondition contract. Ownership follows the
+   font each element actually uses: .cat-name has no font-family (inherits
+   body), .cat-post-title uses --font-body, .cat-post-date uses --font-data
+   (its text contains "Jan", not pure digits, so data rather than data-num). */
+.cat-header .cat-name {
+    translate: 0 calc(-1 * var(--font-body-shift, 0em));
+}
+.cat-post .cat-post-title {
+    translate: 0 calc(-1 * var(--font-body-shift, 0em));
+}
+.cat-post .cat-post-date {
+    translate: 0 calc(-1 * var(--font-data-shift, 0em));
+}
+
+.cat-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease, opacity 0.15s ease;
+    opacity: 0;
+}
+.cat-body.open {
+    max-height: 400px;
+    opacity: 1;
+}
+
+.cat-post {
+    display: flex;
+    align-items: center;
+    padding: 2px 22px 2px calc(8px + 13px + 6px);
+    border-radius: var(--sidebar-radius);
+    color: var(--text-muted);
+    font-size: round(up, calc(13px * var(--font-body-ink-scale)), 1px);
+    line-height: 1;
+    transition: color 0.15s, background 0.15s, box-shadow 0.15s;
+    margin-bottom: 1px;
+}
+.cat-post:hover {
+    background: var(--bg-hover);
+    color: var(--accent-hover);
+}
+
+.cat-post-title {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: var(--font-body);
+    padding: 3px 0; /* reserves 3px descender space inside overflow:hidden border-box, prevents clipping */
+}
+
+/* Plan F: active state (base accent) */
+.cat-post.active {
+    position: relative;
+    color: var(--accent);
+}
+.cat-post.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 4px;
+    bottom: 4px;
+    width: 3px;
+    border-radius: 2px; /* rounded ends */
+    background: var(--accent);
+    transition: background 0.15s;
+}
+
+/* Plan F: active + hover (hover accent) */
+.cat-post.active:hover {
+    color: var(--accent-hover);
+}
+.cat-post.active:hover::before {
+    background: var(--accent-hover);
+}
+
+.cat-post-date {
+    flex-shrink: 0;
+    font-size: 11px;
+    color: var(--text-dim);
+    min-width: 4.2em;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-family: var(--font-data);
+    line-height: 1.35; /* 1.925px of vertical padding keeps monospace digits from looking too bold */
+}
+.cat-post:hover .cat-post-date {
+    color: var(--text-muted); /* date stays neutral on hover: brightened only, not competing with the title */
+}
+
+a.toc-item {
+    display: block;
+    padding: 4px 0;
+    font-size: round(up, calc(13px * var(--font-body-ink-scale)), 1px);
+    color: var(--text-dim);
+    line-height: 1.4;
+    transition: color 0.15s;
+}
+a.toc-item:hover {
+    color: var(--accent);
+}
+a.toc-item[data-level="2"] {
+    padding-left: 16px;
+    font-size: round(up, calc(12.5px * var(--font-body-ink-scale)), 1px);
+}
+a.toc-item[data-level="3"] {
+    padding-left: 28px;
+    font-size: round(up, calc(12px * var(--font-body-ink-scale)), 1px);
+}
+
+.toc-empty {
+    font-size: round(up, calc(13px * var(--font-body-ink-scale)), 1px);
+    color: var(--text-dim);
+}
+
+.post-sidebar-right {
+    flex: 1 1 0;
+    max-width: 270px;
+    min-width: 0;
+    /* Clips overflow during the TOC height animation; harmless to keep at all
+       times: rounded-panel content should be clipped to bounds anyway. */
+    overflow: hidden;
+}
+
+/* At viewports <=1168px (sidebars scale to 200 and the body to 720 at this
+   breakpoint: 200+200+720+48=1168) hide the sidebars; the body becomes a single
+   centered column (800px max reading width, min-width:0 fills the screen on
+   mobile). */
+@media (max-width: 1168px) {
+    .post-sidebar,
+    .post-sidebar-right {
+        display: none;
+    }
+    .post-center {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+}

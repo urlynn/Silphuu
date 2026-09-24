@@ -1,0 +1,52 @@
+{{/* Motto edit JS, extracted for reuse — home.html (dblclick + multiline) /
+     author.html (click + single line)
+     Params: Event=click|dblclick, Field=motto|home_motto, Fallback=text restored on
+     empty (optional), Multiline=true|false
+*/}}
+{{define "motto_edit"}}
+<script>
+(function() {
+    var el = document.getElementById('motto-text');
+    if (!el) return;
+    el.addEventListener('{{.Event}}', function() {
+        if (!(document.body.classList.contains('is-admin') || document.documentElement.classList.contains('is-admin'))) return;
+        el.contentEditable = 'true';
+        el.focus();
+        var r = document.createRange();
+        r.selectNodeContents(el);
+        var s = window.getSelection();
+        s.removeAllRanges();
+        s.addRange(r);
+    });
+    el.addEventListener('blur', function() {
+        if (!(document.body.classList.contains('is-admin') || document.documentElement.classList.contains('is-admin'))) return;
+        el.contentEditable = 'false';
+        var val = el.innerText.trim();
+        if (val) {
+            fetch(window.SITE_URLS.commit.config, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: '{{.Field}}=' + encodeURIComponent(val)
+            });
+        }{{if .Fallback}} else {
+            el.textContent = '{{.Fallback}}';
+        }{{end}}
+    });
+    el.addEventListener('keydown', function(e) {
+        if (!(document.body.classList.contains('is-admin') || document.documentElement.classList.contains('is-admin'))) return;
+        {{if .Multiline}}
+        if (e.key === 'Enter' && !(e.metaKey || e.ctrlKey)) {
+            e.preventDefault();
+            document.execCommand('insertText', false, '\n');
+        }
+        if (e.key === 'Escape' || (e.key === 'Enter' && (e.metaKey || e.ctrlKey))) {
+            e.preventDefault();
+            el.blur();
+        }
+        {{else}}
+        if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
+        {{end}}
+    });
+})();
+</script>
+{{end}}

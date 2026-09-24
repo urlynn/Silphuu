@@ -1,0 +1,24 @@
+{{/* profile_card: profile card shared by the author/posts pages
+     Parameters (passed via dict):
+       Motto        string - motto text (required)
+       IsAdmin      bool   - admin or not (controls button/edit feature visibility)
+       ShowAddBtn   bool   - show the admin new-post button (posts page)
+       ShowMottoEdit bool  - show the motto editor (author page)
+     The social row comes from the deployment's config/social.json (see socialLinks).
+*/}}
+{{define "profile_card"}}
+<div class="profile-card" id="profile-card" hx-preserve="true" data-backdrop-scene="b">
+    <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div>
+    <div class="g-tint"></div>
+    <div class="g-noise"></div>
+    <a href="{{ URLAdminNewPost }}" class="pc-add-btn admin-control" title="{{.UI.profile.card.new_post}}">
+        {{svg "plus"}}
+    </a>
+    <div class="avatar" data-glass-sync="true">
+        {{with avatarURL}}<img src="{{.}}" alt="{{$.UI.profile.card.avatar_alt}}" width="540" height="540" onerror="this.style.display='none'">{{end}}
+    </div>
+    <h1 class="nickname">{{.UI.home.brand.full}}</h1>
+    <p class="motto" id="motto-text" title="{{.UI.profile.card.edit_hint}}">{{.Motto}}</p>
+    <div class="social-links">{{range socialLinks}}<a href="{{.URL}}" class="social-btn"{{with .Label}} title="{{.}}"{{end}}{{if .External}} target="_blank" rel="noopener"{{end}}><svg class="social-draw-svg" viewBox="0 0 38 38" aria-hidden="true"><circle cx="19" cy="19" r="18" fill="none"/></svg>{{.SVG}}</a>{{end}}</div>
+</div>
+{{end}}

@@ -1,0 +1,622 @@
+/* Hero: the first screen of the home page. Full-bleed background image, viewfinder
+   decoration, anchor-based placement and a light/dark tone switch. */
+
+/* Tone tokens for the wallpaper's own lightness. Scoped to body so the hero and the nav
+   read the same values: light means a light background, so decoration goes black; dark
+   means the reverse. Driven by the .hero--tone-* marker classes, which hero_section.html
+   renders from .HeroBg.Tone. */
+body:has(.hero--tone-light) {
+    --hero-text:        #1a1a1a;
+    --hero-text-soft:   rgba(0, 0, 0, 0.72);
+    --hero-text-dim:    rgba(0, 0, 0, 0.42);
+    --hero-line:        rgba(0, 0, 0, 0.42);
+    --hero-line-soft:   rgba(0, 0, 0, 0.20);
+    --hero-backdrop:    rgba(0, 0, 0, 0.12);
+    --hero-pill-bg:     rgba(0, 0, 0, 0.10);
+    --hero-shadow:      0 8px 32px rgba(0, 0, 0, 0.18);
+}
+
+body:has(.hero--tone-dark) {
+    --hero-text:        #ffffff;
+    --hero-text-soft:   rgba(255, 255, 255, 0.72);
+    --hero-text-dim:    rgba(255, 255, 255, 0.42);
+    --hero-line:        rgba(255, 255, 255, 0.42);
+    --hero-line-soft:   rgba(255, 255, 255, 0.20);
+    --hero-backdrop:    rgba(0, 0, 0, 0.16);
+    --hero-pill-bg:     rgba(255, 255, 255, 0.14);
+    --hero-shadow:      0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+/* Hero container. */
+.hero {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 600px;
+    overflow: hidden;
+    isolation: isolate;
+    color: var(--hero-text);
+}
+
+/* Background image. */
+.hero__bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    z-index: 0;
+    /* Scales up slowly on entry, in step with the entry animation. */
+    animation: hero-bg-zoom 1.6s ease-out backwards;
+}
+
+@keyframes hero-bg-zoom {
+    from { transform: scale(1.08); opacity: 0.4; }
+    to   { transform: scale(1);    opacity: 1; }
+}
+
+/* Viewfinder corners, fixed in place and independent of the anchor. */
+.hero__viewfinder {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+}
+
+.hero__vf {
+    position: absolute;
+    width: clamp(28px, 2.4vw, 42px);
+    height: clamp(28px, 2.4vw, 42px);
+    border: 2px solid var(--hero-line);
+}
+
+.hero__vf--tl { top: 20px;    left: 20px;  border-right: none;  border-bottom: none; }
+.hero__vf--tr { top: 20px;    right: 20px; border-left: none;   border-bottom: none; }
+.hero__vf--bl { bottom: 20px; left: 20px;  border-right: none;  border-top: none;    }
+.hero__vf--br { bottom: 20px; right: 20px; border-left: none;   border-top: none;    }
+
+/* Camera parameter panel, fixed below the top-left viewfinder corner. */
+.hero__camera-params {
+    position: absolute;
+    top: calc(28px + clamp(28px, 2.4vw, 42px) + 12px);
+    left: 20px;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-family: var(--font-display-mono);
+    font-size: clamp(10px, 0.85vw, 13px);
+    color: var(--hero-text-soft);
+    line-height: 1.25;
+    pointer-events: none;
+}
+
+/* Content layer, positioned by --ox/--oy as fractions of the hero. */
+.hero__content {
+    position: absolute;
+    left: calc(var(--ox, 0.5) * 100%);
+    top: calc(var(--oy, 0.5) * 100%);
+    z-index: 6;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    padding: clamp(2.5rem, 6vw, 5rem);
+    pointer-events: none;
+    /* Centres the card on (ox, oy). */
+    transform: translate(-50%, -50%);
+}
+
+/* Avatar alignment within the card. */
+.hero--avatar-left  .hero__content { align-items: flex-start; }
+.hero--avatar-right .hero__content { align-items: flex-end; }
+
+/* Avatar with its rotating ring. */
+.hero__avatar-wrap {
+    position: relative;
+    width: clamp(72px, 7vw, 96px);
+    height: clamp(72px, 7vw, 96px);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    border: 2px solid var(--hero-line);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    pointer-events: auto;
+}
+
+/* The ring is a conic-gradient band that spins around the avatar. */
+.hero__avatar-ring {
+    position: absolute;
+    inset: -3px;
+    border-radius: var(--radius-full);
+    background: conic-gradient(
+        from 0deg,
+        transparent 0deg,
+        var(--accent) 80deg,
+        var(--accent-hover) 180deg,
+        var(--accent) 280deg,
+        transparent 360deg
+    );
+    z-index: -1;
+    animation: hero-ring-spin 6s linear infinite;
+    filter: blur(2px);
+    opacity: 0.75;
+}
+
+@keyframes hero-ring-spin {
+    to { transform: rotate(360deg); }
+}
+
+.hero__avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    position: relative;
+    z-index: 1;
+}
+
+/* Text block, with a translucent wash as the fallback background.
+   min-width is the content's unwrapped width — the tag row is what pushes it wide — and
+   max-width is min(90vw, 560px), so it can never exceed the viewport. */
+.hero__text {
+    /* The border comes from the site-wide ::after overlay in glass.css, so this element
+       must be positioned itself. */
+    position: relative;
+    align-self: flex-start;
+    width: fit-content;
+    min-width: max-content;
+    max-width: min(90vw, 560px);
+    padding: var(--space-4) var(--space-6);
+    border-radius: var(--radius-lg);
+    background: var(--hero-bg, var(--hero-backdrop));
+    backdrop-filter: blur(var(--hero-blur, 10px));
+    -webkit-backdrop-filter: blur(var(--hero-blur, 10px));
+    border: 1px solid var(--hero-border, var(--hero-line-soft));
+    box-shadow: var(--hero-shadow);
+    pointer-events: auto;
+    text-align: left;
+}
+
+/* Eyebrow: the small label above the name. */
+.hero__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+    margin-bottom: var(--space-2);
+    padding: 5px var(--space-3);
+    font-family: var(--font-display-mono);
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: var(--hero-text-soft);
+    border: 1px solid var(--hero-line);
+    border-radius: var(--radius-full);
+}
+
+.hero__occupation {
+    margin: var(--space-3) 0 0;
+    font-family: var(--font-display-body);
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    color: var(--hero-text-soft);
+    line-height: 1.55;
+    /* Manual line breaks only, no wrapping, width fitted to the content. */
+    white-space: pre;
+}
+/* The hint shown while the signature is being edited by double-click. */
+.hero__occupation[contenteditable="true"] {
+    outline: 1px dashed var(--accent);
+    outline-offset: 4px;
+    border-radius: 2px;
+    cursor: text;
+}
+
+/* Name: a colour gradient with a slow shimmer. */
+.hero__name {
+    margin: 0;
+    font-family: var(--font-display-heading), var(--font-heading), sans-serif;
+    font-size: clamp(42px, 5.4vw, 68px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--hero-text, #ffffff);
+    background: linear-gradient(
+        100deg,
+        #ffffff 0%,
+        #ffffff 35%,
+        var(--accent) 50%,
+        #ffffff 65%,
+        #ffffff 100%
+    );
+    background-size: 250% 100%;
+    background-position: 50% 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: hero-name-shimmer 4s ease-in-out infinite;
+}
+
+/* On a light background the name goes dark grey and keeps the same gradient animation. */
+.hero--tone-light .hero__name {
+    color: #1a1a1a;
+    background: linear-gradient(
+        100deg,
+        rgba(0, 0, 0, 0.75) 0%,
+        rgba(0, 0, 0, 0.75) 35%,
+        var(--accent) 50%,
+        rgba(0, 0, 0, 0.75) 65%,
+        rgba(0, 0, 0, 0.75) 100%
+    );
+    background-size: 250% 100%;
+    background-position: 50% 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+@keyframes hero-name-shimmer {
+    0%, 100% { background-position: 100% 0; }
+    50%      { background-position: 0% 0; }
+}
+
+/* Bio, with its accent bar. */
+.hero__bio-row {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+}
+
+.hero__bio-decor {
+    flex-shrink: 0;
+    width: 3px;
+    height: 100%;
+    min-height: 1.4em;
+    background: var(--accent);
+    border-radius: var(--radius-full);
+    margin-top: 0.2em;
+}
+
+.hero__bio {
+    margin: 0;
+    font-size: 15px;
+    color: var(--hero-text-soft);
+    line-height: 1.6;
+}
+
+/* Tag row: kept on one line, never allowed to wrap. */
+.hero__tags {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: var(--space-2);
+    margin-top: var(--space-4);
+}
+
+.hero__tag {
+    /* The border comes from the site-wide ::after overlay in glass.css, so this element
+       must be positioned itself. */
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+    padding: 5px var(--space-3);
+    font-family: var(--font-display-mono);
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    color: var(--hero-text-soft);
+    background: var(--hero-tag-bg, var(--hero-pill-bg));
+    border: 1px solid var(--hero-tag-border, var(--hero-line-soft));
+    border-radius: var(--radius-full);
+    backdrop-filter: blur(var(--hero-tag-blur, 4px));
+    -webkit-backdrop-filter: blur(var(--hero-tag-blur, 4px));
+}
+
+/* Chromium fallback: the hero glass replica, scoped to .chromium so Safari and Firefox
+   keep their native behaviour. The structure is the three-piece set in glass.css, and
+   14-backdrop.js's alignSceneA aligns the background image. */
+.chromium .hero__text {
+    position: relative;
+    --glass-blur-fallback: var(--hero-blur, 10px);
+    --glass-tint: var(--hero-bg, var(--hero-backdrop));
+}
+.chromium .hero__tag {
+    position: relative;
+    --glass-blur-fallback: var(--hero-tag-blur, 4px);
+    --glass-expand: 4px;   /* A 4px blur with the default 20px expand bleeds a visible halo, so it is pulled in to the convolution's own range. */
+    --glass-tint: var(--hero-tag-bg, var(--hero-pill-bg));
+}
+/* Admin drag feedback (.hero--dragging). The card's own box-shadow is killed by the
+   three-piece set's !important stripping rule, so it is carried on the tint layer instead
+   for an identical look. */
+.chromium .hero--dragging .hero__text > .g-tint {
+}
+
+/* Right-hand vertical rail, fixed at 13% wide. */
+.hero__rail {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 13%;
+    min-width: 90px;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-5);
+    padding: clamp(2rem, 4vw, 3rem) var(--space-2);
+    pointer-events: none;
+}
+
+.hero__pill {
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+    padding: 5px var(--space-3);
+    border: 1px solid var(--hero-line);
+    border-radius: var(--radius-full);
+    background: var(--hero-pill-bg);
+    font-family: var(--font-display-mono);
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    color: var(--hero-text-soft);
+}
+
+.hero__rail-vtext {
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    font-family: var(--font-display-heading);
+    font-size: clamp(15px, 1.4vw, 20px);
+    letter-spacing: 0.4em;
+    color: var(--hero-text);
+}
+
+.hero__rail-line {
+    width: 1px;
+    height: clamp(40px, 8vh, 80px);
+    background: var(--hero-line);
+}
+
+.hero__rail-micro {
+    writing-mode: vertical-rl;
+    font-family: var(--font-display-jp);
+    font-size: calc(11px * var(--font-display-jp-ink-scale, 1));
+    color: var(--hero-text-dim);
+    letter-spacing: 0.1em;
+}
+
+/* Entry animation: pure CSS keyframes, staggered per element with per-element curves. */
+@keyframes hero-frame-in {
+    from { opacity: 0; transform: scale(0.5); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes hero-fade-up {
+    from { opacity: 0; transform: translateY(28px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes hero-fade-left {
+    from { opacity: 0; transform: translateX(28px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes hero-fade-right {
+    from { opacity: 0; transform: translateX(-28px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes hero-clip-reveal {
+    from { opacity: 0; clip-path: inset(0 0 100% 0); transform: translateY(12px); }
+    to   { opacity: 1; clip-path: inset(0 0 0 0);    transform: translateY(0); }
+}
+
+@keyframes hero-pop {
+    0%   { opacity: 0; transform: scale(0.7); }
+    60%  { opacity: 1; transform: scale(1.06); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes hero-fade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes hero-rail-in {
+    from { opacity: 0; transform: translateX(40px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Viewfinder corners scale up from their centres. */
+.hero__vf                  { animation: hero-frame-in 0.6s ease-out backwards; }
+.hero__vf--tl              { animation-delay: 0.10s; }
+.hero__vf--tr              { animation-delay: 0.18s; }
+.hero__vf--bl              { animation-delay: 0.26s; }
+.hero__vf--br              { animation-delay: 0.34s; }
+
+/* Camera parameters slide up. */
+.hero__camera-params       { animation: hero-fade-up 0.5s 0.55s ease-out backwards; }
+
+/* Avatar pops in. */
+.hero__avatar-wrap         { animation: hero-pop 0.7s 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) backwards; }
+
+/* Eyebrow slides in from the left. */
+.hero__eyebrow             { animation: hero-fade-right 0.5s 0.80s ease-out backwards; }
+
+/* Name: a clip-path reveal from the bottom, then the shimmer loop. */
+.hero__name {
+    animation:
+        hero-clip-reveal 0.8s 0.95s ease-out backwards,
+        hero-name-shimmer 4s 1.8s ease-in-out infinite;
+}
+
+/* Occupation fades up. */
+.hero__occupation          { animation: hero-fade-up 0.7s 1.15s ease-out backwards; }
+
+/* Bio row slides in from the right. */
+.hero__bio-row             { animation: hero-fade-left 0.7s 1.30s ease-out backwards; }
+
+/* Tags fade in, staggered. */
+.hero__tag                 { animation: hero-fade 0.5s ease-out backwards; }
+.hero__tag:nth-child(1)    { animation-delay: 1.45s; }
+.hero__tag:nth-child(2)    { animation-delay: 1.55s; }
+.hero__tag:nth-child(3)    { animation-delay: 1.65s; }
+
+/* Rail slides in from the right. */
+.hero__pill                { animation: hero-fade 0.5s 1.20s ease-out backwards; }
+.hero__rail-vtext,
+.hero__rail-line,
+.hero__rail-micro          { animation: hero-rail-in 0.6s 1.30s ease-out backwards; }
+
+/* Responsive: mobile. */
+@media (max-width: 768px) {
+    .hero {
+        height: 100svh;
+    }
+
+    .hero__content {
+        /* Symmetric padding, so the card lands at the centre of the viewport. */
+        padding: 4.5rem var(--space-5);
+        /* Mobile forces centre placement, overriding --ox/--oy and the avatar alignment,
+           so the card never sits under the navbar. */
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    /* Higher specificity than the avatar alignment rules: always centred on mobile. */
+    .hero--avatar-left  .hero__content,
+    .hero--avatar-right .hero__content {
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    /* The rail is hidden on mobile; there is not enough width. */
+    .hero__rail {
+        display: none;
+    }
+
+    /* The viewfinder corners are hidden on mobile to keep the centre clean. */
+    .hero__viewfinder {
+        display: none;
+    }
+
+    /* The camera parameter panel is hidden on mobile. */
+    .hero__camera-params {
+        display: none;
+    }
+
+    /* One line would overflow on mobile, so wrapping is restored; manual breaks still
+       apply. */
+    .hero__occupation {
+        white-space: pre-wrap;
+    }
+
+    /* The scroll hint is hidden on mobile; there is little room at the bottom. */
+    .hero__scroll-hint {
+        display: none;
+    }
+}
+
+/* Reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+    .hero__bg,
+    .hero__vf,
+    .hero__camera-params,
+    .hero__avatar-wrap,
+    .hero__avatar-ring,
+    .hero__eyebrow,
+    .hero__name,
+    .hero__occupation,
+    .hero__bio-row,
+    .hero__tag,
+    .hero__pill,
+    .hero__rail-vtext,
+    .hero__rail-line,
+    .hero__rail-micro {
+        animation: none;
+    }
+}
+
+/* Inside the hero the background layers are absolute, so they do not leak onto the next
+   screen. */
+.hero .bg-base,
+.hero .bg-blur,
+.hero .bg-sharp,
+.hero .mask {
+    position: absolute;
+}
+
+/* Scroll hint, centred at the bottom, jumping to the next screen on click. */
+.hero__scroll-hint {
+    position: absolute;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 7;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--hero-text-soft);
+    pointer-events: auto;
+    animation: hero-fade 0.6s 2s ease-out backwards;
+    transition: color 0.2s;
+}
+
+.hero__scroll-hint:hover {
+    color: var(--hero-text);
+}
+
+.hero__scroll-text {
+    font-family: var(--font-display-mono);
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+}
+
+.hero__scroll-arrow {
+    width: 22px;
+    height: 34px;
+    border: 1.5px solid var(--hero-line);
+    border-radius: 12px;
+    position: relative;
+}
+
+.hero__scroll-arrow::after {
+    content: '';
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    width: 3px;
+    height: 7px;
+    margin-left: -1.5px;
+    background: var(--hero-text-soft);
+    border-radius: 2px;
+    animation: hero-scroll-dot 1.8s ease-in-out infinite;
+}
+
+@keyframes hero-scroll-dot {
+    0%, 100% { transform: translateY(0); opacity: 1; }
+    50%      { transform: translateY(14px); opacity: 0.2; }
+}
+
+/* Admin: long-press drag to reposition the card. The position is bound to the background
+   and the offset is saved on release. */
+.hero--dragging .hero__content {
+    transition: none;
+    will-change: transform;
+    /* Highlight and scale feedback, so the card visibly becomes movable. */
+    filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.25));
+}
+
+.hero--dragging .hero__text {
+    transform: scale(1.03);
+    box-shadow: 0 0 0 2px var(--accent), 0 12px 40px rgba(0, 0, 0, 0.35);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}

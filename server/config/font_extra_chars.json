@@ -1,0 +1,46 @@
+{
+  "cmt": {
+    "description": "评论区字体配置",
+    "presets": ["gb2312_level1"],
+    "unicode_ranges": [
+      "0x20-0x7E",
+      "0x2000-0x206F",
+      "0x3000-0x303F",
+      "0xFF00-0xFFEF"
+    ],
+    "extra_chars": ""
+  },
+  "data": {
+    "description": "数据/时间/单位/统计字体配置",
+    "unicode_ranges": [
+      "0x20-0x7E"
+    ],
+    "extra_chars": "篇标签分类¥刚钟小时天前"
+  },
+  "display_mono": {
+    "description": "展示等宽英文字体配置",
+    "unicode_ranges": [
+      "0x20-0x7E"
+    ]
+  },
+  "fun_title_sym": {
+    "description": "互动错误页感叹号符号",
+    "extra_chars": "！"
+  },
+  "heading": {
+    "description": "大标题补充符号",
+    "extra_chars": ""
+  },
+  "subheading": {
+    "description": "次级标题补充符号",
+    "extra_chars": "#"
+  },
+  "body": {
+    "description": "正文字体补充符号",
+    "extra_chars": ""
+  },
+  "caption": {
+    "description": "注记字体补充符号",
+    "extra_chars": ""
+  }
+}

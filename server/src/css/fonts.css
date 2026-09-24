@@ -1,0 +1,143 @@
+/* Fonts. The engine ships no font files and declares no @font-face: typefaces are
+   content, supplied by each site.
+
+   A site declares its own fonts by overriding this file (same-named file in the
+   site directory wins), for example:
+
+     @font-face { font-family: 'MySans'; src: url('/assets/font/my-sans.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+
+   Without any declaration the --font-* variables fall back to the system stacks in
+   tokens.css. The -Home / -Admin / -Cmt scope overrides below stay inert unless the
+   site supplies matching families. */
+
+/* display_i18n mixed-script kana segment (split_script segmentation, see main.go FuncMap):
+   hanzi/latin use '乐米沐' (--font-display-i18n), kana use MapleMono (this class); buildInkVarsCSS
+   derives scale/shift/tracking so kana ink matches hanzi (bench values: wght488, s0.881, trk-0.19em, shf+0.009em; re-measure if fonts change). */
+.fnt-jp {
+  font-family: var(--font-display-i18n-jp);
+  font-size: calc(1em * var(--font-display-i18n-jp-scale, 1));
+  font-weight: var(--font-display-i18n-jp-weight);
+  letter-spacing: var(--font-display-i18n-jp-tracking, 0em);
+  translate: 0 var(--font-display-i18n-jp-shift, 0em);
+  margin-left: var(--font-display-i18n-jp-ml, 0em);
+}
+
+/* Page-group font overrides: home/admin pages switch to their file-scoped isolated subsets.
+   body.home / .admin-page specificity (0,1,1) beats the inline ink-vars :root (0,1,0),
+   so they win regardless of load order. --font-*-home/-admin are injected into :root by buildInkVarsCSS. */
+body.home {
+  --font-heading: var(--font-heading-home);
+  --font-subheading: var(--font-subheading-home);
+  --font-display-heading: var(--font-display-heading-home);
+  --font-display-body: var(--font-display-body-home);
+  --font-display-mono: var(--font-display-mono-home);
+  --font-display-jp: var(--font-display-jp-home);
+  --font-display-i18n: var(--font-display-i18n-home);
+  --font-article: var(--font-article-home);
+  --font-body: var(--font-body-home);
+  --font-caption: var(--font-caption-home);
+  --font-footer: var(--font-footer-home);
+  --font-mono: var(--font-mono-home);
+  --font-serif: var(--font-serif-home);
+  --font-data: var(--font-data-home);
+  --font-symbol: var(--font-symbol-home);
+  /* Hard rule (same as tokens.css): when cmt is not configured, fall back to system fonts,
+     never to --font-article (would silently mask the missing comment-font config).
+     `var(--font-cmt-home, ...)`: when the preset leaves cmt empty, buildInkVarsCSS does not
+     inject the -home variant at all, so the second argument applies. */
+  --font-cmt: var(--font-cmt-home, system-ui, -apple-system, 'PingFang SC', sans-serif);
+}
+body .admin-page {
+  --font-heading: var(--font-heading-admin);
+  --font-subheading: var(--font-subheading-admin);
+  --font-display-heading: var(--font-display-heading-admin);
+  --font-display-body: var(--font-display-body-admin);
+  --font-display-mono: var(--font-display-mono-admin);
+  --font-display-jp: var(--font-display-jp-admin);
+  --font-display-i18n: var(--font-display-i18n-admin);
+  --font-article: var(--font-article-admin);
+  --font-body: var(--font-body-admin);
+  --font-caption: var(--font-caption-admin);
+  --font-footer: var(--font-footer-admin);
+  --font-mono: var(--font-mono-admin);
+  --font-serif: var(--font-serif-admin);
+  --font-data: var(--font-data-admin);
+  --font-symbol: var(--font-symbol-admin);
+  --font-cmt: var(--font-cmt-admin, system-ui, -apple-system, 'PingFang SC', sans-serif);
+}
+
+/* Unified data-font utility classes */
+.data-num,
+.font-data {
+  font-family: var(--font-data);
+  font-weight: var(--font-data-weight, 500);
+  font-variation-settings: 'BEVL' var(--font-data-bevl, 100);
+  translate: 0 calc(-1 * var(--font-data-shift, 0em));
+}
+
+/* Modern reset: box-sizing border-box (standard practice) */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  font-synthesis: none;          /* Prevent browsers from synthesizing bold for missing weights */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+  overscroll-behavior: none;
+  overflow-x: clip;
+  scrollbar-width: none;          /* Baseline 2024: hide viewport scrollbar, removing the site-wide scrollbar gap */
+  /* Theme background fallback: data-theme lives on <html>; --bg-body is defined in this
+     scope and inherits downward. Placed on html instead of body so the negative z-index
+     background layers under body (.bg-base/.bg-shapes/.mask) stay visible above the html
+     color — an opaque body background would cover them (CSS painting order).
+     #fff is the first-paint fallback before the first --bg-body resolves. */
+  background: var(--bg-body, #fff);
+  transition: background-color var(--duration-slow);
+}
+
+/* Legacy WebKit fallback */
+html::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-weight: var(--font-body-weight, 400);
+  font-variation-settings: 'BEVL' var(--font-body-bevl, 100);
+  min-height: 100vh;
+  line-height: 1.7;
+  color: var(--text-primary);
+  /* Transparent: page background is provided by html (theme fallback) + .bg-base (z-4),
+     so the negative z-index .bg-shapes geometry layer can show through. */
+  background: transparent;
+  transition: color var(--duration-slow);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg-body);
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--accent);
+}
+
+/* Emoji / system symbols: must not inherit the web-font ink-scale ratio. Anchor to the unrounded
+   --caption-base — inherited 1em is rounded up to 1px and that rounding leaks into emoji size.
+   --font-symbol-ink-scale compensates oversized emoji metrics; --font-symbol-shift aligns ink. */
+.emoji {
+    font-family: var(--font-symbol), 'Apple Symbols', 'Apple Color Emoji';
+    font-size: calc(var(--caption-base, 1em) * var(--font-symbol-ink-scale, 0.82));
+    translate: 0 calc(-1 * var(--font-symbol-shift, 0em));
+    line-height: 1;
+}

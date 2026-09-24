@@ -1,0 +1,182 @@
+{{define "navbar"}}
+<script type="application/json" id="nav-signatures">{{navSignaturesJSON}}</script>
+<header id="navbar">
+    <div class="navbar-row" id="navSegments">
+            <!-- Left: avatar + current page signature (per-page signature, never the blog name) -->
+            <div class="nav-bubble nav-bubble--left" id="navLeft" data-backdrop-scene="b">
+                <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div>
+                <div class="g-tint"></div>
+                <div class="g-noise"></div>
+                <a href="/">
+                    {{with avatarURL}}<img src="{{.}}" alt="avatar" loading="lazy" class="avatar">{{end}}
+                    <span class="labl-wrap"><span class="labl">{{.NavLabel}}</span></span>
+                </a>
+            </div>
+
+            <!-- Center: navigation buttons (never deforms) -->
+            <div class="nav-bubble nav-bubble--center" id="navCenter" data-backdrop-scene="b">
+                <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div>
+                <div class="g-tint"></div>
+                <div class="g-noise"></div>
+                <a href="/" class="nav-item" data-icon="home">{{svg "home"}}<span>{{.UI.nav.menu.home}}</span></a>
+
+                <div class="nav-group">
+                    <button class="nav-item" data-icon="archive" type="button">{{svg "archive"}}<span>{{.UI.nav.menu.articles}}</span></button>
+                    <div class="dd" data-backdrop-scene="b">
+                        <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div>
+                        <div class="g-tint"></div>
+                        <div class="g-noise"></div>
+                        <a href="{{ URLArchive }}">{{.UI.nav.menu.archive}}</a>
+                        {{range .Categories}}
+                        <a href="{{ URLTopic (index $.CategoryAliases .) }}">{{.}}</a>
+                        {{end}}
+                    </div>
+                </div>
+
+                <div class="nav-group" id="navGroupAbout">
+                    <button class="nav-item" data-icon="about" type="button">{{svg "about"}}<span>{{.UI.nav.menu.about}}</span></button>
+                    <div class="dd" data-backdrop-scene="b">
+                        <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div>
+                        <div class="g-tint"></div>
+                        <div class="g-noise"></div>
+                        <a href="{{ URLAbout }}">{{.UI.nav.menu.author}}</a>
+                        <a href="{{ URLFriends }}">{{.UI.nav.menu.friends}}</a>
+                        <a href="{{ URLSponsor }}">{{.UI.nav.menu.sponsor}}</a>
+                    </div>
+                </div>
+
+                <div class="nav-group" id="navGroupFun">
+                    <button class="nav-item" data-icon="fun" type="button">{{svg "smiley"}}<span>{{.UI.nav.menu.fun}}</span></button>
+                    <div class="dd" data-backdrop-scene="b">
+                        <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div>
+                        <div class="g-tint"></div>
+                        <div class="g-noise"></div>
+                        <a href="{{ URLGuestbook }}" data-nav-fun-item>{{.UI.nav.menu.guestbook}}</a>
+                        <a href="{{ URLFunError }}" data-nav-fun-item>{{.UI.nav.menu.fun_error}}</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: ⌘K decorative badge + search button + category filter button (browse
+                 pages only). DOM order: [nav-right-icons[shortcut][search]][divider][filter];
+                 ⌘K+🔍 are wrapped in .nav-right-icons purely as an animation group (FLIP pins/
+                 releases this container only) while remaining semantically separate (the ⌘K
+                 badge is aria-hidden; search is the only clickable button). Resting layout is
+                 driven by #navRight.browse's flex order: non-browse [⌘K][🔍], browse
+                 [⌘K][🔍] | [grid], the divider controlled by data-nav-divider="line-round". -->
+            <div class="nav-bubble nav-bubble--right" id="navRight" data-nav-divider="line-round" data-backdrop-scene="b">
+                <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div>
+                <div class="g-tint"></div>
+                <div class="g-noise"></div>
+                <div class="nav-right-icons" id="navRightIcons">
+                    <span class="shortcut" id="navShortcut" aria-hidden="true"><span class="shortcut-cmd">⌘</span><span class="shortcut-k">K</span></span>
+                    <button id="navSearchBtn" type="button" title="{{.UI.nav.search.toggle}}" aria-label="{{.UI.nav.search.toggle}}">{{svg "search"}}</button>
+                </div>
+                <span class="nav-divider" id="navDivider" aria-hidden="true"></span>
+                <button id="navFilterBtn" type="button" title="{{.UI.nav.filter.toggle}}" aria-label="{{.UI.nav.filter.toggle}}">{{svg "grid"}}</button>
+            </div>
+        </div>
+</header>
+
+<!-- Filter Panel (category + tag dropdown panel, shown on browse pages only) -->
+<div class="nav-filter-panel" id="navFilterPanel">
+    <div class="nav-filter-panel__backdrop" id="navFilterBackdrop" data-backdrop-scene="b">
+        <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div>
+        <div class="g-tint"></div>
+        <div class="g-noise"></div>
+    </div>
+    <div class="nav-filter-panel__content" data-backdrop-scene="b">
+        <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div>
+        <div class="g-tint"></div>
+        <div class="g-noise"></div>
+        <div class="nav-filter-panel__section">
+            <span class="nav-filter-panel__title">{{.UI.nav.filter.cat_title}}</span>
+            <div class="nav-filter-panel__cat-grid">
+                <a href="{{ URLArchive }}" class="nav-filter-cat{{if .IsArchive}} active{{end}}">{{.UI.nav.menu.archive}}</a>
+                {{range $c := .Categories}}
+                <a href="{{ URLTopic (index $.CategoryAliases $c) }}" class="nav-filter-cat{{if eq $.CurrentCat $c}} active{{end}}">{{$c}}</a>
+                {{end}}
+            </div>
+        </div>
+        {{if .AllTags}}
+        <div class="nav-filter-panel__section">
+            <span class="nav-filter-panel__title">{{.UI.nav.filter.tag_title}}</span>
+            <div class="nav-filter-panel__tags">
+                {{range $t := .AllTags}}
+                <a href="{{ URLTag $t }}" class="nav-filter-tag">{{$t}}</a>
+                {{end}}
+            </div>
+        </div>
+        {{end}}
+    </div>
+</div>
+
+<!-- Search Modal -->
+<div class="search-modal" id="searchModal">
+    <div class="search-modal__backdrop" id="searchModalBackdrop" data-backdrop-scene="b">
+        <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div>
+        <div class="g-tint"></div>
+        <div class="g-noise"></div>
+    </div>
+    <div class="search-modal__panel">
+        <form class="search-modal__header" action="{{ URLSearch }}" method="GET">
+            <input type="text" class="search-modal__input" id="searchModalInput" name="q" placeholder="{{.UI.nav.search.input_ph}}" autocomplete="off">
+            <button type="button" class="search-modal__close" id="searchModalClose" aria-label="{{.UI.nav.search.close}}">{{svg "close"}}</button>
+        </form>
+        <div class="search-modal__results" id="searchModalResults"></div>
+    </div>
+</div>
+<script>
+/* Admin nav injection: for admins, "Fun ▾" becomes "Admin ▾" with admin dashboard /
+   status entries appended. Visitor DOM carries no admin items (zero layout impact);
+   they are injected after is-admin, then the collapse offsets are re-measured.
+   Idempotent: every htmx:after:swap re-verifies the injected items exist (htmx page
+   switches may rebuild the dd and lose a one-time injection); no one-shot done flag. */
+(function() {
+    function isAdmin() {
+        return document.cookie.includes('is_admin=1') || document.documentElement.classList.contains('is-admin');
+    }
+    function ensureAdminItems() {
+        if (!isAdmin()) return;
+        var dd = document.querySelector('#navGroupFun .dd');
+        if (!dd) return;
+        // Idempotent: keyed on the admin items themselves (a1/a2); if a sep remains but
+        // the items are missing, re-inject fully (guards against interrupted leftovers wedging the UI)
+        var a1x = dd.querySelector('a[href="' + window.SITE_URLS.admin.dashboard + '"]');
+        var a2x = dd.querySelector('a[href="' + window.SITE_URLS.admin.status + '"]');
+        if (a1x && a2x) return;
+        // Clear stale sep leftovers, then re-inject completely
+        var oldSep = dd.querySelector('.dd-sep');
+        if (oldSep) oldSep.remove();
+        var funBtn = document.querySelector('#navGroupFun > .nav-item[data-icon="fun"]');
+        if (funBtn) {
+            var span = funBtn.querySelector('span');
+            if (span) span.textContent = "{{.UI.nav.menu.admin}}";
+        }
+        var sep = document.createElement('span');
+        sep.className = 'dd-sep';
+        sep.setAttribute('aria-hidden', 'true');
+        dd.appendChild(sep);
+        var a1 = document.createElement('a');
+        a1.href = window.SITE_URLS.admin.dashboard;
+        a1.textContent = "{{.UI.nav.menu.admin_panel}}";
+        var a2 = document.createElement('a');
+        a2.href = window.SITE_URLS.admin.status;
+        a2.textContent = "{{.UI.nav.menu.admin_status}}";
+        dd.appendChild(a1);
+        dd.appendChild(a2);
+        /* Re-measure the center half-width -> collapse offsets auto-calibrate */
+        if (window.navRemeasure) { window.navRemeasure(true); }
+        var measure = window.__navMeasureCenterHalf || function() {};
+        try {
+            if (typeof measureCenterHalf === 'function') { measureCenterHalf(); }
+            else if (window.__navApplyCenterHalf) { window.__navApplyCenterHalf(); }
+        } catch (e) {}
+    }
+    ensureAdminItems();
+    document.addEventListener('htmx:after:swap', ensureAdminItems);
+})();
+</script>
+{{end}}
+
+{{define "search_script"}}{{end}}

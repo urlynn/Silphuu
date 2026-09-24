@@ -1,0 +1,408 @@
+{{define "guestbook.html"}}
+{{template "base_layout" .}}
+{{end}}
+
+{{define "head_extra"}}
+<link rel="stylesheet" href="{{asset "css/comment.bundle.css"}}">
+<script src="{{asset "js/comment.bundle.js"}}" defer></script>
+<style>
+/* Guestbook: a two-sided card — hero on the front, form on the back — over an alternating
+   bubble list. .gb-stage carries the hero plus an absolutely positioned form layer of the
+   same box, so flipping never reflows. List rules anchor on #cmt-comment-area, the id the
+   htmx morph preserves, never on a class it resets. */
+
+#guestbook-container { display: flex; flex-direction: column; gap: 2rem; }
+
+/* Stage: the card and its two faces */
+/* Above the later .gb-list-block. The flip makes the stage a stacking context
+   (perspective), so the form layer's own z-index stops competing outside the stage and
+   the list paints over the card wherever the card overflows the stage box. */
+.gb-stage {
+    position: relative; z-index: 2;
+    perspective: 1800px; max-width: 560px; margin: 0 auto; width: 100%;
+}
+.gb-hero { position: relative; z-index: 1; }
+/* Both faces must be one box or their rotation origins differ: flow-root keeps the card's
+   24px bottom margin inside .gb-hero instead of letting it collapse out and inflate .gb-stage. */
+.gb-hero { display: flow-root; transform: rotateY(0deg); }
+.gb-hero,
+.gb-form-layer {
+    backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    transition: transform 0.7s cubic-bezier(0.45, 0.05, 0.2, 1);
+}
+/* The faces are revealed by a delayed visibility switch, not by backface-visibility: the
+   stage is flat, so a card's own culling never bites, while preserve-3d would cost it its
+   backdrop-filter. 0.25s is where the easing passes 90 degrees and both faces edge on. */
+.gb-form-layer {
+    position: absolute; inset: 0; z-index: 2;
+    visibility: hidden; pointer-events: none;
+    transform: rotateY(180deg);
+    display: flex; overflow: visible;
+    transition: transform 0.7s cubic-bezier(0.45, 0.05, 0.2, 1), visibility 0s 0.25s;
+}
+#guestbook-container.form-active .gb-form-layer { visibility: visible; pointer-events: auto; }
+.form-active .gb-hero { transform: rotateY(-180deg); }
+.form-active .gb-form-layer { transform: rotateY(0deg); }
+.gb-form-layer .cmt-form-card { border-radius: 28px; }
+.gb-form-layer .guestbook-form { margin: 0; width: 100%; }
+.gb-hero .profile-card { border-radius: 28px; }
+
+.gb-form-close {
+    position: absolute; top: 12px; right: 12px; z-index: 20;
+    width: 30px; height: 30px; border: none; border-radius: 50%;
+    background: rgba(128,128,128,0.2); color: var(--text-primary);
+    /* Enumerated, not `all`: `all` also transitions the inherited visibility, and a
+       visibility transition's intermediate value is visible, so the button would paint
+       itself while the layer is still hidden — see docs/GOTCHAS.md §visibility-transition-escape */
+    font-size: 1.1rem; line-height: 1; cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s;
+}
+.gb-form-close:hover { background: rgba(128,128,128,0.4); transform: rotate(90deg); }
+
+/* Popovers: the sticker panel is absolute top:100%, the upload overlay fixed. Opening
+   either lifts the stage's clip and transform, so neither is cut off. */
+.gb-form-layer .cmt-form-card { margin-bottom: 0; }
+.gb-form-layer .cmt-sticker-panel {
+    left: 50%; transform: translateX(-50%);
+    width: min(574px, 92vw); max-height: 62vh; overflow-y: auto;
+}
+.gb-form-layer .cmt-avatar-dialog { left: 50%; transform: translateX(-50%); width: min(320px, 92vw); }
+#guestbook-container.gb-pop-open .gb-stage { overflow: visible !important; perspective: none !important; }
+#guestbook-container.gb-pop-open .gb-form-layer { transform: none !important; }
+
+/* The hero's own call to action */
+.gb-hero-action { margin-top: 18px; display: flex; justify-content: center; position: relative; z-index: 3; }
+.gb-hero-btn {
+    background: var(--accent); color: #ffffff; border: none; border-radius: 50px;
+    padding: 10px 24px; font-size: 0.95rem; font-weight: 700; cursor: pointer;
+    font-family: var(--font-body);
+    display: flex; align-items: center; transition: all 0.3s;
+    /* Ink alignment via asymmetric padding, not translate: Safari drops fractional
+       translations. Pairs with .guestbook-form .cmt-submit-btn in themes/elements.css. */
+    padding-top:    calc(10px - var(--font-caption-shift, 0em));
+    padding-bottom: calc(10px + var(--font-caption-shift, 0em));
+}
+.gb-hero-btn:hover {
+    background: var(--accent-hover);
+}
+
+/* Hero composition: copy and button stay centred, the badge lands in the gap between the
+   centred copy and the card's left border, aligned with the copy block. Equal 1fr tracks
+   make the middle column centred, and the badge centred in the gap it leaves. */
+.gb-hero .page-card {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    /* The middle column is exactly the subtitle's ink width, so "badge to border" runs one
+       card padding longer than "badge to copy". Padding the badge by that amount and
+       centring it splits the difference, leaving the two distances equal. */
+    --gb-hero-pad-inline: 36px;
+}
+.gb-hero .page-card > .page-hero-icon {
+    grid-area: 1 / 1 / 4 / 2;
+    justify-self: center;
+    margin: 0 var(--gb-hero-pad-inline) 0 0;
+}
+.gb-hero .page-card > .page-hero-title { grid-area: 1 / 2; }
+.gb-hero .page-card > .page-hero-subtitle { grid-area: 2 / 2; }
+.gb-hero .page-card > .gb-hero-action { grid-area: 3 / 2; }
+.gb-hero .page-hero-icon svg { width: 104px; height: 104px; margin: 0; }
+
+/* Bubbles carry no hover scale: a fractional scale re-rasterises the text and Chromium keeps
+   the subpixel difference on the way back — see docs/GOTCHAS.md §friend-card-entry-no-scale.
+   Give hover feedback with a shift or a shadow instead. */
+
+/* Comment meta (author + time) sits above the bubble: the glass surface is the message
+   body, not the byline. Carries the entrance fade the meta lost when it left the card. */
+.gb-list .glass-wrap { display: flex; flex-direction: column; gap: 6px; --gb-avatar: 40px; --gb-avatar-gap: 10px; }
+.gb-list .glass-wrap > .cmt-item-meta {
+    animation: gb-card-fade 0.35s cubic-bezier(0.16, 1, 0.3, 1) calc(var(--i, 0) * 30ms + 40ms) backwards;
+}
+
+/* Avatar column: the picture sits beside the bubble, outside it, so the glass surface stays
+   the message body. .cmt-body is a child of .glass-wrap — a new child of #cmt-comment-area
+   would flip the nth-child staircase the bubbles align on. */
+.gb-list .cmt-body { display: flex; align-items: flex-start; gap: var(--gb-avatar-gap); min-width: 0; }
+.gb-list .cmt-body > .profile-card { flex: 1 1 auto; min-width: 0; }
+/* The picture holds the height a one-line bubble centres it at, so a taller bubble grows
+   past it instead of pushing it down. 1lh is the bubble's line box, so the font-size and
+   line-height here must stay those of .cmt-content. */
+.gb-list .cmt-avatar {
+    flex: none; display: block;
+    width: var(--gb-avatar); height: var(--gb-avatar);
+    object-fit: cover; border-radius: 50%;
+    /* The ring matches the bubble's, which is --panel-border on every panel shell. */
+    border: 1px solid var(--panel-border);
+    font-size: 14px; line-height: 1.65;
+    margin-top: calc((var(--gb-bubble-pad-top) + var(--gb-bubble-pad-bottom) + 1lh - var(--gb-avatar)) / 2);
+    animation: gb-card-fade 0.35s cubic-bezier(0.16, 1, 0.3, 1) calc(var(--i, 0) * 30ms + 40ms) backwards;
+}
+/* The two bubble paddings the avatar offset above is derived from; they mirror the top and
+   bottom of #cmt-comment-area .profile-card below. */
+#guestbook-container { --gb-bubble-pad-top: 12px; --gb-bubble-pad-bottom: 12px; }
+/* The byline hangs over the bubble rather than the avatar, so the nickname lines up with the
+   text beneath it. Mirrored rows move the indent to the other side. */
+.gb-list .cmt-item-meta { display: flex; align-items: center; gap: 8px; padding-left: calc(var(--gb-avatar) + var(--gb-avatar-gap)); }
+
+/* List head + end marker. Both live outside #cmt-comment-area so the .glass-wrap
+   nth-child parity the bubbles align on is left alone. The block spans the whole main
+   column — the list is not narrowed to the card's width, so the count and the bubbles
+   hang off the same left edge the column gives them. */
+.gb-list-block {
+    position: relative;
+    display: flex; flex-direction: column; gap: 0.75rem;
+    width: 100%;
+}
+.gb-list-head { display: flex; align-items: baseline; gap: 6px; }
+.gb-count {
+    font-family: var(--font-data); font-weight: var(--font-data-weight, 500);
+    font-variation-settings: 'BEVL' var(--font-data-bevl, 100);
+    font-size: 15px; color: var(--text-muted);
+}
+.gb-count-unit { font-size: 13px; color: var(--text-dim); }
+.gb-list::after {
+    content: ''; align-self: center; flex: none;
+    width: 34px; height: 3px; border-radius: 2px;
+    background: var(--panel-border);
+}
+.gb-list:has(.cmt-empty)::after { display: none; }
+
+/* Conversation bubbles: odd rows hug the left, even rows the right. The glass face takes 76%
+   of the column and the avatar plus its gap are added on top, so a long message's text is
+   never narrowed by the picture sitting beside it. */
+#cmt-comment-area { display: flex; flex-direction: column; gap: 1.2rem; width: 100%; }
+#cmt-comment-area .glass-wrap {
+    width: fit-content;
+    max-width: calc(76% + var(--gb-avatar) + var(--gb-avatar-gap));
+}
+#cmt-comment-area .glass-wrap:nth-child(odd) { align-self: flex-start; }
+#cmt-comment-area .glass-wrap:nth-child(even) { align-self: flex-end; }
+#cmt-comment-area .glass-wrap:nth-child(odd) .profile-card { border-radius: 22px 22px 22px 6px; }
+#cmt-comment-area .glass-wrap:nth-child(even) .profile-card {
+    border-radius: 22px 22px 6px 22px;
+    background: color-mix(in srgb, var(--accent) calc(0.08 * 100%), transparent) !important;
+}
+#cmt-comment-area .glass-wrap:nth-child(even) .cmt-body { flex-direction: row-reverse; }
+#cmt-comment-area .glass-wrap:nth-child(even) .cmt-item-meta {
+    flex-direction: row-reverse; justify-content: flex-start; text-align: right;
+    padding-left: 0; padding-right: calc(var(--gb-avatar) + var(--gb-avatar-gap));
+}
+#cmt-comment-area .glass-wrap:nth-child(even) .cmt-content { text-align: right; }
+/* The empty state is the one row with nothing to say: it sits centred rather than on the
+   alternating side. Keyed on its own copy, so the fragment needs no marker. */
+#cmt-comment-area .glass-wrap:has(.cmt-empty) { align-self: center; }
+#cmt-comment-area .profile-card { padding: 12px 18px; }
+
+/* Narrow screens */
+@media (max-width: 640px) {
+    .gb-list .glass-wrap { --gb-avatar: 30px; --gb-avatar-gap: 8px; }
+    /* Same extra-width rule at a wider basis, capped at the column so a narrow screen
+       cannot push the bubble's outer edge past it. */
+    #cmt-comment-area .glass-wrap {
+        max-width: min(calc(92% + var(--gb-avatar) + var(--gb-avatar-gap)), 100%);
+    }
+}
+</style>
+<script>
+(function () {
+    var container, stage;
+
+    window.openForm = function () {
+        container = container || document.getElementById('guestbook-container');
+        container.classList.add('form-active');
+        setTimeout(function () {
+            var t = document.getElementById('cmt-content');
+            if (t) t.focus({ preventScroll: true });
+        }, 380);
+    };
+
+    window.closeForm = function () {
+        container = container || document.getElementById('guestbook-container');
+        container.classList.remove('form-active');
+    };
+
+    function formActive() { return container.classList.contains('form-active'); }
+
+    // A popover — sticker panel, upload overlay, avatar dialog — must escape the stage's
+    // clip and transform, so opening one marks the container gb-pop-open.
+    function syncPopState() {
+        if (!container) return;
+        var ids = ['cmt-sticker-panel', 'sticker-upload-overlay', 'cmt-avatar-dialog'];
+        var open = false;
+        for (var i = 0; i < ids.length; i++) {
+            var el = document.getElementById(ids[i]);
+            if (el && el.offsetHeight > 0) { open = true; break; }
+        }
+        container.classList.toggle('gb-pop-open', open);
+    }
+
+    // Optimistic count. The head sits outside #cmt-comment-area, so the htmx morph never
+    // rewrites it; recounting the DOM covers a posted comment and a deleted one alike.
+    // The write is guarded because the observer watches an ancestor of the head.
+    function syncCount() {
+        var el = document.querySelector('.gb-count');
+        if (!el) return;
+        var n = document.querySelectorAll('#cmt-comment-area .profile-card[data-cmt-id]').length;
+        if (el.textContent !== String(n)) el.textContent = String(n);
+    }
+
+    function watchCount() {
+        var block = document.querySelector('.gb-list-block');
+        if (!block) return;
+        new MutationObserver(syncCount).observe(block, { childList: true, subtree: true });
+        syncCount();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        container = document.getElementById('guestbook-container');
+        stage = document.getElementById('gb-stage');
+        watchCount();
+
+        // Popovers are rendered lazily and toggled through style/class attributes.
+        var popObserver = new MutationObserver(syncPopState);
+        ['cmt-sticker-panel', 'sticker-upload-overlay', 'cmt-avatar-dialog'].forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el) popObserver.observe(el, { attributes: true, attributeFilter: ['style', 'class'] });
+        });
+
+        // Escape collapses the form.
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && formActive()) closeForm();
+        });
+
+        // Keep-open zone: the union of the stage and the form card, grown by 10%. The card
+        // overflows the stage, so judging by the stage alone collapses while the pointer is
+        // still on it. Recomputed per call, so a preview or a panel widens it.
+        function pointerZone() {
+            var els = [stage, document.getElementById('cmt-form-card')];
+            var l = Infinity, t = Infinity, r = -Infinity, b = -Infinity;
+            for (var i = 0; i < els.length; i++) {
+                if (!els[i]) continue;
+                var box = els[i].getBoundingClientRect();
+                if (!box.width && !box.height) continue;
+                l = Math.min(l, box.left); t = Math.min(t, box.top);
+                r = Math.max(r, box.right); b = Math.max(b, box.bottom);
+            }
+            if (l === Infinity) return null;
+            var mx = (r - l) * 0.05, my = (b - t) * 0.05;
+            return { left: l - mx, top: t - my, right: r + mx, bottom: b + my };
+        }
+
+        function inZone(x, y) {
+            var z = pointerZone();
+            return !!z && x >= z.left && x <= z.right && y >= z.top && y <= z.bottom;
+        }
+
+        // An unknown pointer position (keyboard only) is no evidence of being inside.
+        var lastPointer = null;
+        function pointerInZone() {
+            return !!lastPointer && inZone(lastPointer.x, lastPointer.y);
+        }
+
+        // A click outside the zone collapses the form.
+        document.addEventListener('click', function (e) {
+            if (!formActive()) return;
+            if (stage.contains(e.target)) return;
+            if (inZone(e.clientX, e.clientY)) return;
+            closeForm();
+        });
+
+        // While the pointer is held inside the stage, focus loss is not "leaving": clicking
+        // something unfocusable, such as a sticker image, drops focus to body.
+        var pointerInStage = false;
+        stage.addEventListener('pointerdown', function () { pointerInStage = true; }, true);
+        document.addEventListener('pointerup', function () { pointerInStage = false; }, true);
+
+        // Focus leaving the whole stage collapses: closing and reopening never clear the
+        // input, so nothing typed is at risk. A pointer still inside the zone overrides it —
+        // opening the preview moves the toolbar under the pointer and focus falls to body.
+        stage.addEventListener('focusout', function (e) {
+            if (!formActive()) return;
+            if (pointerInStage) return;
+            if (e.relatedTarget && stage.contains(e.relatedTarget)) return;
+            if (pointerInZone()) return;
+            closeForm();
+        });
+
+        // Leaving the zone collapses; skipped while a popover is open, since panels spill
+        // past the stage's bounds.
+        document.addEventListener('mousemove', function (e) {
+            lastPointer = { x: e.clientX, y: e.clientY };
+            if (!formActive()) return;
+            if (container.classList.contains('gb-pop-open')) return;
+            if (inZone(e.clientX, e.clientY)) return;
+            closeForm();
+        });
+    });
+
+    // Collapse after a successful send. htmx 4 fires this event with a `{ctx}` payload: the
+    // swap target is `ctx.target`, the status `ctx.response.status`.
+    document.addEventListener('htmx:after:request', function (evt) {
+        var ctx = (evt.detail && evt.detail.ctx) || {};
+        var status = (ctx.response && ctx.response.status) || 0;
+        if (ctx.target && ctx.target.id === 'cmt-comment-area' && status >= 200 && status < 400) {
+            closeForm();
+        }
+    });
+})();
+</script>
+{{end}}
+
+{{define "scripts"}}{{end}}
+
+{{define "content"}}
+    <div id="guestbook-container">
+        <div class="gb-stage" id="gb-stage">
+            <div class="gb-hero glass-wrap"><div class="profile-card page-card page-card--center" data-backdrop-scene="b">
+    <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div><div class="g-tint"></div><div class="g-noise"></div>
+                <div class="page-hero-icon">{{svg "guestbook"}}</div>
+                <h1 class="page-hero-title">{{.UI.guestbook.hero.title}}</h1>
+                <p class="page-hero-subtitle">{{.UI.guestbook.hero.subtitle}}</p>
+                <div class="gb-hero-action">
+                    <button class="gb-hero-btn" onclick="openForm()" title="{{.UI.guestbook.hero.cta_hint}}">{{.UI.guestbook.hero.cta}}</button>
+                </div>
+            </div></div>
+
+            <div class="gb-form-layer">
+                <button class="gb-form-close" onclick="closeForm()">×</button>
+                <div class="guestbook-form">
+                    {{template "comment_form" .}}
+                </div>
+            </div>
+        </div>
+
+        <div class="gb-list-block">
+            <div class="gb-list-head">
+                <span class="gb-count">{{len .PostComments}}</span><span class="gb-count-unit">{{.UI.guestbook.list.count_unit}}</span>
+            </div>
+
+            <div class="gb-list" id="cmt-comment-area" data-post-id="0">
+        {{if .PostComments}}
+            {{range $i, $c := .PostComments}}
+            <div class="glass-wrap" id="cmt-{{$c.ID}}" style="--i:{{$i}}">
+                <div class="cmt-item-meta">
+                    {{if $c.Website}}<a href="{{$c.Website}}" target="_blank" rel="noopener" class="cmt-nick">{{$c.Nick}}</a>{{else}}<span class="cmt-nick">{{$c.Nick}}</span>{{end}}
+                    <span class="cmt-date"><time datetime="{{$c.Date}}" data-ts="{{$c.Date}}">{{$c.Date}}</time></span>
+                </div>
+                <div class="cmt-body">
+                    <img class="cmt-avatar" src="{{if $c.Avatar}}{{$c.Avatar}}{{else}}{{asset "image/default-avatar.avif"}}{{end}}" alt="" referrerpolicy="no-referrer">
+                    <div class="profile-card" data-cmt-id="{{$c.ID}}" data-rid="{{$c.Rid}}" data-backdrop-scene="b">
+    <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div><div class="g-tint"></div><div class="g-noise"></div>
+                <button class="cmt-del-btn admin-control owner-control" data-id="{{$c.ID}}" title="{{$.UI.common.action.delete}}">{{svg "trash"}}</button>
+                <div class="cmt-item-main">
+                    <div class="cmt-content">{{$c.RenderedContent}}</div>
+                </div>
+                    </div>
+                </div>
+            </div>
+            {{end}}
+        {{else}}
+        <div class="glass-wrap"><div class="profile-card" data-backdrop-scene="b">
+    <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div><div class="g-tint"></div><div class="g-noise"></div>
+            <p class="cmt-empty">{{.UI.guestbook.list.empty}}</p>
+        </div></div>
+        {{end}}
+            </div>
+        </div>
+    </div>
+{{end}}

@@ -1,0 +1,23 @@
+{{define "fun_error_stage"}}
+<div class="fun-error" data-count="{{len .UI.fun_error.cards}}">
+    <div class="fun-error__stage" id="funErrorStage">
+        {{range $code, $card := .UI.fun_error.cards}}
+        <template class="fun-error__tpl" data-code="{{$card.code}}">
+            <div class="card" data-code="{{$card.code}}">
+                <div class="card-content">
+                    <div class="badge">
+                        <img src="{{ URLErrorImage $card.code }}" alt="{{$card.code}}" fetchpriority="high" decoding="sync">
+                    </div>
+                    <div class="pill">{{safeHTML $card.pill}}</div>
+                    <h2>{{safeHTML $card.title}}</h2>
+                    <div class="colored-desc{{if $card.glitch}} horror-glitch{{end}}">{{safeHTML $card.desc}}</div>
+                </div>
+                <a href="{{if $card.link}}{{$card.link}}{{else}}/{{end}}" class="btn ink-row"><span>{{safeHTML $card.btn}}</span>{{svg "arrow-right"}}</a>
+            </div>
+        </template>
+        {{end}}
+        <!-- Active card injection point -->
+    </div>
+    <button type="button" class="fun-error__reroll ink-row" id="funErrorReroll">{{svg "refresh"}}<span>{{safeHTML .UI.fun_error.hero.reroll}}</span></button>
+</div>
+{{end}}

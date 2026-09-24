@@ -1,0 +1,60 @@
+/* Icon optical corrections. The svg() template function injects a
+   data-icon="<name>" attribute onto every inline SVG, so attribute selectors
+   here give global corrections: any page using the same icon inherits them
+   automatically, and new usages need no extra handling. Correction values are
+   computed from each icon's actual ink-center offset in its viewBox,
+   independent of rendered size. */
+
+/* Calendar: the top antenna (y2-6) is visually lighter than the body square
+   (y4-22), so geometric centering puts the square's ink center too low. Shift
+   up by 1/24 of the viewBox (about 4%), aligning to the square body rather
+   than including the antenna. */
+/* Each icon declares data-ink-center in its .svg file; main.go injects the measured
+   --icon-shift (alpha-weighted centroid, % of icon height, vertical only). A large offset
+   does not always warrant compensation (e.g. the search magnifier's is its design). */
+svg[data-icon][data-ink-center] {
+    translate: 0 var(--icon-shift, 0);
+}
+
+/* Mechanical Odometer (per-digit mechanical roller, site-wide base) */
+.odometer {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: top;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    overflow: hidden;
+    height: 1em;
+}
+
+.odometer-digit {
+    display: inline-block;
+    height: 1em;
+    overflow: hidden;
+    position: relative;
+    line-height: 1;
+    text-align: center;
+    width: 0.6em;
+}
+
+.odometer-ribbon {
+    display: flex;
+    flex-direction: column;
+    will-change: transform;
+    transition: transform var(--odo-duration, 1.2s) cubic-bezier(0.12, 0.88, 0.28, 1);
+}
+
+.odometer-ribbon > span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 1em;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.odometer-sep {
+    display: inline-block;
+    line-height: 1;
+}
+

@@ -1,0 +1,27 @@
+{{define "base_layout"}}
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="{{.Theme}}" translate="no">
+{{template "head" .}}
+<body hx-boost:inherited="true" hx-target:inherited="#content-wrapper" hx-select:inherited="#content-wrapper" hx-swap:inherited="outerHTML" hx-sync:inherited="this:replace"{{block "body_attrs" .}}{{end}}>
+    <div class="app-loading" id="appLoading" aria-hidden="true"><div class="app-loading__spinner"></div></div>
+    <div class="scroll-progress" id="scrollProgress" aria-hidden="true" hx-preserve="true"><div class="scroll-progress__bar"></div></div>
+    {{template "bg_shapes" .}}
+    {{block "header" .}}{{template "navbar" .}}{{end}}
+    <div class="profile-card-anchor">{{block "outer_profile" .}}{{template "profile_card" (dict "Motto" .Motto "UI" .UI)}}{{end}}</div>
+    <div id="content-wrapper" data-body-class="{{block "body_class" .}}{{end}}" data-page-title="{{.Title}}">
+        <main class="{{block "main_class" .}}main-content{{end}}">
+            {{block "content" .}}{{end}}
+        </main>
+        {{block "layout_footer" .}}{{template "global_footer" .}}{{end}}
+        {{block "floating" .}}{{end}}
+        {{block "scripts" .}}{{end}}
+    </div>
+    {{template "theme_fab" .}}
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(function(){});
+        }
+    </script>
+</body>
+</html>
+{{end}}

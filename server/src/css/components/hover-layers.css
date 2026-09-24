@@ -1,0 +1,89 @@
+/* Unified hover-glow layer engine (hg-*, decision 30): the single site-wide
+   implementation of glass-card hover effects. Companion: templates/hover_layers.html
+   (SSR partial; contract in its header comment). Rules from LAYER.md
+   (2026-09-14): layers are painted once and never repainted, hover animates
+   only the compositor property opacity with zero repaints and zero dirty rects;
+   paint properties such as box-shadow/background must never enter
+   transition/keyframes (a transitioning pseudo-element box-shadow repaints per
+   frame and flashes square corners); will-change pins persistent compositor
+   layers, since WebKit reclaims layers ~3s after animation ends and reclaimed
+   overflow layers flash (verified on the sponsor public card in Safari); the
+   card body must have no :hover paint rules. */
+
+/* Hover glow layer: each card's hover shadow token is injected via
+   --hg-glow-shadow, defaulting to the L1B family (--card-shadow-hover);
+   per-card mapping at the end of this file. */
+.hg-glow {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-sizing: border-box;
+    pointer-events: none;
+    z-index: 0;
+    box-shadow: var(--hg-glow-shadow, var(--card-shadow-hover));
+    opacity: 0;
+    transition: opacity 0.22s ease;
+    will-change: opacity;
+}
+[data-hover-glow]:hover > .hg-glow,
+body.force-hover .hg-glow {
+    opacity: 1;
+}
+
+/* Hover sweep layer: the light band is a persistent ::before (4W-wide gradient); on
+   hover it fades opacity 0->1 and crosses via a pure compositor transform (background-position
+   100%->0% equals translateX(-75%)->0). Container overflow:hidden clips only the band; no opacity transition (one frame). */
+.hg-sweep {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 20;
+    opacity: 0;
+}
+.hg-sweep::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 400%;
+    background: linear-gradient(100deg, transparent 40%, rgba(255, 255, 255, 0.13) 50%, transparent 60%);
+    will-change: transform;
+}
+[data-hover-sweep]:hover > .hg-sweep {
+    opacity: 1;
+}
+[data-hover-sweep]:hover > .hg-sweep::before {
+    animation: hg-sweep 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes hg-sweep {
+    from { transform: translateX(-75%); }
+    to   { transform: translateX(0%); }
+}
+
+/* Per-card hover shadow token mapping (the only list that must be maintained per card) */
+.status-stat-card {
+    --hg-glow-shadow: var(--widget-shadow-hover);
+}
+.admin-maint-card {
+    --hg-glow-shadow: var(--shadow-sm);
+}
+.friend-card {
+    --hg-glow-shadow: var(--friend-shadow-hover);
+}
+.sponsor-qr-card,
+.sponsor-public-card {
+    --hg-glow-shadow: var(--widget-shadow-hover);
+}
+
+/* Motion fallback */
+@media (prefers-reduced-motion: reduce) {
+    .hg-glow,
+    .hg-sweep,
+    .hg-sweep::before {
+        transition: none !important;
+        animation: none !important;
+    }
+}

@@ -1,0 +1,112 @@
+/* Iris Dark — Semantic Layer (Layer 2) */
+/* Elegant blue-purple & light wisteria dark theme. */
+
+[data-theme="purple-dark"] {
+    /* Accent (theme primary color) */
+  --accent: #A78BFA;
+
+  /* Glass hex base */
+  --glass-tint: #1A1A2A;
+  --glass-light: #EDEAF8;
+  --glass-dark: #000000;
+  
+  --glass-l1-alpha: 0.10;
+  --glass-l2-alpha: 0.16;
+  --glass-noise-opacity: 0;
+  --bg-noise-opacity: 0;
+  --glass-noise-blend: normal;
+  --glass-noise-url: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.99' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+
+  /* Dusk-purple outer glow instead of black shadow on dark backgrounds */
+  --shadow-sm: 0 0 6px color-mix(in srgb, var(--accent) 25%, transparent);
+
+  /* Background */
+  --bg-body: #161622;
+  --bg-base: #161622;
+  --bg-glass-alt: rgba(30, 30, 48, 0.85);
+  --bg-nav: rgba(22, 22, 36, 0.55);
+  --bg-code: rgba(22, 22, 36, 0.55);
+  --bg-chroma: rgba(22, 22, 36, 0.55);
+  --bg-card: rgba(30, 30, 48, 0.45);
+  --bg-input: rgba(6, 6, 16, 0.35);
+  --bg-overlay: color-mix(in srgb, var(--glass-dark) 55%, transparent);
+
+  /* Surface */
+  --bg-subtle: color-mix(in srgb, var(--glass-light) calc(var(--surface-alpha) * 100%), transparent);
+  --bg-hover: color-mix(in srgb, var(--glass-light) 10%, transparent);
+  --bg-interactive: color-mix(in srgb, var(--glass-light) 8%, transparent);
+
+  /* Text */
+  --text-primary: #C3C0CD;
+  --text-muted: #AEACB9;
+  --text-dim: #9694A1;
+  --timeline-line: color-mix(in srgb, var(--text-primary) 22%, transparent);
+  --timeline-node: color-mix(in srgb, var(--text-primary) 50%, transparent);
+
+  /* Accent (auto-derived) */
+  --accent-hover: #818CF8;
+  --accent-soft: color-mix(in srgb, var(--accent) 15%, transparent);
+
+  /* Border (faint dusk-purple glow edges) */
+  --border-light: color-mix(in srgb, var(--glass-light) 14%, transparent);
+  --border-medium: color-mix(in srgb, var(--accent) 26%, transparent);
+  --border-subtle: color-mix(in srgb, var(--glass-light) 10%, transparent);
+
+  /* Shadow */
+  --shadow-card: 0 0 8px color-mix(in srgb, var(--accent) 28%, transparent), 0 0 16px color-mix(in srgb, var(--accent) 14%, transparent);
+
+  /* Hover states */
+  --hover-bg: color-mix(in srgb, var(--accent) 8%, transparent);
+  --hover-text: var(--accent);
+  --hover-border: color-mix(in srgb, var(--accent) 35%, transparent);
+  --hover-blur: 8px;
+  --hover-bg-active: color-mix(in srgb, var(--accent) 12%, transparent);
+  --hover-text-active: #E9D5FF;
+
+  /* Nav */
+  --nav-bg: rgba(6, 6, 16, 0.25);
+
+  /* Layout */
+  --sidebar-radius: var(--radius-md);
+  --blur-amount: 8px;
+
+  /* Group hover */
+  --group-hover-bg: color-mix(in srgb, var(--glass-light) 8%, transparent);
+  --group-hover-text: var(--accent);
+
+  /* Comment form */
+  --cmt-form-bg: #1E1E30;
+  --cmt-input-color: var(--text-primary);
+  --cmt-input-placeholder: var(--text-muted);
+  --cmt-textarea-color: var(--text-primary);
+  --cmt-textarea-placeholder: var(--text-muted);
+  --cmt-textarea-focus: var(--text-primary);
+  --cmt-input-focus: var(--text-primary);
+  --cmt-submit-bg: var(--accent);
+
+
+  /* Chroma syntax highlighting */
+  --chroma-keyword: #C4B5FD;
+  --chroma-function: #818CF8;
+  --chroma-string: #6EE7B7;
+  --chroma-comment: rgba(237, 234, 248, 0.38);
+  --chroma-number: #FDBA74;
+  --chroma-operator: #93C5FD;
+  --chroma-punctuation: #E2E8F0;
+  --chroma-tag: #F472B6;
+  --chroma-deleted: #F87171;
+  --chroma-inserted: #6EE7B7;
+
+  /* Decorative shapes (Yukari jewel palette) */
+  --shape-1: #9D7CD8;
+  --shape-2: #6366F1;
+  --shape-3: #8B5CF6;
+  --shape-4: #E05697;
+  --shape-5: #2DD4BF;
+  --shape-6: #38BDF8;
+  --shape-7: #A855F7;
+  --shape-8: #E5A93C;
+  --shape-9: #7C3AED;
+  --shape-10: #4F46E5;
+  --shape-blend: screen;
+}

@@ -1,0 +1,105 @@
+/* Global Footer Component */
+
+.footer {
+    text-align: center;
+    padding: 32px 24px;
+    font-family: var(--font-footer);
+    font-weight: var(--font-footer-weight, 400);
+    font-variation-settings: 'BEVL' var(--font-footer-bevl, 100);
+}
+
+.footer-inner {
+    max-width: 720px;
+    margin: 0 auto;
+    width: 100%;
+    text-align: center !important;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.footer-text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    color: var(--text-dim);
+    font-size: 12px;
+    line-height: 1;
+    letter-spacing: 0.5px;
+    width: 100%;
+    margin: 0;
+}
+
+.footer-author {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.15s;
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+    gap: 4px;
+}
+.footer-author:hover {
+    color: var(--accent);
+}
+.footer-author svg,
+.footer-text svg,
+.footer-support svg {
+    width: var(--font-footer-ink-height, 0.9em);
+    height: var(--font-footer-ink-height, 0.9em);
+    overflow: visible;
+    stroke-width: min(calc(var(--font-footer-ink-weight, 0.0833) * 24 / var(--font-footer-ink-height, 0.763)), 3);
+    transform: translateY(var(--font-footer-shift, 0em));
+    display: block;
+    flex-shrink: 0;
+}
+
+.footer-support {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 11.5px;
+    color: var(--text-dim);
+    letter-spacing: 0.3px;
+    line-height: 1;
+    width: 100%;
+    margin: 0;
+}
+
+/* Must stay scoped: a bare .footer-sep rule would hand the footer role's shift to any
+   element with that class site-wide. Only the site footer and the admin footer preview
+   carry the footer role. */
+:is(.footer-support, .font-preview__text--footer) .footer-sep {
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+    transform: translateY(var(--font-footer-shift, 0em));
+}
+
+.footer-rss {
+    color: var(--accent);
+    text-decoration: none;
+    transition: color 0.15s;
+}
+.footer-rss:hover {
+    color: var(--accent-hover);
+    text-decoration: underline;
+}
+
+/* Upstream project attribution, inline in the fixed footer line. Rendered from
+   constants in server/project.go, not from configuration — see that file. */
+.footer-powered-link {
+    color: var(--text-dim);
+    text-decoration: none;
+    transition: color 0.15s;
+}
+.footer-powered-link:hover {
+    color: var(--accent);
+    text-decoration: underline;
+}

@@ -1,0 +1,37 @@
+{{define "theme_fab"}}
+<!-- Read-mode toggle (floating): transparent clear ↔ paper -->
+<div id="read-fab" title="{{.UI.theme.fab.read}}" hx-preserve="true" data-backdrop-scene="b">
+    <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div>
+    <div class="g-tint"></div>
+    <div class="g-noise"></div>
+    <span class="read-icon read-icon--clear">{{svg "page-text"}}</span>
+    <span class="read-icon read-icon--paper">{{svg "page-text-off"}}</span>
+</div>
+<!-- Theme toggle (floating) -->
+<div id="theme-fab" title="{{.UI.theme.fab.toggle}}" hx-preserve="true" data-backdrop-scene="b">
+    <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div>
+    <div class="g-tint"></div>
+    <div class="g-noise"></div>
+    {{svg "moon"}}
+</div>
+<!-- Theme picker popup -->
+<div class="theme-picker" id="themePicker" hx-preserve="true" data-backdrop-scene="b">
+    <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div>
+    <div class="g-tint"></div>
+    <div class="g-noise"></div>
+    <div class="theme-picker__header">
+        <span class="theme-picker__label">{{.UI.theme.fab.label}}</span>
+        <label class="theme-sync-toggle" title="模式：跟随系统 / 手动锁定">
+            <input type="checkbox" id="theme-sync-checkbox">
+            <span class="toggle-slider">
+                <span class="toggle-icon-os">OS</span>
+                <span class="toggle-icon-blog">ME</span>
+                <span class="toggle-thumb"></span>
+            </span>
+        </label>
+    </div>
+    <div class="theme-picker__body" id="themeGrid">
+        <!-- Generated dynamically by theme.js -->
+    </div>
+</div>
+{{end}}

@@ -1,0 +1,5 @@
+{
+  "_comment": "【示例配置】把 TTF/OTF 放进站点目录的 Fonts/，在此建立「族名 -> 源文件」映射，字体工坊据此切 WOFF2 子集。各键：src 源文件名（留空则该条既不切子集、也不进后台下拉框）；weight CSS 字重，如 \"400\" 或可变字体的 \"200 700\"；name 后台下拉框的显示名，省略则用族名；bevl 可变字体圆角轴范围如 \"1 100\"，非空才会显示圆角输入框；order 下拉框排序，并列时按 name。同族第二个字重把文件键写成「族名-Medium」（CSS 里仍属同一个族）。若仅使用系统字体，保持本文件为空结构即可。",
+  "ExampleSans": { "src": "ExampleSans-Regular.ttf", "weight": "400" },
+  "ExampleMono": { "src": "ExampleMono-Bold.ttf", "weight": "700" }
+}

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>评论回复通知</title>
+</head>
+<body style="margin:0;padding:24px 12px;background-color:#f4f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#2d3748;line-height:1.6;">
+  <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:580px;background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.06);border:1px solid #e2e8f0;">
+    <tr>
+      <td style="padding:24px 28px;background-color:#1a202c;color:#ffffff;">
+        <div style="font-size:16px;font-weight:600;letter-spacing:0.5px;">Silphuu</div>
+        <div style="font-size:13px;color:#a0aec0;margin-top:4px;">新评论互动通知</div>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:28px;">
+        <p style="margin:0 0 16px;font-size:15px;color:#4a5568;">
+          你好 <strong>@{{.ParentNick}}</strong>：
+        </p>
+        <p style="margin:0 0 16px;font-size:14px;color:#4a5568;">
+          你在 <strong>{{.ContextName}}</strong> 中的评论收到了新回复：
+        </p>
+        <div style="margin:20px 0;padding:16px 20px;background-color:#f7fafc;border-left:4px solid #3182ce;border-radius:4px;">
+          <div style="font-size:13px;font-weight:600;color:#2d3748;margin-bottom:8px;">
+            @{{.ReplyNick}} 说：
+          </div>
+          <div style="font-size:14px;color:#4a5568;line-height:1.6;">
+            {{.Content}}
+          </div>
+        </div>
+        <div style="margin:28px 0 16px;text-align:center;">
+          <a href="{{.PageURL}}" target="_blank" style="display:inline-block;padding:12px 28px;background-color:#3182ce;color:#ffffff;text-decoration:none;font-size:14px;font-weight:500;border-radius:6px;">
+            查看回复与完整讨论 &rarr;
+          </a>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:18px 28px;background-color:#edf2f7;border-top:1px solid #e2e8f0;font-size:12px;color:#718096;line-height:1.5;">
+        <p style="margin:0 0 4px;">本邮件由系统自动发出，请勿直接回复此邮件。</p>
+        <p style="margin:0;">站点来源：<a href="https://example.com" style="color:#4a5568;text-decoration:underline;">Silphuu (example.com)</a></p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

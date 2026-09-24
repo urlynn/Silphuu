@@ -1,0 +1,277 @@
+/* Sponsor page component */
+
+/* Sponsor QR payment cards */
+.sponsor-qr-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+@media (max-width: 768px) {
+    .sponsor-qr-grid {
+        grid-template-columns: 1fr;
+    }
+}
+/* L2 section layer */
+.sponsor-qr-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 24px;
+    border-radius: var(--radius-lg);
+    border: none !important;
+    overflow: visible !important;
+    background: color-mix(in srgb, var(--glass-base) calc(var(--widget-alpha) * 100%), transparent);
+    backdrop-filter: blur(var(--widget-blur));
+    -webkit-backdrop-filter: blur(var(--widget-blur));
+    /* Card body painting is off limits here: resting/hover box-shadow lives on
+       the ::before overlay, so the card body itself never changes */
+    transition: opacity 0.35s ease;
+}
+.sponsor-qr-card::after {
+    content: '';
+    display: block;
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 1px solid var(--widget-border);
+    box-sizing: border-box;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 1;
+    background: transparent;
+    box-shadow: var(--widget-shadow);
+}
+/* Resting shadow lives permanently on the ::after ring (never changes); hover
+   glow uses the dedicated .hg-glow layer (decision 30 unified engine, 0.22s
+   opacity fade, mapping in hover-layers.css). Per LAYER.md, pseudo-elements
+   carry no hover box-shadow. */
+
+/* Pure-CSS entrance animation for DOM-inserted cards (rationale in friends.css).
+   fill-mode: backwards only covers the delay period, then the GPU compositing
+   layer is returned, keeping the frosted glass permanent. */
+@keyframes sponsor-card-in {
+    from {
+        opacity: 0.2;
+        transform: translateY(12px) scale(0.98);
+    }
+}
+
+.sponsor-qr-card,
+.sponsor-public-card {
+    animation: sponsor-card-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+.sponsor-qr-card:first-child { animation-delay: 30ms; }
+.sponsor-qr-card:last-child { animation-delay: 70ms; }
+.sponsor-public-card:nth-child(1) { animation-delay: 90ms; }
+.sponsor-public-card:nth-child(2) { animation-delay: 120ms; }
+.sponsor-public-card:nth-child(n+3) { animation-delay: 150ms; }
+
+@media (prefers-reduced-motion: reduce) {
+    .sponsor-qr-card,
+    .sponsor-qr-card::after,
+    .sponsor-public-card,
+    .sponsor-public-card::before,
+    .sponsor-public-card::after {
+        transition: none !important;
+        animation: none !important;
+    }
+    /* .hg-glow / .hg-sweep fallbacks are unified in hover-layers.css */
+}
+
+.sponsor-qr-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    line-height: 1;
+}
+.sponsor-qr-icon {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+.sponsor-qr-icon svg {
+    display: block;
+    width: var(--icon-md);
+    height: var(--icon-md);
+}
+.sponsor-qr-name {
+    font-size: 18px;
+    color: var(--text-primary);
+    margin: 0;
+    text-box: trim-both ideographic-ink ideographic-ink;
+    translate: 0 calc(-1 * var(--font-body-shift));
+}
+.sponsor-qr-desc {
+    font-size: 13px;
+    color: var(--text-dim);
+    text-align: center;
+    margin: 0;
+}
+
+.sponsor-qr-link {
+    display: block;
+    width: 180px;
+    height: 180px;
+    margin: 0 auto;
+    background-color: var(--text-primary);
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+}
+
+/* Sponsor card date row */
+.sponsor-card-date {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding-top: 12px;
+    margin-top: auto;
+    border-top: 1px solid var(--border-light);
+    line-height: 1;
+}
+.sponsor-card-date svg {
+    display: block;
+    width: var(--icon-sm);
+    height: var(--icon-sm);
+    flex-shrink: 0;
+    opacity: 0.55;
+}
+.sponsor-card-date-text {
+    font-family: var(--font-data);
+    font-size: 12px;
+    color: var(--text-dim);
+}
+
+/* Sponsor public card (L3 item layer) */
+.sponsor-public-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    border-radius: var(--radius-lg);
+    border: none !important;
+    background: color-mix(in srgb, var(--glass-base) calc(var(--widget-alpha) * 100%), transparent);
+    backdrop-filter: blur(var(--widget-blur));
+    -webkit-backdrop-filter: blur(var(--widget-blur));
+    /* Card body painting is off limits here: resting shadow on the ::before
+       overlay; hover glow/sweep on shared .hg-glow/.hg-sweep layers (decision
+       30); the lift is a pure compositor transform, verified not to re-raster
+       the backdrop, so the card body is preserved */
+    transition: transform 0.22s var(--card-ease);
+}
+/* Border ring + resting shadow live on ::before (a separate paint layer that
+   never changes — keep the L1C transition:none pin). Hover glow/sweep live on
+   shared hg-* layers: a transitioning pseudo-element box-shadow repaints every
+   frame, and the dirty-rect union with the card body flashes square corners
+   over the rounded backdrop (QR card hover-out flash, 2026-09-14). */
+.sponsor-public-card::before {
+    content: '';
+    display: block;
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 1px solid var(--widget-border);
+    box-sizing: border-box;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 1;
+    background: transparent;
+    box-shadow: var(--widget-shadow);
+}
+/* Hover: glow/sweep fade in via opacity (shared hg-* layers, decision 30) plus
+   card lift via transform (pure compositor, verified safe in S2) */
+.sponsor-public-card:hover {
+    transform: translateY(-2px);
+}
+/* Sweep moved to the shared .hg-sweep layer (decision 30): pixel-identical
+   structure, path and easing, including the will-change:transform pin — see
+   hover-layers.css for the Safari compositor-layer reclaim rule. */
+.sponsor-public-card.is-pressing {
+    transform: scale(0.98);
+}
+
+.sponsor-public-actions,
+.sponsor-public-del {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    z-index: 4;
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.9);
+    transition: opacity var(--duration-fast, 0.2s) var(--ease-out, ease), transform var(--duration-fast, 0.2s) var(--ease-out, ease);
+}
+.sponsor-grid.is-edit-mode .sponsor-public-actions,
+#sponsor-grid.is-edit-mode .sponsor-public-actions {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1);
+}
+
+.sponsor-grid.is-edit-mode .sponsor-public-card,
+#sponsor-grid.is-edit-mode .sponsor-public-card {
+    cursor: pointer;
+    outline: 1.5px dashed var(--accent);
+    outline-offset: -2px;
+}
+
+.sponsor-public-action-btn,
+.sponsor-public-del-btn {
+    background: var(--bg-nav, rgba(0, 0, 0, 0.2));
+    border: 1px solid var(--border-light);
+    cursor: pointer;
+    color: var(--text-dim);
+    padding: 5px;
+    line-height: 1;
+    border-radius: var(--radius-sm, 6px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: color var(--duration-fast), background var(--duration-fast), border-color var(--duration-fast);
+}
+.sponsor-public-action-btn:hover {
+    color: var(--accent);
+    background: var(--hover-bg);
+    border-color: var(--accent);
+}
+.sponsor-public-action-btn--del:hover,
+.sponsor-public-del-btn:hover {
+    color: var(--danger-red);
+    background: var(--hover-bg);
+    border-color: var(--danger-red);
+}
+.sponsor-public-action-btn svg,
+.sponsor-public-del-btn svg {
+    width: 13px;
+    height: 13px;
+    display: block;
+}
+
+/* Sponsor floating edit bar (long-press trigger; pill shifted down to avoid
+   covering cards) */
+.chromium .sponsor-qr-card {
+    position: relative;
+    --glass-blur-fallback: var(--widget-blur);
+    --glass-tint: color-mix(in srgb, var(--glass-base) calc(var(--widget-alpha) * 100%), transparent);
+}
+.chromium .sponsor-public-card {
+    position: relative;
+    --glass-blur-fallback: var(--widget-blur);
+    --glass-tint: color-mix(in srgb, var(--glass-base) calc(var(--widget-alpha) * 100%), transparent);
+}
+.chromium .sponsor-public-card:hover > .g-tint {
+    --glass-tint: color-mix(in srgb, var(--glass-base) calc(var(--sponsor-alpha-hover, calc(var(--widget-alpha) + 0.04)) * 100%), transparent);
+}

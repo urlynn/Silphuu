@@ -1,0 +1,349 @@
+/* Article Page Element Overrides */
+/* Color rules now use theme-aware CSS variables and apply globally.
+   Selectors that retain :is([data-theme$="-light"]) do so because
+   they still hold hardcoded values (rgba gradients, #fff, box-shadow)
+   not covered by the variable mapping, or are purely structural
+   (border-radius / opacity / padding / offset) with no var() value. */
+
+.article-edit-btn { color: var(--text-dim); }
+.article-edit-btn:hover { color: var(--accent); }
+
+.back-link {
+    color: var(--text-dim);
+}
+
+.back-link:hover {
+    color: var(--accent);
+}
+
+.footer-label {
+    color: var(--text-dim);
+}
+
+.footer-meta {
+    color: var(--text-dim);
+}
+
+:is([data-theme$="-light"]) .bg-base {
+    background:
+        radial-gradient(ellipse at 20% 40%, var(--accent-soft) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 30%, var(--border-light) 0%, transparent 50%),
+        linear-gradient(135deg, var(--bg-body) 0%, var(--bg-glass-alt) 50%, var(--bg-body) 100%);
+}
+
+:is([data-theme$="-light"]) .mask {
+    background: transparent;
+}
+
+/* READ surface (L1A + component override protocol + paper dual mode):
+   default translucency via --article-* overrides of L1A defaults; paper mode via [data-read-mode="paper"] switching to 0.88. */
+.post-article {
+    background: color-mix(in srgb, var(--glass-base) calc(var(--article-alpha, var(--panel-alpha)) * 100%), transparent);
+    backdrop-filter: blur(var(--article-blur, var(--panel-blur)));
+    -webkit-backdrop-filter: blur(var(--article-blur, var(--panel-blur)));
+    border: none !important;
+    box-shadow: var(--panel-shadow);
+}
+/* Never add transform: translateZ(0) here: it would make .post-article the containing
+   block for fixed/absolute descendants and re-anchor fixed elements (lightbox, copy
+   button, overlays) to the article; Safari backdrop-filter is handled by .post-frost
+   (initWebKitArticleFrost in src/js/parts/14-backdrop.js), so no layer promotion needed. */
+
+[data-read-mode="paper"] .post-article {
+    --article-alpha: 0.88;
+}
+
+.article-title {
+    color: var(--text-primary);
+}
+
+.article-content {
+    color: var(--text-primary);
+}
+
+.article-content h1,
+.article-content h2,
+.article-content h3 {
+    color: var(--text-primary);
+}
+
+.article-content table th,
+.article-content table td {
+    border: 1px solid var(--border-light);
+}
+
+.article-content pre {
+    background: var(--bg-chroma);
+    border: 1px solid var(--border-subtle);
+}
+
+.article-content hr {
+    border-top: 1px solid var(--border-subtle);
+}
+
+.article-footer {
+    border-top: 1px solid var(--border-subtle);
+}
+
+.footer-text {
+    color: var(--text-dim);
+}
+
+.footer-support {
+    color: var(--text-dim);
+}
+
+.footer-rss {
+    color: var(--text-dim);
+}
+
+.footer-rss:hover {
+    color: var(--accent);
+}
+
+:is([data-theme$="-light"]) .footer {
+    padding-bottom: 60px;
+}
+
+.article-date {
+    color: var(--text-dim);
+}
+
+.article-date svg,
+.article-words svg,
+.article-views svg,
+.article-updated svg {
+    /* Sizing and alignment are handled by .article-meta svg; only opacity kept here */
+    opacity: 0.55;
+}
+
+.article-words {
+    color: var(--text-dim);
+}
+
+.article-updated {
+    color: var(--text-dim);
+}
+
+.article-views {
+    color: var(--text-dim);
+}
+
+.post-sidebar,
+.post-sidebar-right {
+    backdrop-filter: blur(var(--blur-amount));
+    -webkit-backdrop-filter: blur(var(--blur-amount));
+}
+
+.sidebar-title {
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.sidebar-title-link {
+    color: var(--text-dim);
+}
+
+.sidebar-link {
+    color: var(--text-muted);
+}
+
+.cat-name {
+    color: var(--text-muted);
+}
+
+.cat-arrow {
+    color: var(--text-dim);
+}
+
+.cat-count {
+    color: var(--text-dim);
+}
+
+.cat-header {
+    border-radius: 10px;
+}
+
+.cat-post {
+    color: var(--text-muted);
+    border-radius: 10px;
+}
+
+.sidebar-link {
+    border-radius: 10px;
+}
+
+.cat-post-date {
+    color: var(--text-dim);
+}
+
+.cat-post:hover .cat-post-date {
+    color: var(--text-dim);
+}
+
+a.toc-item {
+    color: var(--text-muted);
+}
+
+a.toc-item:hover {
+    color: var(--accent);
+}
+
+.toc-empty {
+    color: var(--text-dim);
+}
+
+.nav-icon-bar {
+    background: var(--bg-subtle);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-subtle);
+}
+
+.nav-icon {
+    color: var(--text-muted);
+}
+
+.nav-icon:hover {
+    background: var(--hover-bg);
+    color: var(--accent);
+}
+
+.nav-icon span {
+    color: var(--text-dim);
+}
+.nav-icon:hover span,
+.nav-icon-group:hover .nav-icon span {
+    color: inherit;
+}
+.nav-icon-active span {
+    color: inherit;
+}
+
+.nav-search-global-inner {
+    background: color-mix(in srgb, var(--glass-base) calc(var(--glass-l2-alpha) * 100%), transparent);
+    backdrop-filter: var(--glass-l2-filter);
+    -webkit-backdrop-filter: var(--glass-l2-filter);
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-card);
+}
+
+.nav-search-input {
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-light);
+    color: var(--text-muted);
+}
+
+.nav-search-input:focus {
+    border-color: var(--border-light);
+    color: var(--text-primary);
+}
+
+:is([data-theme$="-light"]) .nav-search-global {
+    top: calc(100% + 8px);
+}
+
+.nav-search-input::placeholder {
+    color: var(--text-dim);
+}
+
+.nav-dropdown {
+    top: calc(100% + 13px);
+    background: color-mix(in srgb, var(--glass-base) calc(var(--glass-l2-alpha) * 100%), transparent);
+    backdrop-filter: var(--glass-l2-filter);
+    -webkit-backdrop-filter: var(--glass-l2-filter);
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-card);
+}
+
+.nav-dropdown-item {
+    color: var(--text-muted);
+}
+
+.nav-dropdown-item:hover {
+    background: var(--hover-bg);
+    color: var(--accent);
+}
+
+.search-dropdown {
+    background: color-mix(in srgb, var(--glass-base) calc(var(--glass-l2-alpha) * 100%), transparent);
+    backdrop-filter: var(--glass-l2-filter);
+    -webkit-backdrop-filter: var(--glass-l2-filter);
+    border: 1px solid var(--border-light);
+}
+
+.search-item {
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.search-item:hover {
+    background: var(--hover-bg);
+    color: var(--accent);
+}
+
+.cmt-empty {
+    color: var(--text-dim);
+}
+
+.cmt-content code {
+    background: var(--bg-subtle);
+}
+
+.cmt-content pre {
+    background: var(--bg-subtle);
+}
+
+.cmt-preview {
+    color: var(--text-muted);
+}
+
+.cmt-preview-title {
+    color: var(--text-dim);
+}
+
+:is([data-theme$="-light"]) .bg-shape {
+    opacity: 0.15;
+}
+
+.ft-pill .footer-inner {
+    background: color-mix(in srgb, var(--glass-base) calc(var(--notice-alpha) * 100%), transparent);
+    border: 1px solid var(--notice-border);
+}
+
+/* Tag pills (light) */
+.tag-pill {
+    background: var(--bg-subtle);
+    color: var(--text-muted);
+}
+.tag-pill:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+.tag-float-pill {
+    background: var(--bg-subtle);
+    color: var(--text-muted);
+    border-color: var(--border-subtle);
+}
+.tag-float-pill:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+.cat-float-pill {
+    background: color-mix(in srgb, var(--glass-base) calc(var(--row-alpha) * 100%), transparent);
+    border-color: var(--row-border-hover);
+    backdrop-filter: blur(var(--row-blur));
+    -webkit-backdrop-filter: blur(var(--row-blur));
+}
+
+/* Active cat-post color (light) */
+
+/* Chromium fallback: glass replica of the article body, 24px blur;
+   box-shadow comes from .glass (not overridden here). The trio are absolutely positioned
+   negative-z sibling layers and must never wrap .article-content, so the body's
+   shattered-ink/FLIP animations are unaffected by the filter containing block. */
+.chromium .post-article {
+    position: relative;
+    --glass-blur-fallback: var(--article-blur, var(--panel-blur));
+    --glass-tint: color-mix(in srgb, var(--glass-base) calc(var(--article-alpha, var(--panel-alpha)) * 100%), transparent);
+}

@@ -1,0 +1,1297 @@
+{
+  "author": {
+    "photo": {
+      "delete_sel": {
+        "text": "删除选中",
+        "role": "body"
+      },
+      "upload": {
+        "text": "上传照片",
+        "role": "body"
+      }
+    }
+  },
+  "cat_scheme": {
+    "fab": {
+      "opt": {
+        "banner": {
+          "text": "向右",
+          "role": "body"
+        },
+        "fan": {
+          "text": "扇形",
+          "role": "body"
+        },
+        "popover": {
+          "text": "向上",
+          "role": "body"
+        },
+        "stack": {
+          "text": "向下",
+          "role": "body"
+        }
+      },
+      "toggle": {
+        "text": "切换分类方案",
+        "role": "native"
+      }
+    }
+  },
+  "comment": {
+    "avatar": {
+      "dialog_title": {
+        "text": "设置头像",
+        "role": "body"
+      },
+      "dialog_hint": {
+        "text": "粘贴图片链接，留空使用默认头像",
+        "role": "body"
+      },
+      "placeholder": {
+        "text": "https://…",
+        "role": "body"
+      },
+      "preview_ok": {
+        "text": "预览",
+        "role": "body"
+      },
+      "preview_fail": {
+        "text": "这张图片加载不了，换一个链接",
+        "role": "body"
+      },
+      "clear": {
+        "text": "恢复默认",
+        "role": "body"
+      },
+      "confirm": {
+        "text": "确定",
+        "role": "body"
+      }
+    },
+    "form": {
+      "cancel_reply": {
+        "text": "取消回复",
+        "role": "native"
+      },
+      "field": {
+        "content": {
+          "placeholder": {
+            "text": "欢迎评论",
+            "role": "body"
+          },
+          "placeholder_guestbook": {
+            "text": "写下你想说的话...",
+            "role": "body"
+          }
+        },
+        "email": {
+          "label": {
+            "text": "邮箱",
+            "role": "body"
+          },
+          "placeholder": {
+            "text": "回复通知",
+            "role": "body"
+          }
+        },
+        "nickname": {
+          "label": {
+            "text": "昵称",
+            "role": "body"
+          },
+          "placeholder": {
+            "text": "可选",
+            "role": "body"
+          }
+        },
+        "website": {
+          "label": {
+            "text": "网站",
+            "role": "body"
+          },
+          "placeholder": {
+            "text": "https://",
+            "role": "body"
+          }
+        }
+      },
+      "submit": {
+        "default": {
+          "text": "提交",
+          "role": "body"
+        },
+        "guestbook": {
+          "text": "发表留言",
+          "role": "body"
+        }
+      },
+      "toolbar": {
+        "avatar": {
+          "text": "头像",
+          "role": "native"
+        },
+        "emoji": {
+          "text": "表情",
+          "role": "native"
+        },
+        "preview": {
+          "text": "预览",
+          "role": "native"
+        },
+        "upload_image": {
+          "text": "上传图片",
+          "role": "native"
+        }
+      },
+      "sticker_mode": {
+        "animated": {
+          "text": "动",
+          "role": "body"
+        },
+        "static": {
+          "text": "静",
+          "role": "body"
+        }
+      }
+    },
+    "list": {
+      "empty": {
+        "text": "暂无评论，快来抢沙发！",
+        "role": "body"
+      }
+    },
+    "preview": {
+      "title": {
+        "text": "预览",
+        "role": "cmt"
+      }
+    },
+    "sort": {
+      "hottest": {
+        "text": "按热度",
+        "role": "body"
+      },
+      "newest": {
+        "text": "按倒序",
+        "role": "body"
+      },
+      "oldest": {
+        "text": "按正序",
+        "role": "body"
+      }
+    },
+    "sticker": {
+      "contribute": {
+        "text": "贡献表情包",
+        "role": "body"
+      },
+      "field": {
+        "file": {
+          "label": {
+            "text": "选择文件：",
+            "role": "body"
+          }
+        },
+        "name": {
+          "label": {
+            "text": "表情包名称：",
+            "role": "body"
+          },
+          "placeholder": {
+            "text": "例如：新表情",
+            "role": "body"
+          }
+        }
+      },
+      "submit": {
+        "text": "提交",
+        "role": "body"
+      }
+    }
+  },
+  "common": {
+    "action": {
+      "back": {
+        "text": "返回",
+        "role": "body"
+      },
+      "add": {
+        "text": "添加",
+        "role": "body"
+      },
+      "cancel": {
+        "text": "取消",
+        "role": "body"
+      },
+      "delete": {
+        "text": "删除",
+        "role": "body"
+      },
+      "edit": {
+        "text": "编辑",
+        "role": "body"
+      },
+      "save": {
+        "text": "保存",
+        "role": "body"
+      }
+    },
+    "count": {
+      "prefix": {
+        "text": "共",
+        "role": "body"
+      }
+    },
+    "input": {
+      "message": {
+        "text": "留言",
+        "role": "body"
+      },
+      "nickname": {
+        "text": "昵称",
+        "role": "body"
+      }
+    },
+    "unit": {
+      "char": {
+        "text": "字",
+        "role": "body"
+      }
+    }
+  },
+  "convert": {
+    "result": {
+      "back": {
+        "text": "返回管理后台",
+        "role": "body"
+      },
+      "download_prefix": {
+        "text": "下载",
+        "role": "body"
+      },
+      "download_suffix": {
+        "text": "文件",
+        "role": "body"
+      },
+      "preview_alt": {
+        "text": "转换结果预览",
+        "role": "body"
+      },
+      "title": {
+        "text": "转换完成",
+        "role": "body"
+      }
+    }
+  },
+  "editor": {
+    "field": {
+      "category": {
+        "text": "分类",
+        "role": "body"
+      },
+      "slug": {
+        "text": "文件名 (slug)",
+        "role": "body"
+      },
+      "summary": {
+        "text": "摘要（留空自动取第一句）",
+        "role": "body"
+      },
+      "tags": {
+        "text": "标签 (逗号分隔)",
+        "role": "body"
+      }
+    },
+    "nav": {
+      "manage": {
+        "text": "管理",
+        "role": "body"
+      }
+    },
+    "pane": {
+      "edit": {
+        "text": "编辑",
+        "role": "body"
+      },
+      "image": {
+        "text": "上传图片",
+        "role": "body"
+      },
+      "markdown_ph": {
+        "text": "在此编写 Markdown...",
+        "role": "mono"
+      }
+    }
+  },
+  "float_toolbar": {
+    "browse": {
+      "opt": {
+        "cards": {
+          "text": "卡片",
+          "role": "body"
+        },
+        "compact": {
+          "text": "胶囊",
+          "role": "body"
+        },
+        "ribbon": {
+          "text": "横带",
+          "role": "body"
+        },
+        "split": {
+          "text": "分栏",
+          "role": "body"
+        },
+        "spotlight": {
+          "text": "展板",
+          "role": "body"
+        }
+      },
+      "toggle": {
+        "text": "切换浏览头部方案",
+        "role": "native"
+      }
+    },
+    "layout": {
+      "opt": {
+        "merged": {
+          "text": "合并",
+          "role": "body"
+        },
+        "split": {
+          "text": "分立",
+          "role": "body"
+        },
+        "split_with_banner": {
+          "text": "横幅",
+          "role": "body"
+        }
+      },
+      "toggle": {
+        "text": "切换整体布局",
+        "role": "native"
+      }
+    }
+  },
+  "footer": {
+    "copy": {
+      "name": {
+        "text": "Your Name",
+        "role": "footer"
+      },
+      "year": {
+        "text": "2026",
+        "role": "footer"
+      }
+    },
+    "support": {
+      "rss": {
+        "text": "RSS 订阅",
+        "role": "footer"
+      }
+    },
+    "tech": {
+      "avif": {
+        "text": "AVIF",
+        "role": "footer"
+      },
+      "htmx": {
+        "text": "HTMX 4.0",
+        "role": "footer"
+      },
+      "jxl": {
+        "text": "本站支持 - JPEG XL",
+        "role": "footer"
+      },
+      "quic": {
+        "text": "QUIC",
+        "role": "footer"
+      }
+    }
+  },
+  "friends": {
+    "header": {
+      "notice": {
+        "text": "以下链接均为外部资源，点击将在新标签页打开。",
+        "role": "body"
+      },
+      "subtitle": {
+        "text": "汇集一些有趣的项目与工具，欢迎探索。",
+        "role": "body"
+      }
+    },
+    "list": {
+      "empty": {
+        "text": "暂无友链",
+        "role": "body"
+      },
+      "title": {
+        "text": "友链列表",
+        "role": "body"
+      }
+    },
+    "edit": {
+      "mode": {
+        "text": "编辑模式",
+        "role": "body"
+      },
+      "done": {
+        "text": "完成",
+        "role": "body"
+      }
+    },
+    "pending": {
+      "title": {
+        "text": "待审申请",
+        "role": "body"
+      },
+      "approve": {
+        "text": "通过",
+        "role": "body"
+      }
+    },
+    "modal": {
+      "apply_title": {
+        "text": "申请友链",
+        "role": "body"
+      },
+      "add_title": {
+        "text": "添加友链",
+        "role": "body"
+      },
+      "edit_title": {
+        "text": "编辑友链",
+        "role": "body"
+      },
+      "apply_btn": {
+        "text": "申请友链",
+        "role": "body"
+      },
+      "name": {
+        "text": "站点名称",
+        "role": "body"
+      },
+      "url": {
+        "text": "站点链接",
+        "role": "body"
+      },
+      "desc": {
+        "text": "站点描述",
+        "role": "body"
+      },
+      "tag": {
+        "text": "标签分类",
+        "role": "body"
+      },
+      "email": {
+        "text": "联系邮箱",
+        "role": "body"
+      },
+      "svg": {
+        "text": "SVG 图标代码",
+        "role": "body"
+      },
+      "svg_placeholder": {
+        "text": "<svg viewBox=\"0 0 24 24\" ...> ... </svg>",
+        "role": "native"
+      },
+      "svg_hint": {
+        "text": "粘贴完整 SVG 文本",
+        "role": "body"
+      },
+      "preview": {
+        "text": "图标实时预览",
+        "role": "body"
+      },
+      "submit_apply": {
+        "text": "提交申请",
+        "role": "body"
+      },
+      "submit_add": {
+        "text": "确认",
+        "role": "body"
+      },
+      "error_svg": {
+        "text": "SVG 格式无效",
+        "role": "body"
+      },
+      "applied_toast": {
+        "text": "友链申请已提交！已发送通知给博主，审核后将会显示。",
+        "role": "body"
+      }
+    }
+  },
+  "guestbook": {
+    "hero": {
+      "cta": {
+        "text": "留下足迹",
+        "role": "body"
+      },
+      "cta_hint": {
+        "text": "添加留言",
+        "role": "native"
+      },
+      "subtitle": {
+        "text": "有什么想说的，留下你的足迹",
+        "role": "body"
+      },
+      "title": {
+        "text": "留言板",
+        "role": "body"
+      }
+    },
+    "list": {
+      "empty": {
+        "text": "还没有留言，来第一条吧",
+        "role": "body"
+      },
+      "count_unit": {
+        "text": "条足迹",
+        "role": "body"
+      }
+    }
+  },
+  "fun_error": {
+    "hero": {
+      "subtitle": {
+        "text": "翻牌子抽一个错误码，看看你今天的手气",
+        "role": "body"
+      },
+      "title": {
+        "text": "随机拉拉肥",
+        "role": "body"
+      },
+      "reroll": {
+        "text": "再掷一次",
+        "role": "fun_reroll"
+      }
+    },
+    "cards": {
+      "403": {
+        "code": "403",
+        "title_tag": "403 Forbidden - Tataru",
+        "accent": "#ff4d4f",
+        "pill_bg": "rgba(255, 77, 79, 0.12)",
+        "pill_border": "#ff4d4f",
+        "box_shadow": "0 0 6px rgba(255, 77, 79, 0.45), 0 0 12px rgba(255, 77, 79, 0.2)",
+        "img_scale": "calc(100% * 768 / 1536)",
+        "glitch": true,
+        "link": "/",
+        "pill": {
+          "text": "4O3 · BEHIND YOU",
+          "role": "fun_pill"
+        },
+        "title": {
+          "text": "闭上眼睛...就不会觉得痛了哦？",
+          "role": "fun_title"
+        },
+        "desc": {
+          "text": "YOU SHOULDN'T BE HERE",
+          "role": "fun_desc"
+        },
+        "btn": {
+          "text": "在恋恋动手前拔掉网线",
+          "role": "fun_btn"
+        }
+      },
+      "404": {
+        "code": "404",
+        "title_tag": "404 Not Found - Tataru",
+        "accent": "#58a6ff",
+        "pill_bg": "rgba(88, 166, 255, 0.12)",
+        "pill_border": "#58a6ff",
+        "box_shadow": "0 0 6px rgba(88, 166, 255, 0.45), 0 0 12px rgba(88, 166, 255, 0.2)",
+        "img_scale": "calc(100% * 1192 / 1536)",
+        "glitch": false,
+        "link": "/",
+        "pill": {
+          "text": "4O4 · NOT FOOD",
+          "role": "fun_pill"
+        },
+        "title": {
+          "text": "页面已经被当成应急食材煮掉啦！",
+          "role": "fun_title"
+        },
+        "desc": {
+          "text": "Lalafell ≠ Popoto!",
+          "role": "fun_desc"
+        },
+        "btn": {
+          "text": "抢救锅里的拉拉肥",
+          "role": "fun_btn"
+        }
+      },
+      "418": {
+        "code": "418",
+        "title_tag": "418 I'm a Lalafell - Tataru",
+        "accent": "#ff7b72",
+        "pill_bg": "rgba(255, 123, 114, 0.12)",
+        "pill_border": "#ff7b72",
+        "box_shadow": "0 0 6px rgba(255, 123, 114, 0.45), 0 0 12px rgba(255, 123, 114, 0.2)",
+        "img_scale": "calc(100% * 1192 / 1536)",
+        "glitch": false,
+        "link": "/",
+        "pill": {
+          "text": "418 · I'M A LALAFELL",
+          "role": "fun_pill"
+        },
+        "title": {
+          "text": "拉拉菲尔无情的拒绝了你的请求！",
+          "role": "fun_title"
+        },
+        "desc": {
+          "text": "Lalafell says No!",
+          "role": "fun_desc"
+        },
+        "btn": {
+          "text": "返回博客主页",
+          "role": "fun_btn"
+        }
+      },
+      "429": {
+        "code": "429",
+        "title_tag": "429 Too Many Requests - Tataru",
+        "accent": "#f0883e",
+        "pill_bg": "rgba(240, 136, 62, 0.12)",
+        "pill_border": "#f0883e",
+        "box_shadow": "0 0 6px rgba(240, 136, 62, 0.45), 0 0 12px rgba(240, 136, 62, 0.2)",
+        "img_scale": "calc(100% * 1187 / 1536)",
+        "glitch": false,
+        "link": "/",
+        "pill": {
+          "text": "429 · OVERLOAD",
+          "role": "fun_pill"
+        },
+        "title": {
+          "text": "不要再戳啦！肥肥快要被戳晕了！",
+          "role": "fun_title"
+        },
+        "desc": {
+          "text": "Too many clicks!",
+          "role": "fun_desc"
+        },
+        "btn": {
+          "text": "稍后再来和肥肥贴贴",
+          "role": "fun_btn"
+        }
+      },
+      "502": {
+        "code": "502",
+        "title_tag": "502 Bad Gateway - Tataru",
+        "accent": "#bc8cff",
+        "pill_bg": "rgba(188, 140, 255, 0.12)",
+        "pill_border": "#bc8cff",
+        "box_shadow": "0 0 6px rgba(188, 140, 255, 0.45), 0 0 12px rgba(188, 140, 255, 0.2)",
+        "img_scale": "calc(100% * 1192 / 1536)",
+        "glitch": false,
+        "link": "/",
+        "pill": {
+          "text": "5O2 · SLEEPY TATARU",
+          "role": "fun_pill"
+        },
+        "title": {
+          "text": "再睡五分钟嘛～等睡醒站点马上就上线！",
+          "role": "fun_title"
+        },
+        "desc": {
+          "text": "ZZZ · SLEEPING POPOTO",
+          "role": "fun_desc"
+        },
+        "btn": {
+          "text": "Coming soon... 敬请期待！",
+          "role": "fun_btn"
+        }
+      }
+    }
+  },
+  "home": {
+    "anchor": {
+      "label": {
+        "text": "POSITION",
+        "role": "display_mono"
+      }
+    },
+    "brand": {
+      "decor": {
+        "text": "HW  9950X",
+        "role": "body"
+      },
+      "full": {
+        "text": "Silphuu",
+        "role": "display_heading"
+      }
+    },
+    "hero": {
+      "blog": {
+        "text": "SW  Go 1.26",
+        "role": "display_mono"
+      },
+      "eyebrow": {
+        "text": "HELLO · I'M",
+        "role": "display_mono"
+      },
+      "open": {
+        "text": "OS  Gentoo",
+        "role": "display_mono"
+      },
+      "signature_edit": {
+        "text": "双击编辑签名",
+        "role": "native"
+      },
+      "tag": {
+        "backend": {
+          "text": "后端",
+          "role": "display_mono"
+        },
+        "linux": {
+          "text": "GNU/Linux",
+          "role": "display_mono"
+        },
+        "rust": {
+          "text": "Rust",
+          "role": "display_mono"
+        }
+      }
+    },
+    "post_card": {
+      "toggle": {
+        "text": "切换信息位置",
+        "role": "native"
+      },
+      "toggle_aria": {
+        "text": "切换首屏信息位置",
+        "role": "native"
+      }
+    },
+    "rail": {
+      "label": {
+        "text": "WELCOME",
+        "role": "display_mono"
+      },
+      "micro1": {
+        "text": "アタシ 再生産",
+        "role": "display_jp"
+      },
+      "scroll": {
+        "text": "SCROLL",
+        "role": "display_mono"
+      },
+      "scroll_stats": {
+        "text": "向下滚动到站点数据",
+        "role": "native"
+      }
+    },
+    "pinned": {
+      "badge": {
+        "text": "置顶",
+        "role": "body"
+      },
+      "ribbon": {
+        "text": "PINNED",
+        "role": "display_mono"
+      }
+    },
+    "latest": {
+      "badge": {
+        "text": "最新",
+        "role": "body"
+      }
+    },
+    "section": {
+      "kicker": {
+        "text": "STATS",
+        "role": "display_mono"
+      },
+      "posts_kicker": {
+        "text": "POSTS",
+        "role": "display_mono"
+      },
+      "posts_title": {
+        "text": "最新文章",
+        "role": "display_heading"
+      },
+      "title": {
+        "text": "站点数据",
+        "role": "display_heading"
+      }
+    },
+    "stat": {
+      "cats": {
+        "text": "个分类",
+        "role": "caption"
+      },
+      "posts": {
+        "text": "文章",
+        "role": "display_body"
+      },
+      "tags": {
+        "text": "个标签",
+        "role": "caption"
+      },
+      "today_views": {
+        "text": "今日浏览",
+        "role": "display_body"
+      },
+      "total_pv": {
+        "text": "总浏览",
+        "role": "caption"
+      },
+      "total_uv": {
+        "text": "总访客",
+        "role": "caption"
+      },
+      "words_unit": {
+        "text": "字",
+        "role": "body"
+      }
+    }
+  },
+  "login": {
+    "form": {
+      "password": {
+        "text": "密码",
+        "role": "body"
+      },
+      "submit": {
+        "text": "进入",
+        "role": "body"
+      },
+      "title": {
+        "text": "登录",
+        "role": "body"
+      }
+    }
+  },
+  "nav": {
+    "filter": {
+      "cat_title": {
+        "text": "分类",
+        "role": "body"
+      },
+      "tag_title": {
+        "text": "标签",
+        "role": "body"
+      },
+      "toggle": {
+        "text": "分类 / 标签",
+        "role": "native"
+      }
+    },
+    "menu": {
+      "about": {
+        "text": "小屋",
+        "role": "body"
+      },
+      "archive": {
+        "text": "归档",
+        "role": "body"
+      },
+      "articles": {
+        "text": "文章",
+        "role": "display_body"
+      },
+      "author": {
+        "text": "作者",
+        "role": "body"
+      },
+      "friends": {
+        "text": "友链",
+        "role": "body"
+      },
+      "guestbook": {
+        "text": "留言",
+        "role": "body"
+      },
+      "fun": {
+        "text": "互动",
+        "role": "body"
+      },
+      "fun_error": {
+        "text": "随机拉拉肥",
+        "role": "body"
+      },
+      "admin": {
+        "text": "管理",
+        "role": "body"
+      },
+      "admin_panel": {
+        "text": "管理",
+        "role": "body"
+      },
+      "admin_status": {
+        "text": "状态",
+        "role": "body"
+      },
+      "home": {
+        "text": "首页",
+        "role": "body"
+      },
+      "sponsor": {
+        "text": "赞助",
+        "role": "body"
+      }
+    },
+    "search": {
+      "close": {
+        "text": "关闭搜索",
+        "role": "native"
+      },
+      "input_ph": {
+        "text": "搜索文章...",
+        "role": "body"
+      },
+      "toggle": {
+        "text": "搜索",
+        "role": "native"
+      }
+    }
+  },
+  "post": {
+    "comments": {
+      "count_unit": {
+        "text": "评论",
+        "role": "body"
+      },
+      "title": {
+        "text": "评论",
+        "role": "body"
+      }
+    },
+    "license": {
+      "cc": {
+        "text": "CC BY-NC-SA 4.0",
+        "role": "caption"
+      },
+      "emoji": {
+        "text": "请喝奶茶",
+        "role": "caption"
+      },
+      "label": {
+        "text": "许可",
+        "role": "caption"
+      }
+    },
+    "meta": {
+      "author": {
+        "text": "作者",
+        "role": "body"
+      },
+      "edit": {
+        "text": "Edit",
+        "role": "caption"
+      },
+      "reading": {
+        "text": "阅读",
+        "role": "caption"
+      },
+      "sponsor": {
+        "text": "赞助",
+        "role": "caption"
+      },
+      "updated": {
+        "text": "最近编辑",
+        "role": "caption"
+      }
+    },
+    "sidebar": {
+      "all_posts": {
+        "text": "所有文章",
+        "role": "body"
+      }
+    },
+    "toc": {
+      "title": {
+        "text": "目录",
+        "role": "body"
+      }
+    }
+  },
+  "posts": {
+    "archive": {
+      "month": {
+        "text": "月",
+        "role": "body"
+      },
+      "post_unit": {
+        "text": "篇",
+        "role": "body"
+      },
+      "year": {
+        "text": "年",
+        "role": "body"
+      }
+    },
+    "count": {
+      "suffix": {
+        "text": "篇文章",
+        "role": "body"
+      }
+    },
+    "header": {
+      "archive_title": {
+        "text": "文章归档",
+        "role": "body"
+      },
+      "tag_unit": {
+        "text": "个标签",
+        "role": "body"
+      },
+      "tags_hint": {
+        "text": "滚动查看标签",
+        "role": "body"
+      },
+      "tags_title": {
+        "text": "标签过滤",
+        "role": "body"
+      }
+    },
+    "list": {
+      "empty": {
+        "text": "暂无文章",
+        "role": "body"
+      }
+    }
+  },
+  "profile": {
+    "card": {
+      "avatar_alt": {
+        "text": "avatar",
+        "role": "native"
+      },
+      "edit_hint": {
+        "text": "点击编辑",
+        "role": "native"
+      },
+      "new_post": {
+        "text": "新建文章",
+        "role": "native"
+      }
+    }
+  },
+  "search": {
+    "count": {
+      "suffix": {
+        "text": "个结果",
+        "role": "body"
+      }
+    },
+    "header": {
+      "title": {
+        "text": "搜索",
+        "role": "data"
+      }
+    },
+    "list": {
+      "empty": {
+        "text": "未找到匹配结果",
+        "role": "body"
+      }
+    }
+  },
+  "sponsor": {
+    "channel": {
+      "alipay": {
+        "desc": {
+          "text": "使用支付宝扫码打赏",
+          "role": "body"
+        },
+        "link": {
+          "text": "",
+          "role": "url"
+        },
+        "link_aria": {
+          "text": "支付宝收款码",
+          "role": "native"
+        },
+        "name": {
+          "text": "支付宝",
+          "role": "body"
+        }
+      },
+      "wechat": {
+        "desc": {
+          "text": "使用微信扫码打赏",
+          "role": "body"
+        },
+        "link": {
+          "text": "",
+          "role": "url"
+        },
+        "link_aria": {
+          "text": "微信收款码",
+          "role": "native"
+        },
+        "name": {
+          "text": "微信",
+          "role": "body"
+        }
+      }
+    },
+    "header": {
+      "notice": {
+        "text": "每一笔赞助，将用于服务器维护、内容创作与功能开发",
+        "role": "body"
+      },
+      "subtitle": {
+        "text": "感谢您的赞助与支持！",
+        "role": "body"
+      },
+      "title": {
+        "text": "赞助",
+        "role": "body"
+      }
+    },
+    "list": {
+      "empty": {
+        "text": "暂无记录",
+        "role": "body"
+      },
+      "title": {
+        "text": "赞助列表",
+        "role": "body"
+      }
+    },
+    "edit": {
+      "btn": {
+        "text": "编辑",
+        "role": "body"
+      },
+      "done": {
+        "text": "完成",
+        "role": "body"
+      },
+      "mode": {
+        "text": "编辑模式",
+        "role": "body"
+      },
+      "title": {
+        "text": "编辑赞助",
+        "role": "body"
+      }
+    },
+    "new": {
+      "amount": {
+        "text": "金额",
+        "role": "body"
+      },
+      "btn": {
+        "text": "新建赞助",
+        "role": "body"
+      },
+      "msg": {
+        "text": "留言（可选）",
+        "role": "body"
+      },
+      "nick": {
+        "text": "昵称",
+        "role": "body"
+      }
+    }
+  },
+  "tag_cloud": {
+    "fab": {
+      "opt": {
+        "arc": {
+          "text": "圆弧",
+          "role": "body"
+        },
+        "bloom": {
+          "text": "自然",
+          "role": "body"
+        },
+        "cascade": {
+          "text": "阶梯",
+          "role": "body"
+        },
+        "fan": {
+          "text": "扇形",
+          "role": "body"
+        },
+        "grid": {
+          "text": "网格",
+          "role": "body"
+        }
+      },
+      "toggle": {
+        "text": "切换标签云方案",
+        "role": "native"
+      }
+    }
+  },
+  "theme": {
+    "fab": {
+      "label": {
+        "text": "THEME",
+        "role": "display_mono"
+      },
+      "toggle": {
+        "text": "切换主题",
+        "role": "native"
+      },
+      "read": {
+        "text": "切换阅读模式",
+        "role": "native"
+      }
+    },
+    "picker": {
+      "title_light": {
+        "text": "Light",
+        "role": "display_mono"
+      },
+      "title_dark": {
+        "text": "Dark",
+        "role": "display_mono"
+      },
+      "themes": {
+        "catppuccin_latte": {
+          "text": "Violet Garden",
+          "role": "display_mono"
+        },
+        "everforest_light": {
+          "text": "Ever Forest",
+          "role": "display_mono"
+        },
+        "sakura_pink": {
+          "text": "Madoka Magica",
+          "role": "display_mono"
+        },
+        "solarized_light": {
+          "text": "Hoseki Phos",
+          "role": "display_mono"
+        },
+        "sunny_light": {
+          "text": "Ijichi Nijika",
+          "role": "display_mono"
+        },
+        "tokyonight_day": {
+          "text": "Sorakado Ao",
+          "role": "display_mono"
+        },
+        "deepocean_dark": {
+          "text": "Sonoda Umi",
+          "role": "display_mono"
+        },
+        "tokyonight_dark": {
+          "text": "Tokyo Night",
+          "role": "display_mono"
+        },
+        "kanagawa_wave": {
+          "text": "Ayanami Rei",
+          "role": "display_mono"
+        },
+        "nord_dark": {
+          "text": "Yuki Setsuna",
+          "role": "display_mono"
+        },
+        "iris_dark": {
+          "text": "Yakumo Yukari",
+          "role": "display_mono"
+        },
+        "coffee_dark": {
+          "text": "Ujimatsu Chiya",
+          "role": "display_mono"
+        }
+      }
+    }
+  }
+}

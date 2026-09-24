@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>新友链申请通知</title>
+</head>
+<body style="margin:0;padding:24px 12px;background-color:#f4f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#2d3748;line-height:1.6;">
+  <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:580px;background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.06);border:1px solid #e2e8f0;">
+    <tr>
+      <td style="padding:24px 28px;background-color:#1a202c;color:#ffffff;">
+        <div style="font-size:16px;font-weight:600;letter-spacing:0.5px;">Silphuu · 友链申请通知</div>
+        <div style="font-size:13px;color:#a0aec0;margin-top:4px;">收到新的友链申请待审核</div>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:28px;">
+        <p style="margin:0 0 16px;font-size:15px;color:#4a5568;">
+          收到来自 <strong>@{{.Name}}</strong> 的友链申请：
+        </p>
+        <table border="0" cellpadding="8" cellspacing="0" width="100%" style="margin:16px 0;background-color:#f7fafc;border-left:4px solid #3182ce;border-radius:4px;font-size:14px;color:#4a5568;">
+          <tr>
+            <td width="80" style="color:#718096;font-weight:600;">站点名称</td>
+            <td><strong>{{.Name}}</strong></td>
+          </tr>
+          <tr>
+            <td style="color:#718096;font-weight:600;">站点链接</td>
+            <td><a href="{{.URL}}" target="_blank" rel="noopener noreferrer" style="color:#3182ce;word-break:break-all;">{{.URL}}</a></td>
+          </tr>
+          <tr>
+            <td style="color:#718096;font-weight:600;">站点简介</td>
+            <td>{{.Desc}}</td>
+          </tr>
+          <tr>
+            <td style="color:#718096;font-weight:600;">标签分类</td>
+            <td><span style="display:inline-block;padding:2px 8px;background:#edf2f7;border-radius:12px;font-size:12px;">{{.Tag}}</span></td>
+          </tr>
+          <tr>
+            <td style="color:#718096;font-weight:600;">联系邮箱</td>
+            <td>{{if .Email}}<a href="mailto:{{.Email}}" style="color:#3182ce;">{{.Email}}</a>{{else}}<span style="color:#a0aec0;">未提供</span>{{end}}</td>
+          </tr>
+          <tr>
+            <td style="color:#718096;font-weight:600;">图标配置</td>
+            <td>
+              {{if .TempSVGPath}}
+              已存为临时 SVG: <code style="background:#e2e8f0;padding:2px 4px;border-radius:3px;font-size:12px;">{{.TempSVGPath}}</code>
+              {{else}}
+              使用内置图标: <code>{{.Icon}}</code>
+              {{end}}
+            </td>
+          </tr>
+          {{if .SVGContent}}
+          <tr>
+            <td style="color:#718096;font-weight:600;">图标预览</td>
+            <td>
+              <div style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:#edf2f7;border-radius:8px;padding:6px;box-sizing:border-box;">
+                {{.SVGContent}}
+              </div>
+            </td>
+          </tr>
+          {{end}}
+        </table>
+        <div style="margin:28px 0 16px;text-align:center;">
+          <a href="{{.PageURL}}" target="_blank" style="display:inline-block;padding:12px 28px;background-color:#3182ce;color:#ffffff;text-decoration:none;font-size:14px;font-weight:500;border-radius:6px;">
+            前往友链页 &rarr;
+          </a>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:18px 28px;background-color:#edf2f7;border-top:1px solid #e2e8f0;font-size:12px;color:#718096;line-height:1.5;">
+        <p style="margin:0;">站点来源：<a href="https://example.com" style="color:#4a5568;text-decoration:underline;">Silphuu (example.com)</a></p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

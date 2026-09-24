@@ -1,0 +1,50 @@
+{{define "guestbook.html"}}
+{{template "base_layout" .}}
+{{end}}
+
+{{define "head_extra"}}
+<link rel="stylesheet" href="{{asset "css/comment.bundle.css"}}">
+<script src="{{asset "js/comment.bundle.js"}}" defer></script>
+{{end}}
+
+{{define "scripts"}}{{end}}
+
+{{define "content"}}
+        <div class="glass-wrap"><div class="profile-card page-card page-card--center" data-backdrop-scene="b">
+    <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div><div class="g-tint"></div><div class="g-noise"></div>
+            <div class="page-hero-icon">{{svg "guestbook"}}</div>
+            <h1 class="page-hero-title">{{.UI.guestbook.hero.title}}</h1>
+            <p class="page-hero-subtitle">{{.UI.guestbook.hero.subtitle}}</p>
+        </div></div>
+
+        <!-- Message input: .cmt-form-card is itself the L1A glass shell (glass.css
+             overlay outline). It takes no second shell — a wrapper would squeeze the
+             card's overlay outline into an "inner border" -->
+        <div class="guestbook-form">
+            {{template "comment_form" .}}
+        </div>
+
+        <!-- Message list -->
+        <div class="gb-list" id="cmt-comment-area" data-post-id="0">
+        {{if .PostComments}}
+            {{range $i, $c := .PostComments}}
+            <div class="glass-wrap" style="--i:{{$i}}"><div class="profile-card" data-cmt-id="{{$c.ID}}" data-rid="{{$c.Rid}}" data-backdrop-scene="b">
+    <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div><div class="g-tint"></div><div class="g-noise"></div>
+                <button class="cmt-del-btn admin-control owner-control" data-id="{{$c.ID}}" title="{{$.UI.common.action.delete}}">{{svg "trash"}}</button>
+                <div class="cmt-item-main">
+                    <div class="cmt-item-meta">
+                        {{if $c.Website}}<a href="{{$c.Website}}" target="_blank" rel="noopener" class="cmt-nick">{{$c.Nick}}</a>{{else}}<span class="cmt-nick">{{$c.Nick}}</span>{{end}}
+                        <span class="cmt-date"><time datetime="{{$c.Date}}" data-ts="{{$c.Date}}">{{$c.Date}}</time></span>
+                    </div>
+                    <div class="cmt-content">{{$c.RenderedContent}}</div>
+                </div>
+            </div></div>
+            {{end}}
+        {{else}}
+        <div class="glass-wrap"><div class="profile-card" data-backdrop-scene="b">
+    <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div><div class="g-tint"></div><div class="g-noise"></div>
+            <p class="cmt-empty">{{.UI.guestbook.list.empty}}</p>
+        </div></div>
+        {{end}}
+        </div>
+{{end}}

@@ -1,0 +1,413 @@
+/* Editor glass on the L0B canvas */
+
+/* Takes over the full screen for an immersive, distraction-free workspace */
+.editor-form[data-theme="frozen-dark"] {
+    --editor-top-bg: rgba(236, 239, 244, 0.04);
+    --editor-border: rgba(236, 239, 244, 0.14);
+}
+.editor-form[data-theme="forest-light"] {
+    --editor-top-bg: rgba(60, 56, 54, 0.04);
+    --editor-border: rgba(60, 56, 54, 0.15);
+}
+.editor-form {
+    font-family: var(--editor-font-sans);
+    --editor-font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    --editor-font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    --editor-border: rgba(var(--contrast-base-rgb), 0.12);
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-body);
+    overflow: hidden;
+}
+
+/* 1. Top action bar */
+.editor-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    height: 56px;
+    background: var(--editor-top-bg);
+    border-bottom: 1px solid var(--editor-border);
+    flex-shrink: 0;
+}
+
+.editor-top-left, .editor-top-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Title input (seamlessly blended) */
+.editor-title-input {
+    background: transparent;
+    border: none;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    outline: none;
+    width: 300px;
+    font-family: var(--editor-font-sans);
+}
+.editor-title-input::placeholder {
+    color: var(--text-dim);
+}
+
+/* Shared button base */
+.editor-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+.editor-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Button variants */
+.editor-btn-secondary {
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid transparent;
+}
+.editor-btn-secondary:hover {
+    background: rgba(var(--contrast-base-rgb), 0.05);
+    color: var(--text-primary);
+}
+
+.editor-btn-primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+}
+.editor-btn-primary:hover {
+    background: color-mix(in srgb, var(--accent) 85%, black 15%);
+}
+
+
+/* 2. Main workspace (two-column layout) */
+.editor-body {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+}
+
+.editor-pane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: var(--bg-body);
+}
+.editor-pane-left {
+    border-right: 1px solid var(--editor-border);
+}
+
+/* Quick formatting toolbar */
+.editor-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--editor-border);
+    background: color-mix(in srgb, var(--glass-tint) calc(0.02 * 100%), transparent);
+    flex-shrink: 0;
+}
+.editor-tb-btn {
+    background: transparent;
+    border: none;
+    padding: 6px;
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    opacity: 0.65;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+}
+.editor-tb-btn:hover {
+    opacity: 1;
+    background: rgba(var(--contrast-base-rgb), 0.06);
+}
+.editor-tb-btn svg {
+    width: 16px;
+    height: 16px;
+}
+.editor-tb-divider {
+    width: 1px;
+    height: 16px;
+    background: var(--editor-border);
+    margin: 0 4px;
+}
+
+/* Markdown input canvas (L0B, zero distraction) */
+.editor-textarea {
+    flex: 1;
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--text-primary);
+    font-family: var(--editor-font-mono);
+    font-size: 15px;
+    line-height: 1.7;
+    padding: 20px 30px;
+    resize: none;
+    box-sizing: border-box;
+}
+.editor-textarea::placeholder {
+    color: var(--text-dim);
+}
+
+/* Right-side live preview canvas */
+.editor-preview {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 40px;
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--text-primary);
+    word-break: break-word;
+    font-family: var(--editor-font-sans);
+}
+
+.editor-preview h1, .editor-preview h2, .editor-preview h3, .editor-preview h4, .editor-preview h5 {
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    font-weight: 600;
+}
+.editor-preview pre {
+    background: rgba(var(--contrast-base-rgb), 0.04);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    overflow-x: auto;
+    font-size: 13.5px;
+    border: 1px solid var(--editor-border);
+    font-family: var(--editor-font-mono);
+}
+.editor-preview code {
+    font-family: var(--editor-font-mono);
+    background: rgba(var(--contrast-base-rgb), 0.06);
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+.editor-preview pre code {
+    background: none;
+    padding: 0;
+}
+.editor-preview img {
+    max-width: 100%;
+    border-radius: var(--radius-md);
+    box-shadow: var(--l0a-shadow);
+    margin: 1rem 0;
+}
+.editor-preview blockquote {
+    border-left: 4px solid var(--accent-soft);
+    padding-left: 16px;
+    color: var(--text-dim);
+    margin: 1rem 0;
+    background: color-mix(in srgb, var(--accent) calc(0.05 * 100%), transparent);
+    padding: 12px 16px;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+.editor-preview table {
+    border-collapse: collapse;
+    margin: 1rem 0;
+    width: 100%;
+}
+.editor-preview th, .editor-preview td {
+    border: 1px solid var(--editor-border);
+    padding: 8px 12px;
+    text-align: left;
+}
+
+/* 3. Bottom status bar */
+.editor-statusbar {
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    font-size: 12px;
+    color: var(--text-dim);
+    border-top: 1px solid var(--editor-border);
+    background: var(--editor-top-bg);
+    flex-shrink: 0;
+}
+
+/* 4. Side settings drawer (metadata drawer) */
+.editor-drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 10000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+.editor-drawer-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+.editor-drawer {
+    position: fixed;
+    right: -360px;
+    top: 0;
+    bottom: 0;
+    width: 320px;
+    background: var(--form-bg);
+    box-shadow: -8px 0 32px rgba(0, 0, 0, 0.2);
+    z-index: 10001;
+    transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+}
+.editor-drawer.active {
+    right: 0;
+}
+.editor-drawer-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--editor-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 600;
+}
+.editor-drawer-close {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    display: inline-flex;
+}
+.editor-drawer-close:hover {
+    background: rgba(var(--contrast-base-rgb), 0.05);
+    color: var(--text-primary);
+}
+.editor-drawer-body {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.editor-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.editor-field label {
+    font-size: 13px;
+    color: var(--text-dim);
+    font-weight: 500;
+}
+.editor-field input[type="text"],
+.editor-field select,
+.editor-field textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--editor-border);
+    background: rgba(var(--contrast-base-rgb), 0.03);
+    color: var(--text-primary);
+    font-family: var(--editor-font-sans);
+    font-size: 14px;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease;
+}
+.editor-field input:focus, .editor-field select:focus, .editor-field textarea:focus {
+    border-color: var(--accent);
+}
+.editor-field textarea {
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.5;
+}
+
+/* 3. Bottom status bar */
+.editor-copyright {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    opacity: 0.8;
+}
+
+/* 4. Metadata bar */
+.editor-meta-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 20px;
+    border-bottom: 1px solid var(--editor-border);
+    background: color-mix(in srgb, var(--glass-tint) calc(0.02 * 100%), transparent);
+    flex-shrink: 0;
+}
+.editor-field-inline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.editor-field-inline label {
+    font-size: 13px;
+    color: var(--text-dim);
+    font-weight: 500;
+    white-space: nowrap;
+}
+.editor-field-inline input[type="text"],
+.editor-field-inline select {
+    width: 100%;
+    padding: 6px 10px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--editor-border);
+    background: rgba(var(--contrast-base-rgb), 0.03);
+    color: var(--text-primary);
+    font-family: var(--editor-font-sans);
+    font-size: 13px;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease;
+}
+.editor-field-inline input:focus,
+.editor-field-inline select:focus {
+    border-color: var(--accent);
+}
+.editor-meta-tags {
+    width: 200px;
+}
+.editor-meta-summary {
+    flex: 1;
+}
+
+/* 5. Override global floating buttons (FAB).
+   Must scope to the editor page via :has(#editor-form). This file ships in
+   adminCSSFiles and is loaded via admin.bundle.css on the admin/editor/status pages;
+   without the scope the status page loses its reading-mode button and theme picker.
+   Worse, hx-head="append" only adds and never removes: once status has been visited,
+   admin.bundle.css stays in <head> and this rule follows the user across all pages
+   (the theme button permanently stops working) until a full reload.
+   Page detection follows the :has() convention established in glass.css (no body class,
+   since body_class is a global same-named define that gets overwritten). */
+body:has(#editor-form) #read-fab,
+body:has(#editor-form) .theme-picker {
+    display: none !important;
+}
+#theme-fab {
+    z-index: 10000 !important;
+}

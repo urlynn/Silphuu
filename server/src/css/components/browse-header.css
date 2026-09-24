@@ -1,0 +1,345 @@
+/* Browse Header: compact, lightweight browsing header shared by category/tag/archive pages.
+   Includes an Apple/Vercel-style magnetic category indicator. */
+
+.browse-header {
+    position: relative;
+    margin-top: 14px;
+    margin-bottom: 16px;
+    padding: 14px 18px;
+    background: color-mix(in srgb, var(--glass-base) calc(var(--panel-alpha) * 100%), transparent);
+    backdrop-filter: blur(var(--panel-blur));
+    -webkit-backdrop-filter: blur(var(--panel-blur));
+    border: none !important;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--panel-shadow);
+    transition: all 0.3s ease;
+}
+
+/* First row: title + stats on the left, category nav on the right */
+.browse-header__top-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: nowrap;
+}
+
+.browse-header__title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.browse-header__title {
+    margin: 0;
+    color: var(--text-primary);
+    font-family: var(--font-subheading);
+    font-weight: var(--font-subheading-weight, 600);
+    font-variation-settings: 'BEVL' var(--font-subheading-bevl, 100);
+    font-size: 20px;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    translate: 0 calc(-1 * var(--font-subheading-shift, 0em));
+}
+
+.browse-header__stats {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.browse-stat {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 3px;
+    padding: 0 4px;
+    border: none;
+    background: none;
+    color: var(--text-muted);
+    white-space: nowrap;
+    font-size: 12px;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+/* 2px dot separator between pills (centered within the 6px gap) */
+.browse-stat:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    right: -4px;
+    top: 50%;
+    /* The dot is a geometric circle (ink center = box center) and needs no ink compensation itself,
+       but it must align with the optical line of the same-row text. This row breaks the ink system's
+       preconditions ("flex centering + line-height:1 + single-font-size text leaves"): a 13px box strut
+       mixed with a 12px CJK suffix at line-height:normal (22.1px), so --font-body-shift calibrated for
+       the 13px box systematically under-compensates the 12px suffix ink line. Measured with
+       scripts/cdp/dot-align.mjs (zero-size probe reading baselines directly, two cross-checked methods):
+       the dot's ink center sits 0.692 / 0.782px above the pills' text ink center, mean 0.737px — 5x the
+       noise floor, a systematic error. Fix = frozen measured value 0.737px / 12px (inherited font size)
+       = 0.0614em; em scales with font size instead of a hard-coded px. Re-run dot-align.mjs to re-measure
+       after changing fonts or sizes. */
+    transform: translateY(-50%);
+    translate: 0 0.0614em;
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+    background: var(--text-muted);
+}
+
+/* Only the text layer carries the ink offset */
+.browse-stat__ink {
+    translate: 0 calc(-1 * var(--font-body-shift, 0em));
+    font-size: round(up, calc(11.5px * var(--font-body-ink-scale, 1)), 1px);
+}
+
+.browse-stat b {
+    color: var(--accent);
+    font-size: round(up, calc(13px * var(--font-body-ink-scale, 1)), 1px);
+}
+
+.browse-stat i {
+    font-style: normal;
+    font-size: round(up, calc(11px * var(--font-body-ink-scale, 1)), 1px);
+}
+
+/* Minimal 4-category buttons (top-right area) */
+.browse-header__cat-grid {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    transition: all 0.2s ease;
+}
+
+/* Underline magnetic slider (Magnetic Indicator) */
+.browse-cat-indicator {
+    position: absolute;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    border: none;
+    border-radius: 2px;
+    background: var(--accent);
+    pointer-events: none;
+    opacity: 0;
+    z-index: 1;
+    box-sizing: border-box;
+    will-change: transform, width;
+}
+
+.browse-cat-card--archive {
+    display: inline-flex;
+}
+
+.browse-cat-card {
+    position: relative;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: none;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    padding: 4px 6px;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+
+.browse-cat-card:hover {
+    transform: translateY(-1px);
+}
+
+.browse-cat-card:hover .browse-cat-card__name {
+    color: var(--accent);
+}
+
+.browse-cat-card__name {
+    color: var(--text-primary);
+    font-size: round(up, calc(13px * var(--font-body-ink-scale, 1)), 1px);
+    white-space: nowrap;
+    translate: 0 calc(-1 * var(--font-body-shift, 0em));
+    transition: color 0.15s ease;
+}
+
+/* Active category button */
+.browse-cat-card.active {
+    border-bottom-color: var(--accent);
+    background: none;
+}
+
+.browse-cat-card.active .browse-cat-card__name {
+    color: var(--accent);
+}
+
+/* While the category area is hovered: temporarily erase the static selected styles, fully managed
+   dynamically by the slider, restored on mouse leave */
+.browse-header__cat-grid.is-hovering .browse-cat-card.active {
+    border-bottom-color: transparent !important;
+    background: transparent !important;
+}
+
+.browse-header__cat-grid.is-hovering .browse-cat-card.active .browse-cat-card__name {
+    color: var(--text-primary);
+}
+
+.browse-cat-card:hover .browse-cat-card__name,
+.browse-header__cat-grid.is-hovering .browse-cat-card:hover .browse-cat-card__name {
+    color: var(--accent) !important;
+}
+
+/* Tag filter section */
+.browse-header__tags-section {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border-light);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.browse-header__tags-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    /* Ink compensation precondition: with align-items:center on the container, tabular values hold
+       only if text leaves have line-height:1; otherwise the line-box center misses the ink center
+       and compensation applied there would be wrong. */
+    line-height: 1;
+}
+
+.browse-header__tags-title {
+    color: var(--text-primary);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+}
+
+.browse-header__tags-hint {
+    color: var(--text-dim);
+    font-size: 11px;
+}
+
+/* Ink compensation (inherited from body).
+   Neither leaf declares its own font-family, so both inherit body; the line-box precondition is
+   guaranteed by .browse-header__tags-head's line-height:1 above. */
+.browse-header__tags-head .browse-header__tags-title,
+.browse-header__tags-head .browse-header__tags-hint {
+    translate: 0 calc(-1 * var(--font-body-shift, 0em));
+}
+
+.browse-header__tags-scroll-wrap {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%);
+}
+
+.browse-header__pill-row--tags {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    padding: 2px 12px 12px 12px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-medium) transparent;
+}
+
+.browse-header__pill-row--tags::-webkit-scrollbar {
+    height: 3px;
+}
+
+.browse-header__pill-row--tags::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.browse-header__pill-row--tags::-webkit-scrollbar-thumb {
+    background: var(--border-medium);
+    border-radius: var(--radius-full);
+}
+
+.browse-tag-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    border: none;
+    background: var(--bg-subtle);
+    border-radius: var(--radius-sm);
+    padding: 3px 8px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    text-decoration: none;
+    flex-shrink: 0;
+    font-size: 12px;
+    transition: all 0.15s ease;
+}
+
+.browse-tag-chip:hover {
+    transform: translateY(-1px);
+    background: var(--accent-2-soft);
+    color: var(--accent-2);
+}
+
+.browse-tag-chip__hash {
+    color: var(--accent-2);
+    font-size: 12px;
+    opacity: 0.85;
+}
+
+.browse-tag-chip__label {
+    font-size: 12px;
+}
+
+/* Active tag */
+.browse-tag-chip.active {
+    background: var(--accent-2-soft);
+    color: var(--accent-2);
+}
+
+.browse-tag-chip.active .browse-tag-chip__hash {
+    color: var(--accent-2);
+    opacity: 1;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 768px) {
+    .browse-header {
+        padding: 12px 14px;
+    }
+
+    .browse-header__top-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .browse-header__cat-grid {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}
+
+
+/* Chromium fallback: browse-header glass replication */
+.chromium .browse-header {
+    position: relative;
+    --glass-blur-fallback: var(--panel-blur);
+    --glass-tint: color-mix(in srgb, var(--glass-base) calc(var(--panel-alpha) * 100%), transparent);
+}
+
+/* Tag chips: asymmetric padding instead of translate (Safari swallows fractional offsets; see the
+   long comment in inline-pill.css). Original padding 3px 8px: only the vertical side changes,
+   horizontal 8px untouched. Warning: both the __hash and __label children must have translate disabled. */
+.browse-tag-chip {
+    padding-top:    calc(3px - var(--font-caption-shift, 0em));
+    padding-bottom: calc(3px + var(--font-caption-shift, 0em));
+}
+.browse-tag-chip > * {
+    translate: none !important;
+}

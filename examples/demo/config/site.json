@@ -1,0 +1,13 @@
+{
+  "_comment": "本站点的人手配置。字体测量数据在 fonts.json，由后台自动生成，请勿混入本文件。页脚：短署名填 credit / credit_url（与项目署名同排显示）；版权、备案号、打赏说明等需要排版的内容写 templates/footer_content.html。",
+  "password": "",
+  "author": "Your Name",
+  "site_name": "",
+  "credit": "",
+  "credit_url": "",
+  "motto": "把这里换成你的个人签名",
+  "home_motto": "把这里换成你的个人签名",
+  "base_url": "",
+  "esa_site_id": 0,
+  "pinned_post_id": 1
+}

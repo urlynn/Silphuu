@@ -1,0 +1,195 @@
+/* Page Header (title + icon + notice bar for friend-links, sponsor and other pages).
+   Alignment: flex + line-height:1 + svg display:block + fixed sizes. */
+
+.page-card {
+    text-align: left;
+    padding: 32px 36px;
+}
+.page-card--center {
+    text-align: center;
+}
+
+/* Large top icon (guestbook, conversion-done, etc.) */
+.page-hero-icon {
+    margin-bottom: 4px;
+    line-height: 1;
+}
+.page-hero-icon svg {
+    display: block;
+    width: var(--icon-lg);
+    height: var(--icon-lg);
+    margin: 0 auto;
+    color: var(--accent);
+}
+.page-hero-icon--lg svg {
+    width: 28px;
+    height: 28px;
+}
+.page-hero-title {
+    font-size: 22px;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+    text-box: trim-both ideographic-ink ideographic-ink;
+}
+.page-hero-subtitle {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-top: 4px;
+    text-box: trim-both ideographic-ink ideographic-ink;
+}
+
+/* Title row: icon pill + title text */
+.page-title-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 6px;
+    line-height: 1;
+}
+.page-title-row--h3 {
+    margin-bottom: 20px;
+}
+.page-title-icon {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--accent-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.page-title-icon svg {
+    display: block;
+    width: var(--icon-md);
+    height: var(--icon-md);
+    color: var(--accent);
+}
+.page-title-h2 {
+    font-size: 22px;
+    color: var(--text-primary);
+    margin: 0;
+    text-box: trim-both ideographic-ink ideographic-ink;
+    translate: 0 calc(-1 * var(--font-body-shift));
+}
+.page-title-h2--accent {
+    color: var(--accent);
+}
+/* Scoped to the h3 row: ink compensation is per font role and the container sets the role,
+   so a bare class selector would hand this shift to anything else reusing the name. */
+.page-title-row--h3 .page-title-h3 {
+    font-size: 18px;
+    color: var(--accent);
+    margin: 0;
+    text-box: trim-both ideographic-ink ideographic-ink;
+    translate: 0 calc(-1 * var(--font-body-shift));
+}
+.page-title-row--h3 .page-title-count {
+    font-family: var(--font-data);
+    font-weight: var(--font-data-weight, 500);
+    font-variation-settings: 'BEVL' var(--font-data-bevl, 100);
+    font-size: 12px;
+    color: var(--text-dim);
+    text-box: trim-both ideographic-ink ideographic-ink;
+    translate: 0 calc(-1 * var(--font-data-shift, 0em));
+}
+.page-title-action {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 7px;
+    border: 1px solid var(--border-light);
+    background: var(--bg-subtle);
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.15s;
+    line-height: 1;
+}
+.page-title-action svg {
+    display: block;
+    width: var(--icon-sm);
+    height: var(--icon-sm);
+}
+.page-title-action:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+/* Subtitle */
+.page-subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+}
+
+/* Notice bar: check icon + text (L2A soft notice, LAYER.md) */
+.page-notice {
+    position: relative;
+    margin-bottom: 20px;
+    padding: 14px;
+    border-radius: var(--radius-md);
+    border: none !important;
+    background: color-mix(in srgb, var(--glass-base) calc(var(--notice-alpha) * 100%), transparent);
+    backdrop-filter: blur(var(--notice-blur));
+    -webkit-backdrop-filter: blur(var(--notice-blur));
+    box-shadow: var(--notice-shadow);
+}
+.page-notice--accent {
+    margin-bottom: 24px;
+    padding: 16px;
+    border-radius: 8px;
+}
+.page-notice-inner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    line-height: 1;
+}
+.page-notice-inner svg {
+    display: block;
+    width: var(--icon-sm);
+    height: var(--icon-sm);
+    color: var(--accent);
+    flex-shrink: 0;
+}
+.page-notice-text {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin: 0;
+    text-box: trim-both ideographic-ink ideographic-ink;
+    translate: 0 calc(-1 * var(--font-body-shift));
+}
+
+/* Heimu: pure-CSS hover-to-reveal mask */
+.heimu {
+    display: inline-block;
+    line-height: var(--font-body-ink-height, 1);
+    vertical-align: calc(var(--font-body-shift) * -1);
+    background-color: var(--accent);
+    color: var(--accent);
+    text-shadow: none;
+    border-radius: 2px;
+    cursor: help;
+    transition: color 0.15s ease, background-color 0.15s ease;
+}
+.heimu__word {
+    display: inline-block;
+    line-height: 1;
+    transform: translateY(calc(-1 * var(--font-body-shift)));
+}
+.heimu:hover,
+.heimu:active {
+    background-color: transparent;
+    color: inherit;
+}
+
+/* Chromium fallback: page-notice glass rebuild */
+.chromium .page-notice {
+    position: relative;
+    --glass-blur-fallback: var(--notice-blur);
+    --glass-tint: color-mix(in srgb, var(--glass-base) calc(var(--notice-alpha) * 100%), transparent);
+}

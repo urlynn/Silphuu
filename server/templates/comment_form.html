@@ -1,0 +1,112 @@
+{{define "comment_form"}}
+<div class="cmt-form-card" id="cmt-form-card">
+    <button class="cmt-close-btn" id="cmt-cancel-reply" title="{{.UI.comment.form.cancel_reply}}" style="display:none;">{{svg "close"}}</button>
+    <form method="POST" action="{{ URLCommentAdd }}" id="cmt-form" hx-post="{{ URLCommentAdd }}" hx-target="#cmt-comment-area" hx-select="#cmt-comment-area" hx-swap="outerMorph" hx-sync="this:drop">
+        <input type="hidden" name="post_id" id="cmt-post-id" value="{{.CurrentPost.ID}}">
+        <input type="hidden" name="rid" id="cmt-rid" value="">
+        {{/* The posted comment is re-rendered as a fragment into this page's list, so the
+             fragment has to be told which order that list is in. Carrying the page's sort
+             keeps the morph from reordering the list under the reader. */}}
+        <input type="hidden" name="sort" value="{{.Sort}}">
+        {{/* The dialog writes the confirmed URL here; the field itself is never visible. */}}
+        <input type="hidden" name="avatar" id="cmt-avatar-value" value="">
+        <div class="cmt-form-tabs">
+            <label class="cmt-form-third">
+                <button type="button" class="cmt-field-icon" id="cmt-avatar-btn" title="{{.UI.comment.form.toolbar.avatar}}">{{svg "user-circle"}}</button>
+                <input type="text" name="nick" placeholder="{{.UI.comment.form.field.nickname.label}}" class="cmt-form-tab-input">
+            </label>
+            <label class="cmt-form-third">
+                <span class="cmt-field-icon">{{svg "email"}}</span>
+                <input type="email" name="email" placeholder="{{.UI.comment.form.field.email.label}}" class="cmt-form-tab-input">
+            </label>
+            <label class="cmt-form-third">
+                <span class="cmt-field-icon">{{svg "link-chain-diagonal"}}</span>
+                <input type="url" name="website" placeholder="{{.UI.comment.form.field.website.label}}" class="cmt-form-tab-input">
+            </label>
+        </div>
+        {{/* The copy is a sibling element, not the placeholder attribute: an attribute cannot
+             hold markup, and the copy needs <del> to strike through. placeholder=" " only
+             drives :placeholder-shown, which hides the overlay once the field has text. */}}
+        <div class="cmt-field-wrap">
+            <textarea name="content" rows="3" placeholder=" " class="cmt-textarea" required id="cmt-content" maxlength="300"></textarea>
+            <div class="cmt-placeholder" aria-hidden="true">{{if eq .CurrentPost.Slug `guestbook`}}{{.UI.comment.form.field.content.placeholder_guestbook}}{{else}}{{.UI.comment.form.field.content.placeholder}}{{end}}</div>
+        </div>
+        <div class="cmt-preview" id="cmt-preview" style="display:none;"><div class="cmt-preview-title">{{.UI.comment.preview.title}}</div><div class="cmt-preview-body" id="cmt-preview-body"></div></div>
+        <div class="cmt-form-bar">
+            <div class="cmt-form-tools">
+                <button type="button" class="cmt-tool-icon cmt-sticker-btn" id="cmt-sticker-btn" title="{{.UI.comment.form.toolbar.emoji}}">
+                    {{svg "smiley"}}
+                </button>
+                <button type="button" class="cmt-tool-icon" id="cmt-img-btn" title="{{.UI.comment.form.toolbar.upload_image}}">
+                    {{svg "image"}}
+                </button>
+                <button type="button" class="cmt-tool-icon" id="cmt-preview-btn" title="{{.UI.comment.form.toolbar.preview}}">
+                    <span id="cmt-preview-eye">{{svg "file-text"}}</span>
+                    <span id="cmt-preview-eye-off" style="display:none;">{{svg "file-code"}}</span>
+                </button>
+                <input type="file" id="cmt-img-input" accept="image/*" style="display:none">
+            </div>
+            <div class="cmt-form-right">
+                <span class="cmt-char-count" id="cmt-char-wrap"><span id="cmt-chars">0</span> / <span id="cmt-limit">2</span> {{.UI.common.unit.char}}</span>
+                {{/* The submit label must align inside the pill itself: as the button's direct
+                     text node, the shift moved the pill background along with the label.
+                     Wrapping the label in a span moves only the text. */}}
+                <button type="submit" class="cmt-submit-btn"><span class="cmt-submit-label">{{if eq .CurrentPost.Slug `guestbook`}}{{.UI.comment.form.submit.guestbook}}{{else}}{{.UI.comment.form.submit.default}}{{end}}</span></button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Sticker picker is lazy-loaded: the first click on #cmt-sticker-btn fetches
+         SITE_URLS.stickersJSON and renders -->
+    <div class="cmt-sticker-panel" id="cmt-sticker-panel" style="display:none;"></div>
+    <!-- The JS-rendered panel clones this template to avoid inlining the SVG -->
+    <template id="sticker-plus-icon">{{svg "plus"}}</template>
+
+    <!-- Avatar is a link, not an upload: the visitor pastes a URL and the browser proves it
+         loads before it is accepted. Sits outside the form so its own input is never part of
+         the form's native validation. Shown by the .open class — an inline display would
+         outrank it. -->
+    <div class="cmt-avatar-dialog" id="cmt-avatar-dialog"
+         data-ok="{{.UI.comment.avatar.preview_ok}}" data-fail="{{.UI.comment.avatar.preview_fail}}"
+         data-hint="{{.UI.comment.avatar.dialog_hint}}">
+        <div class="cmt-avatar-dialog-head">
+            <span>{{.UI.comment.avatar.dialog_title}}</span>
+            <button type="button" class="cmt-avatar-dialog-close" id="cmt-avatar-close">&times;</button>
+        </div>
+        <input type="url" class="cmt-avatar-url" id="cmt-avatar-url" placeholder="{{.UI.comment.avatar.placeholder}}" autocomplete="off" spellcheck="false">
+        <div class="cmt-avatar-preview">
+            <img class="cmt-avatar-preview-img" id="cmt-avatar-preview-img" alt="" referrerpolicy="no-referrer" style="display:none;">
+            <span class="cmt-avatar-preview-msg" id="cmt-avatar-preview-msg">{{.UI.comment.avatar.dialog_hint}}</span>
+        </div>
+        <div class="cmt-avatar-dialog-bar">
+            <button type="button" class="cmt-avatar-dialog-ghost" id="cmt-avatar-clear">{{.UI.comment.avatar.clear}}</button>
+            <button type="button" class="cmt-avatar-dialog-primary" id="cmt-avatar-confirm">{{.UI.comment.avatar.confirm}}</button>
+        </div>
+    </div>
+
+    <div class="sticker-upload-overlay" id="sticker-upload-overlay" style="display:none;">
+        <div class="sticker-upload-modal">
+            <div class="sticker-upload-header">
+                <span>{{.UI.comment.sticker.contribute}}</span>
+                <button type="button" class="sticker-upload-close" id="sticker-upload-close">&times;</button>
+            </div>
+            <form id="sticker-upload-form" enctype="multipart/form-data">
+                <div class="sticker-upload-field">
+                    <label>{{.UI.comment.sticker.field.file.label}}</label>
+                    <input type="file" name="files" multiple accept=".png,.jpg,.jpeg,.gif,.webp,.avif" id="sticker-upload-files" required>
+                </div>
+                <div class="sticker-upload-field">
+                    <label>{{.UI.comment.sticker.field.name.label}}</label>
+                    <input type="text" name="name" id="sticker-upload-name" placeholder="{{.UI.comment.sticker.field.name.placeholder}}" required>
+                </div>
+                <div class="sticker-upload-progress-wrap" id="sticker-upload-progress-wrap" style="display:none;">
+                    <div class="sticker-upload-progress-bar"><div class="sticker-upload-progress-fill" id="sticker-upload-progress-fill"></div></div>
+                    <span class="sticker-upload-progress-text" id="sticker-upload-progress-text">0%</span>
+                </div>
+                <div class="sticker-upload-msg" id="sticker-upload-msg" style="display:none;"></div>
+                <button type="submit" class="sticker-upload-submit" id="sticker-upload-submit">{{.UI.comment.sticker.submit}}</button>
+            </form>
+        </div>
+    </div>
+</div>
+{{end}}

@@ -1,0 +1,72 @@
+/* Inline Pill Base */
+/* Shared pill structure (article meta / archive / post list / heading tags).
+   Site-wide base styles and default theme colours. Translate compensation is
+   handled by .ink-row (ink-row.css). */
+.ap-category,
+.post-cat,
+.tag {
+    /* Padding base uses em, not px, so the pill keeps proportions when font-size changes.
+       The ink-offset compensation is applied further down from --font-caption-shift (default
+       0em) — base scaling and ink compensation are separate concerns. */
+    --pill-pad-y: 0.25em;   /* 0.25em × 12px = 3px */
+    --pill-pad-x: 0.42em;   /* 0.42em × 12px ≈ 5px */
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--font-caption);
+    font-size: 12px;
+    padding: var(--pill-pad-y) var(--pill-pad-x);
+    border-radius: 4px;
+    line-height: 1;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.tag {
+    background: var(--accent-2-soft);
+    color: var(--accent-2);
+}
+.tag:hover {
+    background: var(--bg-hover);
+    color: var(--accent-2-hover);
+}
+
+.post-cat,
+.ap-category {
+    background: var(--accent);
+    color: #ffffff;
+    /* White text on the accent background: separated by a shadow using a
+       darker accent-family derivative. --accent-edge is only defined in
+       themes that enable it (currently oceans-dark); elsewhere var() is
+       invalid, the whole declaration drops out and there is no shadow
+       (opt in per theme). See docs/REMAINING-ISSUES-AUDIT.md §11. */
+    text-shadow: 0 1px 2px var(--accent-edge);
+}
+.post-cat:hover,
+.ap-category:hover {
+    background: var(--accent-hover);
+    color: #ffffff;
+    text-shadow: 0 1px 2px var(--accent-edge);
+}
+
+.pill-label {
+    display: inline-block;
+    line-height: 1;
+}
+
+
+/* Pill ink alignment: asymmetric padding instead of translate (plan H).
+   Why not translate: Safari drops fractional shifts (measured in ablation:
+   translate: 0 -0.95268px works in Chrome, fails in Safari). Padding is a
+   layout shift, fixed during layout with no layer transform, so both browsers
+   agree. The outer box height is unchanged (-s and +s cancel), so pill size
+   and inline position stay put; only the text moves up by shift inside the
+   box. Values come from --font-caption-shift (these pills render caption-role
+   text, which measures to the same 0.07939em at their font sizes). Inner text
+   must also disable translate (rule below) or the shift is applied twice. */
+:is(.post-cat, .tag, .ap-category) {
+    padding-top:    calc(var(--pill-pad-y) - var(--font-caption-shift, 0em));
+    padding-bottom: calc(var(--pill-pad-y) + var(--font-caption-shift, 0em));
+}
+:is(.post-cat, .tag, .ap-category) > * {
+    translate: none !important;
+}

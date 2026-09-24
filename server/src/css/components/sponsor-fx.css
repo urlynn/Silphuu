@@ -1,0 +1,228 @@
+/* Sponsor card hover material effects (sfx-*), productionized from static/sweep-lab.html exp12.
+   On each hover, 15-sponsor-fx.js picks one effect set at random via the site-wide non-repeating
+   picker window.pickNoRepeat() from the theme's pool (light: fx-bubbles / fx-balloons / fx-clovers;
+   dark: fx-meteo / fx-starry / fx-ring-duo). fx-* classes exist only during hover and are removed on
+   leave, cancelling the animations. Layer DOM is lazily built per picked token and cached; theme
+   lightness is detected by JS measuring --bg-base luminance (toggles .sfx-light / .sfx-dark). */
+
+/* Theme-adaptive core colors: dark background -> white-hot core (strongest glow);
+   light background -> dark core + theme-colored body (keeps contrast on beige paper) */
+.sponsor-public-card {
+    --sfx-core: #FFFFFF;
+    --sfx-mid: color-mix(in srgb, var(--accent, #8DA101) 58%, #FFFFFF);
+}
+.sponsor-public-card.sfx-light {
+    --sfx-core: color-mix(in srgb, var(--accent, #8DA101) 32%, #2B2721);
+    --sfx-mid: var(--accent, #8DA101);
+}
+
+/* Meteors: diagonal forward fall (dual-angle band 30deg/38deg).
+   Start points spread evenly along the vertical axis (left/top: calc(50% ± Npx) covers the whole card);
+   elements rotate(--ang) collinear with the motion, bright core leading, tail fading out;
+   --gdir: 270deg = bright core on the right end (down-right mirrored). */
+.sfx-meteo { position: absolute; inset: 0; pointer-events: none; z-index: 21; overflow: hidden; border-radius: inherit; }
+.sfx-meteo i {
+    position: absolute;
+    width: var(--len, 64px); height: var(--th, 1.6px);
+    border-radius: 999px;
+    background: linear-gradient(var(--gdir, 90deg),
+        var(--sfx-core) 0%,
+        var(--sfx-mid) 22%,
+        color-mix(in srgb, var(--accent, #8DA101) 46%, transparent) 62%,
+        transparent 100%);
+    opacity: 0; pointer-events: none;
+    will-change: transform, opacity;
+}
+.sponsor-public-card.fx-meteo:hover .sfx-meteo i,
+.sponsor-public-card.fx-meteo.force-hover .sfx-meteo i {
+    animation: sfx-meteor var(--dur, 1.9s) linear infinite;
+    animation-delay: var(--d, 0s);
+}
+@keyframes sfx-meteor {
+    0%   { opacity: 0;    transform: translate3d(0, 0, 0) rotate(var(--ang, -28deg)); }
+    7%   { opacity: var(--op, 0.85); }
+    86%  { opacity: var(--op, 0.85); }
+    100% { opacity: 0;    transform: translate3d(var(--tx, -200px), var(--ty, 107px), 0) rotate(var(--ang, -28deg)); }
+}
+
+/* Starry sky: real SVG star shapes (4- and 5-point, no 6-point).
+   During hover: stars glint/twinkle plus the whole layer drifts downward. */
+.sfx-starry { position: absolute; inset: 0; pointer-events: none; z-index: 21; overflow: hidden; border-radius: inherit; }
+.sfx-starry i {
+    position: absolute; top: -10px;
+    opacity: 0; pointer-events: none;
+    will-change: transform, opacity;
+}
+.sfx-starry i b {
+    display: block; width: 100%; height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--sfx-core) 0%, color-mix(in srgb, var(--accent, #8DA101) 70%, transparent) 45%, color-mix(in srgb, var(--accent, #8DA101) 30%, transparent) 75%);
+    will-change: transform, opacity;
+}
+.sponsor-public-card.fx-starry .sfx-starry i b {
+    animation: sfx-glint var(--tk, 1.1s) ease-in-out infinite;
+    animation-delay: var(--tkd, 0s);
+}
+.sfx-starry i.star b {
+    border-radius: 0;
+    background: color-mix(in srgb, var(--sfx-core) 55%, var(--accent, #8DA101));
+    clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
+}
+.sfx-starry i.star5 b {
+    border-radius: 0;
+    background: color-mix(in srgb, var(--sfx-core) 55%, var(--accent, #8DA101));
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+}
+.sponsor-public-card.fx-starry .sfx-starry i[class^="star"] b {
+    animation: sfx-star-twinkle var(--tk, 1.3s) ease-in-out infinite;
+    animation-delay: var(--tkd, 0s);
+}
+@keyframes sfx-glint {
+    0%, 100% { opacity: 0.3; transform: scale(0.8); }
+    50%      { opacity: 1;   transform: scale(1.12); }
+}
+@keyframes sfx-star-twinkle {
+    0%, 100% { opacity: 0.25; transform: scale(0.65) rotate(0deg); }
+    50%      { opacity: 1;    transform: scale(1.15) rotate(22deg); }
+}
+.sponsor-public-card.fx-starry:hover .sfx-starry i,
+.sponsor-public-card.fx-starry.force-hover .sfx-starry i {
+    animation: sfx-drift var(--dur, 1.15s) linear infinite;
+    animation-delay: var(--d, 0s);
+}
+@keyframes sfx-drift {
+    0%   { opacity: 0; transform: translate(0, 0); }
+    12%  { opacity: var(--op, 0.9); }
+    50%  { transform: translate(calc(var(--sx, 6px) * -0.6), var(--my, 64px)); }
+    88%  { opacity: var(--op, 0.9); }
+    100% { opacity: 0; transform: translate(var(--sx, 6px), var(--my2, 134px)); }
+}
+
+/* Dual-arc sweep: counter-rotating rings. Two conic arcs rotate in opposite directions;
+   mask-composite keeps only a 1.5px stroked ring. Layer elements are cached per token
+   (display:none when the fx class is absent), fading in via opacity on hover — same compositor
+   discipline as the hg-* engine. */
+.sponsor-public-card.fx-ring-duo .sfx-ring {
+    display: block;
+    position: absolute; inset: 0; border-radius: inherit; padding: 1.5px;
+    pointer-events: none; z-index: 3; overflow: hidden;
+    opacity: 0; transition: opacity 0.2s ease;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask-composite: exclude;
+}
+.sfx-ring { display: none; }
+.sfx-ring::before,
+.sfx-ring::after {
+    content: ''; position: absolute; inset: -60%;
+    will-change: transform;
+}
+.sfx-ring::before {
+    background: conic-gradient(from 0deg, transparent 0 76%, var(--accent, #8DA101) 90%, var(--sfx-core) 96%, transparent 100%);
+}
+.sfx-ring::after {
+    background: conic-gradient(from 180deg, transparent 0 76%, var(--accent, #8DA101) 90%, var(--sfx-core) 96%, transparent 100%);
+}
+.sponsor-public-card.fx-ring-duo:hover .sfx-ring,
+.sponsor-public-card.fx-ring-duo.force-hover .sfx-ring { opacity: 1; }
+.sponsor-public-card.fx-ring-duo:hover .sfx-ring::before,
+.sponsor-public-card.fx-ring-duo.force-hover .sfx-ring::before,
+.sponsor-public-card.fx-ring-duo:hover .sfx-ring::after,
+.sponsor-public-card.fx-ring-duo.force-hover .sfx-ring::after {
+    animation: sfx-ring 1.8s linear infinite;
+}
+@keyframes sfx-ring { to { transform: rotate(360deg); } }
+
+/* Glass bubbles */
+.sfx-bubbles { position: absolute; inset: 0; pointer-events: none; z-index: 21; overflow: hidden; border-radius: inherit; }
+.sfx-bubbles i {
+    position: absolute; border-radius: 50%;
+    border: 1px solid color-mix(in srgb, var(--c) 40%, rgba(255,255,255,0.8));
+    box-shadow: inset 0 0 10px rgba(255,255,255,0.9), 0 4px 6px rgba(0,0,0,0.06);
+    background: linear-gradient(135deg, rgba(255,255,255,0.6) 0%, transparent 40%, color-mix(in srgb, var(--c) 15%, transparent) 100%);
+    opacity: 0; will-change: transform, opacity;
+}
+.sponsor-public-card.fx-bubbles:hover .sfx-bubbles i,
+.sponsor-public-card.fx-bubbles.force-hover .sfx-bubbles i {
+    animation: sfx-bubble-rise var(--dur) ease-in forwards;
+    animation-delay: var(--d);
+}
+@keyframes sfx-bubble-rise {
+    0%   { opacity: 0; transform: translateY(20px) scale(0.5); }
+    20%  { opacity: 1; transform: translateY(0px) scale(1) translateX(var(--sw)); }
+    80%  { opacity: 1; transform: translateY(-70px) scale(1.1) translateX(calc(var(--sw) * -1)); }
+    100% { opacity: 0; transform: translateY(-100px) scale(1.2) translateX(var(--sw)); }
+}
+/* Light-background fix: glass white smears on beige paper -> theme-colored border + inner highlight */
+.sponsor-public-card.sfx-light .sfx-bubbles i {
+    border-color: color-mix(in srgb, var(--c) 62%, transparent);
+    box-shadow: inset 0 0 9px color-mix(in srgb, var(--sfx-core) 20%, transparent),
+                0 2px 5px rgba(0, 0, 0, 0.07);
+    background: radial-gradient(circle at 32% 28%,
+        rgba(255, 255, 255, 0.92) 0 16%,
+        color-mix(in srgb, var(--c) 30%, transparent) 62%,
+        color-mix(in srgb, var(--c) 14%, transparent) 100%);
+}
+
+/* Balloons: real balloon SVGs (with tethers), rising and swaying one by one.
+   Inline SVGs must set explicit width/height:100% to lock into the <i> size,
+   otherwise the UA default 300x150 blows out the card. */
+.sfx-balloons { position: absolute; inset: 0; pointer-events: none; z-index: 21; overflow: hidden; border-radius: inherit; }
+.sfx-balloons i { position: absolute; opacity: 0; pointer-events: none; will-change: transform, opacity; }
+.sponsor-public-card.fx-balloons:hover .sfx-balloons i,
+.sponsor-public-card.fx-balloons.force-hover .sfx-balloons i {
+    animation: sfx-balloon-rise var(--dur) ease-in-out infinite;
+    animation-delay: var(--d);
+}
+@keyframes sfx-balloon-rise {
+    0%   { opacity: 0; transform: translate3d(0, 40px, 0) rotate(var(--rz, 0deg)); }
+    12%  { opacity: 0.92; }
+    50%  { transform: translate3d(var(--sw), -70px, 0) rotate(calc(var(--rz, 0deg) * -0.7)); }
+    88%  { opacity: 0.92; }
+    100% { opacity: 0; transform: translate3d(calc(var(--sw) * -1), -205px, 0) rotate(var(--rz, 0deg)); }
+}
+
+/* Lucky clovers: 5 real four-/three-leaf clover SVGs mixed */
+.sfx-clovers { position: absolute; inset: 0; pointer-events: none; z-index: 21; overflow: hidden; border-radius: inherit; }
+.sfx-clovers i {
+    position: absolute; top: -30px;
+    width: var(--sz, 22px); height: var(--sz, 22px);
+    color: var(--c);
+    opacity: 0; pointer-events: none;
+    will-change: transform, opacity;
+}
+.sponsor-public-card.fx-clovers:hover .sfx-clovers i,
+.sponsor-public-card.fx-clovers.force-hover .sfx-clovers i {
+    animation: sfx-clover-fall var(--dur) linear infinite;
+    animation-delay: var(--d);
+}
+@keyframes sfx-clover-fall {
+    0%   { opacity: 0; transform: translate3d(0, 0, 0) rotate(var(--rz)); }
+    10%  { opacity: 1; }
+    90%  { opacity: 1; }
+    100% { opacity: 0; transform: translate3d(var(--sx, 0px), 212px, 0) rotate(calc(var(--rz) + 180deg)); }
+}
+
+/* Unified rule for shape-based effects: inline SVGs fill the container (locked size, prevents UA-default 300x150 overflow) */
+.sfx-clovers i svg, .sfx-balloons i svg {
+    width: 100%; height: 100%; display: block;
+}
+
+/* White-glow ownership: the sweep (.hg-sweep white band) belongs to the dual-ring effect
+   alone and is suppressed in every other variant. */
+.sponsor-public-card[class*="fx-"]:not(.fx-ring-duo):hover > .hg-sweep,
+.sponsor-public-card[class*="fx-"]:not(.fx-ring-duo).force-hover > .hg-sweep { opacity: 0 !important; }
+.sponsor-public-card[class*="fx-"]:not(.fx-ring-duo):hover > .hg-sweep::before,
+.sponsor-public-card[class*="fx-"]:not(.fx-ring-duo).force-hover > .hg-sweep::before { animation: none !important; }
+
+/* Reduced-motion fallback */
+@media (prefers-reduced-motion: reduce) {
+    .sfx-meteo i,
+    .sfx-starry i, .sfx-starry i b,
+    .sfx-bubbles i, .sfx-balloons i, .sfx-clovers i,
+    .sfx-ring, .sfx-ring::before, .sfx-ring::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}

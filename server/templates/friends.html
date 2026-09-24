@@ -1,0 +1,467 @@
+{{define "friends.html"}}
+{{template "base_layout" .}}
+{{end}}
+
+{{define "main_class"}}main-content friend-main{{end}}
+
+{{define "head_extra"}}
+    <meta name="theme-color" content="#232A2E">
+    <link rel="stylesheet" href="{{asset "css/browse.bundle.css"}}">
+    <script src="{{asset "js/browse.bundle.js"}}" defer></script>
+    <style>
+    .friend-card-badge.is-latin {
+        padding-top: calc(2px - var(--font-body-shift-latin, 0em)) !important;
+        padding-bottom: calc(2px + var(--font-body-shift-latin, 0em)) !important;
+    }
+    </style>
+{{end}}
+
+{{define "content"}}
+        <div class="profile-card page-card" data-backdrop-scene="b">
+            <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div>
+            <div class="g-tint"></div>
+            <div class="g-noise"></div>
+
+            {{template "page_header" (dict "Icon" "friends" "Title" .UI.nav.menu.friends "Subtitle" .UI.friends.header.subtitle "Notice" .UI.friends.header.notice "NoticeIcon" "link-chain-diagonal")}}
+
+            <!-- Applications waiting for review. Admin-only, and only once there is one:
+                 an empty review queue is not worth a heading. -->
+            {{if .FriendPending}}
+            <div class="page-title-row page-title-row--h3" style="margin-top:20px;margin-bottom:16px;">
+                <div class="page-title-icon">{{svg "clock"}}</div>
+                <h3 class="page-title-h3 page-title-h3--accent">{{.UI.friends.pending.title}}</h3>
+                <span class="page-title-count">({{len .FriendPending}})</span>
+            </div>
+            <div class="friend-grid">
+                {{range $i, $a := .FriendPending}}
+                <div class="friend-card" style="--i: {{$i}}" data-backdrop-scene="b">
+                    {{template "hover_layers" (dict "glow" true)}}<div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div><div class="g-tint"></div><div class="g-noise"></div>
+                    <div class="friend-actions admin-control">
+                        <form method="POST" action="{{ URLCommit "friend/approve" }}" style="display:inline;margin:0;">
+                            <input type="hidden" name="staged" value="{{$a.Staged}}">
+                            <input type="hidden" name="redirect" value="{{ URLFriends }}">
+                            <button type="submit" class="friend-action-btn" title="{{$.UI.friends.pending.approve}}">{{svg "check"}}</button>
+                        </form>
+                    </div>
+                    {{if $a.Tag}}
+                    <span class="friend-card-badge"{{if $a.Color}} style="--badge-color: {{$a.Color}};"{{end}}>{{$a.Tag}}</span>
+                    {{end}}
+
+                    <!-- Same layers as a live card, so a pending entry reads as one of them -->
+                    <div class="friend-card-default">
+                        <div class="friend-card-icon">{{svg "link"}}</div>
+                        <div class="friend-card-info">
+                            <div class="friend-card-header"><h3 class="friend-card-title">{{$a.Name}}</h3></div>
+                            <p class="friend-card-desc">{{$a.URL}}</p>
+                        </div>
+                    </div>
+
+                    <div class="friend-card-overlay">
+                        <h3 class="friend-card-overlay-title">{{$a.Name}}{{svg "link"}}</h3>
+                        <p class="friend-card-overlay-desc">{{$a.Desc}}</p>
+                    </div>
+                </div>
+                {{end}}
+            </div>
+            {{end}}
+
+            <!-- Friend list title bar + apply/add button (always visible) -->
+            <div class="page-title-row page-title-row--h3" style="margin-top:20px;margin-bottom:16px;">
+                <div class="page-title-icon">{{svg "link-chain-diagonal"}}</div>
+                <h3 class="page-title-h3 page-title-h3--accent">{{.UI.friends.list.title}}</h3>
+                {{if .Friends}}<span class="page-title-count">({{len .Friends}})</span>{{end}}
+                <button type="button" onclick="openFriendModal()" class="page-title-action" title="{{.UI.friends.modal.apply_btn}}">{{svg "plus"}}</button>
+            </div>
+
+            <!-- Friend cards -->
+            {{if .Friends}}
+            <div id="friend-grid" class="friend-grid">
+                {{range $i, $f := .Friends}}
+                <a href="{{$f.URL}}" class="friend-card" target="_blank" rel="noopener noreferrer" style="--i: {{$i}}" data-backdrop-scene="b" data-hover-glow>
+                    {{template "hover_layers" (dict "glow" true)}}<div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div><div class="g-tint"></div><div class="g-noise"></div>
+                    <div class="friend-actions admin-control">
+                        <button type="button" class="friend-action-btn friend-edit-btn"
+                            data-index="{{$i}}"
+                            data-name="{{$f.Name}}"
+                            data-url="{{$f.URL}}"
+                            data-desc="{{$f.Desc}}"
+                            data-tag="{{$f.Tag}}"
+                            data-color="{{$f.Color}}"
+                            data-icon="{{$f.Icon}}"
+                            title="{{$.UI.common.action.edit}}">
+                            {{svg "edit"}}
+                        </button>
+                        <form method="POST" action="{{ URLCommit "friend/delete" }}" style="display:inline;margin:0;">
+                            <input type="hidden" name="index" value="{{$i}}">
+                            <input type="hidden" name="redirect" value="{{ URLFriends }}">
+                            <button type="submit" class="friend-action-btn friend-action-btn--del" onclick="return confirm('{{$.UI.common.action.delete}}？')" title="{{$.UI.common.action.delete}}">{{svg "close"}}</button>
+                        </form>
+                    </div>
+                    {{if $f.Tag}}
+                    <span class="friend-card-badge"{{if $f.Color}} style="--badge-color: {{$f.Color}};"{{end}}>{{$f.Tag}}</span>
+                    {{end}}
+
+                    <!-- Default layer: icon + title + one-line intro -->
+                    <div class="friend-card-default">
+                        <div class="friend-card-icon">{{svg .Icon}}</div>
+                        <div class="friend-card-info">
+                            <div class="friend-card-header"><h3 class="friend-card-title">{{.Name}}</h3></div>
+                            <p class="friend-card-desc">{{.Desc}}</p>
+                        </div>
+                    </div>
+
+                    <!-- Overlay: slides in on hover, showing the full intro -->
+                    <div class="friend-card-overlay">
+                        <h3 class="friend-card-overlay-title">{{.Name}}{{svg "link"}}</h3>
+                        <p class="friend-card-overlay-desc">{{.Desc}}</p>
+                    </div>
+                </a>
+                {{end}}
+            </div>
+            {{else}}
+            <p style="text-align:center;padding:24px 0;color:var(--text-dim);font-size:0.82rem;">{{.UI.friends.list.empty}}</p>
+            {{end}}
+        </div>
+{{end}}
+
+{{define "floating"}}
+        <!-- Friend apply/add/edit modal (outside the main card so the overlay truly covers the viewport) -->
+        {{template "modal_begin" dict 
+            "ID" "friend-modal" 
+            "Title" .UI.friends.modal.apply_title 
+            "CardClass" "friend-modal-card" 
+            "HeaderSlot" `<div id="friend-color-wrap" style="flex: 1; margin: 0 12px 0 0; min-width: 0; display: flex; justify-content: flex-end;">
+                <input type="hidden" name="color" id="friend-color-input" form="friend-form" value="">
+                <div class="friend-color-palette" id="friend-color-palette" role="radiogroup" aria-label="Tag Color"></div>
+            </div>`
+        }}
+                <form id="friend-form" method="POST" action="{{ URLFriendApply }}" data-action-add="{{ URLFriendApply }}" data-action-edit="{{ URLCommit "friend/edit" }}" class="modal-form" hx-boost="false">
+                    <input type="hidden" name="redirect" value="{{ URLFriends }}">
+                    <input type="hidden" name="index" id="friend-index" value="">
+                    <input type="hidden" name="icon" id="friend-icon" value="">
+                    <input type="text" name="name" id="friend-name" placeholder="{{.UI.friends.modal.name}} *" required class="modal-field">
+                    <input type="text" inputmode="url" name="url" id="friend-url" placeholder="{{.UI.friends.modal.url}} *" required class="modal-field">
+                    <input type="text" name="desc" id="friend-desc" placeholder="{{.UI.friends.modal.desc}} *" required class="modal-field">
+                    <div class="friend-field-row">
+                        <input type="text" name="tag" id="friend-tag" placeholder="{{.UI.friends.modal.tag}}" class="modal-field">
+                        <input type="email" name="email" id="friend-email" placeholder="{{.UI.friends.modal.email}}" class="modal-field">
+                    </div>
+                    <div class="friend-svg-section">
+                        <div class="friend-svg-header">
+                            <span class="friend-svg-label">{{.UI.friends.modal.svg}}</span>
+                            <span class="friend-svg-hint">{{.UI.friends.modal.svg_hint}}</span>
+                        </div>
+                        <div class="friend-svg-input-row">
+                            <textarea name="svg" id="friend-svg-input" placeholder="{{.UI.friends.modal.svg_placeholder}}" class="modal-field friend-svg-textarea" rows="3"></textarea>
+                            <div class="friend-svg-preview-wrap">
+                                <div class="friend-svg-preview-box" id="friend-svg-preview" title="{{.UI.friends.modal.preview}}"><span class="friend-svg-preview-empty">{{svg "image"}}</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" id="friend-modal-submit" class="modal-confirm">{{.UI.friends.modal.submit_apply}}</button>
+                </form>
+        {{template "modal_end"}}
+
+        <!-- Friend edit management bar (inherits the parent directly) -->
+        {{template "edit_bar" dict
+            "ID" "friend-edit-bar"
+            "Text" .UI.friends.edit.mode
+            "BtnText" .UI.friends.edit.done
+            "OnDone" "exitFriendEditMode()"
+        }}
+{{end}}
+
+{{define "scripts"}}
+        <script>
+        var PALETTE = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444', '#EC4899', '#06B6D4', '#64748B'];
+        var isColorManual = false;
+        function hashColor(str) {
+            var h = 0;
+            for (var i = 0; i < str.length; i++) {
+                h = ((h << 5) - h) + str.charCodeAt(i);
+                h |= 0;
+            }
+            return PALETTE[Math.abs(h) % PALETTE.length];
+        }
+        function setColor(c) {
+            var cin = document.getElementById('friend-color-input');
+            if (cin) cin.value = c || '';
+            var dots = document.querySelectorAll('.friend-color-dot');
+            for (var i = 0; i < dots.length; i++) {
+                if (c && dots[i].dataset.color.toLowerCase() === c.toLowerCase()) {
+                    dots[i].classList.add('is-active');
+                    dots[i].style.order = '-1';
+                } else {
+                    dots[i].classList.remove('is-active');
+                    dots[i].style.order = '0';
+                }
+            }
+        }
+        var defaultPreviewHTML = document.getElementById('friend-svg-preview') ? document.getElementById('friend-svg-preview').innerHTML : '';
+        function openFriendModal(opts) {
+            var m = document.getElementById('friend-modal'), f = document.getElementById('friend-form');
+            var isEdit = opts && opts.mode === 'edit';
+            var a = document.body.classList.contains('is-admin') || document.documentElement.classList.contains('is-admin');
+            var t = document.getElementById('friend-modal-title'), b = document.getElementById('friend-modal-submit');
+            var idx = document.getElementById('friend-index'), ic = document.getElementById('friend-icon');
+            var name = document.getElementById('friend-name'), url = document.getElementById('friend-url');
+            var desc = document.getElementById('friend-desc'), tag = document.getElementById('friend-tag');
+            var email = document.getElementById('friend-email'), svgIn = document.getElementById('friend-svg-input');
+            var svgPrev = document.getElementById('friend-svg-preview');
+
+            if (!defaultPreviewHTML && svgPrev) defaultPreviewHTML = svgPrev.innerHTML;
+
+            if (t) t.textContent = isEdit ? '{{.UI.friends.modal.edit_title}}' : (a ? '{{.UI.friends.modal.add_title}}' : '{{.UI.friends.modal.apply_title}}');
+            if (b) {
+                b.textContent = isEdit ? '{{.UI.common.action.save}}' : (a ? '{{.UI.friends.modal.submit_add}}' : '{{.UI.friends.modal.submit_apply}}');
+                b.style.background = '';
+                b.style.color = '';
+                b.disabled = false;
+            }
+            if (f) f.action = isEdit ? (f.dataset.actionEdit || f.action) : (f.dataset.actionAdd || f.action);
+            if (idx) idx.value = isEdit && opts.index != null ? opts.index : '';
+            if (ic) ic.value = isEdit && opts.icon ? opts.icon : '';
+            if (name) name.value = isEdit ? (opts.name || '') : '';
+            if (url) url.value = isEdit ? (opts.url || '') : '';
+            if (desc) desc.value = isEdit ? (opts.desc || '') : '';
+            if (tag) tag.value = isEdit ? (opts.tag || '') : '';
+            if (email) {
+                email.value = '';
+                email.style.display = isEdit ? 'none' : '';
+            }
+            var pal = document.getElementById('friend-color-palette');
+            if (pal && !pal.hasChildNodes()) {
+                PALETTE.forEach(function(c) {
+                    var dot = document.createElement('button');
+                    dot.type = 'button';
+                    dot.className = 'friend-color-dot';
+                    dot.style.setProperty('--dot-color', c);
+                    dot.dataset.color = c;
+                    dot.setAttribute('aria-label', c);
+                    dot.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        isColorManual = true;
+                        setColor(c);
+                    });
+                    pal.appendChild(dot);
+                });
+            }
+            if (isEdit && opts.color) {
+                isColorManual = true;
+                setColor(opts.color);
+            } else if (isEdit && opts.tag) {
+                isColorManual = false;
+                setColor(hashColor(opts.tag));
+            } else {
+                isColorManual = false;
+                setColor('');
+            }
+            if (svgIn) svgIn.value = '';
+            if (svgPrev) {
+                svgPrev.style.borderColor = '';
+                if (isEdit && opts.icon) {
+                    var origBtn = document.querySelector('.friend-edit-btn[data-index="' + opts.index + '"]');
+                    var card = origBtn ? origBtn.closest('.friend-card') : null;
+                    var cIcon = card ? card.querySelector('.friend-card-icon') : null;
+                    svgPrev.innerHTML = cIcon ? cIcon.innerHTML : defaultPreviewHTML;
+                } else {
+                    svgPrev.innerHTML = defaultPreviewHTML;
+                }
+            }
+            if (m) m.classList.add('show');
+        }
+
+        (function() {
+            var grid = document.getElementById('friend-grid');
+            var bar = document.getElementById('friend-edit-bar');
+            var timer = null, pressCard = null, startX = 0, startY = 0, longPressed = false, inEditMode = false;
+            function isAdmin() { return document.body.classList.contains('is-admin') || document.documentElement.classList.contains('is-admin'); }
+            function clearPress() { if (timer) { clearTimeout(timer); timer = null; } if (pressCard) { pressCard.classList.remove('is-pressing'); pressCard = null; } }
+            function enterMode() {
+                if (!isAdmin() || inEditMode) return;
+                inEditMode = true;
+                if (navigator.vibrate) try { navigator.vibrate(40); } catch (_) {}
+                if (grid) grid.classList.add('is-edit-mode');
+                if (bar) bar.style.display = 'flex';
+            }
+            window.exitFriendEditMode = function() {
+                inEditMode = false;
+                clearPress();
+                if (grid) grid.classList.remove('is-edit-mode');
+                if (bar) bar.style.display = 'none';
+            };
+
+            if (grid) {
+                grid.addEventListener('pointerdown', function(e) {
+                    if (!isAdmin() || e.button !== 0 || e.target.closest('.friend-actions') || e.target.closest('.modal-overlay')) return;
+                    var card = e.target.closest('.friend-card');
+                    if (!card) return;
+                    startX = e.clientX; startY = e.clientY; longPressed = false;
+                    clearPress();
+                    pressCard = card;
+                    pressCard.classList.add('is-pressing');
+                    timer = setTimeout(function() {
+                        longPressed = true;
+                        if (pressCard) pressCard.classList.remove('is-pressing');
+                        pressCard = null;
+                        enterMode();
+                    }, 600);
+                });
+                grid.addEventListener('pointermove', function(e) {
+                    if (timer && Math.hypot(e.clientX - startX, e.clientY - startY) > 10) clearPress();
+                });
+                ['pointerup', 'pointerleave', 'pointercancel'].forEach(function(ev) { grid.addEventListener(ev, clearPress); });
+                grid.addEventListener('contextmenu', function(e) { if (longPressed || inEditMode) e.preventDefault(); });
+                grid.addEventListener('click', function(e) {
+                    if (longPressed) { e.preventDefault(); e.stopPropagation(); setTimeout(function() { longPressed = false; }, 50); return; }
+                    if (!inEditMode || e.target.closest('.friend-action-btn--del') || e.target.closest('form')) return;
+                    var card = e.target.closest('.friend-card');
+                    if (!card) return;
+                    var b = card.querySelector('.friend-edit-btn');
+                    if (b) {
+                        e.preventDefault();
+                        openFriendModal({
+                            mode: 'edit',
+                            index: b.dataset.index,
+                            name: b.dataset.name,
+                            url: b.dataset.url,
+                            desc: b.dataset.desc,
+                            tag: b.dataset.tag,
+                            icon: b.dataset.icon
+                        });
+                    }
+                });
+            }
+            document.addEventListener('click', function(e) {
+                if (inEditMode && !e.target.closest('#friend-grid') && !e.target.closest('#friend-edit-bar') && !e.target.closest('#friend-modal')) exitFriendEditMode();
+            });
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && inEditMode) {
+                    var m = document.getElementById('friend-modal');
+                    if (!m || !m.classList.contains('show')) exitFriendEditMode();
+                }
+            });
+
+            var f = document.getElementById('friend-form'), i = document.getElementById('friend-svg-input'), p = document.getElementById('friend-svg-preview'), b = document.getElementById('friend-modal-submit');
+            var empty = p ? p.innerHTML : '';
+            var errTimer = null;
+
+            function flashError(msg) {
+                if (!b) return;
+                var a = isAdmin();
+                var isEdit = f && f.dataset.actionEdit && f.action === f.dataset.actionEdit;
+                var orig = isEdit ? '{{.UI.common.action.save}}' : (a ? '{{.UI.friends.modal.submit_add}}' : '{{.UI.friends.modal.submit_apply}}');
+                b.textContent = msg;
+                b.style.background = '#e06c75';
+                b.style.color = '#ffffff';
+                if (errTimer) clearTimeout(errTimer);
+                errTimer = setTimeout(function() {
+                    b.textContent = orig;
+                    b.style.background = '';
+                    b.style.color = '';
+                    b.disabled = false;
+                }, 2000);
+            }
+            
+            var tagInput = document.getElementById('friend-tag');
+            if (tagInput) {
+                tagInput.addEventListener('input', function() {
+                    var v = tagInput.value.trim();
+                    if (!v) {
+                        isColorManual = false;
+                        setColor('');
+                        return;
+                    }
+                    if (!isColorManual) {
+                        setColor(hashColor(v));
+                    }
+                });
+            }
+
+            if (i && p) {
+                i.addEventListener('input', function() {
+                    var v = i.value.trim(), s = v.toLowerCase().indexOf('<svg'), ed = v.toLowerCase().lastIndexOf('</svg>');
+                    if (s !== -1 && ed > s) {
+                        var c = v.substring(s, ed + 6).replace(/<script[\s\S]*?<\/script>/gi, '').replace(/\son[a-z]+\s*=\s*(?:'[^']*'|"[^"]*"|[^\s>]+)/gi, '');
+                        p.innerHTML = c;
+                        p.style.borderColor = '';
+                    } else if (v.length > 0) {
+                        p.innerHTML = empty;
+                        p.style.borderColor = '#e06c75';
+                    } else {
+                        var ic = document.getElementById('friend-icon');
+                        var idx = document.getElementById('friend-index');
+                        if (idx && idx.value !== '' && ic && ic.value) {
+                            var origBtn = document.querySelector('.friend-edit-btn[data-index="' + idx.value + '"]');
+                            var card = origBtn ? origBtn.closest('.friend-card') : null;
+                            var cIcon = card ? card.querySelector('.friend-card-icon') : null;
+                            p.innerHTML = cIcon ? cIcon.innerHTML : empty;
+                        } else {
+                            p.innerHTML = empty;
+                        }
+                        p.style.borderColor = '';
+                    }
+                });
+            }
+
+            if (f && b) {
+                f.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    var u = document.getElementById('friend-url');
+                    if (u && u.value.trim()) {
+                        var uv = u.value.trim();
+                        if (!/^https?:\/\//i.test(uv)) {
+                            u.value = 'https://' + uv;
+                        }
+                    }
+                    var v = i ? i.value.trim() : '';
+                    if (v.length > 0) {
+                        var s = v.toLowerCase().indexOf('<svg'), ed = v.toLowerCase().lastIndexOf('</svg>');
+                        if (s === -1 || ed === -1 || ed <= s) {
+                            flashError('{{.UI.friends.modal.error_svg}}');
+                            if (i) i.focus();
+                            return;
+                        }
+                    }
+                    b.disabled = true;
+                    b.textContent = '...';
+                    fetch(f.action, {
+                        method: 'POST',
+                        body: new URLSearchParams(new FormData(f)),
+                        headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'fetch'}
+                    }).then(function(res) {
+                        b.disabled = false;
+                        if (res.ok || res.redirected || res.status === 303) {
+                            if (isAdmin()) {
+                                window.location.reload();
+                            } else {
+                                var m = document.getElementById('friend-modal');
+                                if (m) m.classList.remove('show');
+                                alert('{{.UI.friends.modal.applied_toast}}');
+                            }
+                        } else {
+                            flashError('{{.UI.friends.modal.error_svg}}');
+                        }
+                    }).catch(function() {
+                        b.disabled = false;
+                        flashError('{{.UI.friends.modal.error_svg}}');
+                    });
+                });
+            }
+
+            if (window.location.search.indexOf('applied=1') !== -1) {
+                alert('{{.UI.friends.modal.applied_toast}}');
+                if (window.history && window.history.replaceState) {
+                    window.history.replaceState(null, '', window.location.pathname + window.location.search.replace(/[?&]applied=1/, '').replace(/^&/, '?'));
+                }
+            }
+
+            // Apply latin shift for non-CJK badges
+            document.querySelectorAll('.friend-card-badge').forEach(function(badge) {
+                if (!/[\u4e00-\u9fa5]/.test(badge.textContent || '')) {
+                    badge.classList.add('is-latin');
+                }
+            });
+        })();
+        </script>
+{{end}}

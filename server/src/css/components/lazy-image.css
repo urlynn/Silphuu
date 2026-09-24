@@ -1,0 +1,108 @@
+/* Lazy Image Spinner: loading spinner for article body images, shortcode kaomoji and
+   comment images. <img> has no ::after (replaced element), so JS setupLazyImages()
+   wraps it in <span class="lazy-spin"> and manages .lazy-spin--done. */
+
+.lazy-spin {
+    --lazy-spin-size: 24px;
+    --lazy-spin-border: 2px;
+    --lazy-spin-duration: 0.8s;
+    display: inline-block;
+    position: relative;
+    vertical-align: middle;
+}
+
+.lazy-spin--block {
+    display: block;
+}
+
+.lazy-spin--inline {
+    --lazy-spin-size: 16px;
+    --lazy-spin-border: 1.5px;
+}
+
+.lazy-spin--picture {
+    display: inline-block;
+    position: relative;
+}
+
+/* Anti-flash delay: cache hits are ready in <150ms, so the spinner waits 150ms before
+   appearing — fast loads never show it. Implemented as an opacity animation with
+   animation-delay + backwards, invisible until the delay elapses. */
+@keyframes lazy-spin-delay-show {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.lazy-spin::after,
+.lazy-spin--picture::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: var(--lazy-spin-size);
+    height: var(--lazy-spin-size);
+    margin-top: calc(var(--lazy-spin-size) / -2);
+    margin-left: calc(var(--lazy-spin-size) / -2);
+    border: var(--lazy-spin-border) solid var(--border-medium);
+    border-top-color: var(--accent);
+    border-radius: var(--radius-full);
+    animation:
+        lazy-spin-delay-show 0.01s 0.15s backwards,
+        lazy-spin-rotate var(--lazy-spin-duration) linear infinite;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.lazy-spin--done::after,
+.lazy-spin--picture.lazy-spin--done::after {
+    display: none;
+}
+
+@keyframes lazy-spin-rotate {
+    to { transform: rotate(360deg); }
+}
+
+/* Sticker Panel Loading Overlay: all groups load at once when the panel
+   opens; an overlay + spinner shows while they load. JS adds
+   .sticker-loading on open and removes it once every thumbnail has loaded. */
+
+.cmt-sticker-panel.sticker-loading {
+    position: relative;
+}
+
+.cmt-sticker-panel.sticker-loading::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--bg-base);
+    border-radius: var(--radius-md);
+    z-index: 10;
+    /* Anti-flash delay: same as .lazy-spin (if the groups finish in <150ms the overlay never shows) */
+    animation: lazy-spin-delay-show 0.01s 0.15s backwards;
+}
+
+.cmt-sticker-panel.sticker-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 32px;
+    height: 32px;
+    margin-top: -16px;
+    margin-left: -16px;
+    border: 3px solid var(--border-medium);
+    border-top-color: var(--accent);
+    border-radius: var(--radius-full);
+    animation: lazy-spin-rotate 0.8s linear infinite;
+    z-index: 11;
+}
+
+/* Reduced Motion */
+
+@media (prefers-reduced-motion: reduce) {
+    .lazy-spin::after,
+    .lazy-spin--picture::after,
+    .cmt-sticker-panel.sticker-loading::after {
+        animation-duration: 2s;
+    }
+}

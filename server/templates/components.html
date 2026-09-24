@@ -1,0 +1,343 @@
+{{/*
+  Generic modal (modal_begin / modal_end).
+  Params:
+    ID         string - modal DOM ID (required)
+    Title      string - modal title (required)
+    CardClass  string - extra class for the modal card (optional)
+    HeaderSlot string - HTML placed inside the header (optional; for odd designs like
+                        the friend-link palette picker)
+*/}}
+{{define "modal_begin"}}
+<div id="{{.ID}}" class="modal-overlay" data-backdrop-scene="b" onclick="if(event.target===this)this.classList.remove('show')">
+    <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div>
+    <div class="g-tint"></div><div class="g-noise"></div>
+    <div class="modal-card {{.CardClass}}">
+        <div class="modal-header-row" style="display: flex; align-items: center; justify-content: space-between;">
+            <h3 class="modal-header-title" style="white-space: nowrap; margin-right: 12px;">{{.Title}}</h3>
+            {{if .HeaderSlot}}{{safeHTML .HeaderSlot}}{{end}}
+            <button type="button" onclick="document.getElementById('{{.ID}}').classList.remove('show')" class="modal-close-btn" style="flex-shrink: 0;">{{svg "close"}}</button>
+        </div>
+{{end}}
+
+{{define "modal_end"}}
+    </div>
+</div>
+{{end}}
+
+{{/*
+  Generic bottom floating edit bar (edit_bar).
+  Params:
+    ID      string - container ID (required)
+    Text    string - hint text (required)
+    BtnText string - done-button label (required)
+    OnDone  string - done-button onclick code (required)
+*/}}
+{{define "edit_bar"}}
+<div id="{{.ID}}" class="edit-bar admin-control" style="display:none;" data-backdrop-scene="b">
+    <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div>
+    <div class="g-tint"></div><div class="g-noise"></div>
+    <div class="edit-bar-info">
+        {{svg "edit"}}
+        <span>{{.Text}}</span>
+    </div>
+    <button type="button" class="edit-bar-done" onclick="{{.OnDone}}">{{.BtnText}}</button>
+</div>
+{{end}}
+
+{{/* Post card (L1B interactive large card) — the single site-wide implementation.
+     Call: {{template "post_card" (dict
+         "P" $p "I" $i "Cats" $.CategoryAliases
+         "ShowDate" true "ShowTags" true "Snippet" true)}}
+     I drives the --i entrance stagger; consumers: posts.html · search.html · admin.html.
+     data-tags is the card's tag set, comma-separated (splitTags never puts a comma inside a
+     tag), for the /posts fragment filter — see src/js/parts/03-nav-filter.js.
+     New pages must reference this, not copy it. */}}
+{{define "post_card"}}
+    <div class="card-row-wrapper" data-tags="{{range $i, $t := .P.Tags}}{{if $i}},{{end}}{{$t}}{{end}}">
+        <div class="post-item" style="--i: {{.I}}" data-backdrop-scene="b" data-hover-glow>
+            {{template "hover_layers" (dict "glow" true)}}<i class="post-item-sweep" aria-hidden="true"></i><div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div><div class="g-tint"></div><div class="g-noise"></div>
+            <a href="{{ URLPost .P.ID }}" class="card-cover"></a>
+            <div class="post-meta ink-row"><a href="{{ URLTopic (index .Cats .P.Category) }}" class="post-cat"><span class="pill-label">{{.P.Category}}</span></a>{{if .ShowDate}}<span class="post-meta-date">{{.P.Date.Format "2006-01-02"}}</span>{{end}}</div>
+            <h2 class="post-title">{{.P.Title}}</h2>
+            {{if .Snippet}}{{if .P.Summary}}<p class="post-summary search-snippet">{{.P.Summary}}</p>{{end}}{{else}}<p class="post-summary">{{.P.Summary}}</p>{{end}}
+            {{if .ShowTags}}<div class="post-item-tags ink-row">{{range .P.Tags}}<a href="{{ URLTag . }}" class="tag"><span class="pill-label">{{.}}</span></a>{{end}}</div>{{end}}
+        </div>
+    </div>
+{{end}}
+
+{{/* Empty-state card — same "list block" concern as post_card, also the single
+     site-wide implementation.
+     Call: {{template "post_empty_card" (dict "Msg" .UI.posts.list.empty)}} */}}
+{{define "post_empty_card"}}
+    <div class="card-row-wrapper">
+        <div class="post-item empty-card" style="--i: 0; text-align:center;cursor:default;">
+            <p style="opacity:0.6;">{{.Msg}}</p>
+        </div>
+    </div>
+{{end}}
+
+{{/* Single comment (L2B list row) — the single implementation of the comment display.
+     Call: {{template "comment_item" (dict
+         "C" $c "RenderedContent" $c.RenderedContent
+         "UAShort" $c.UAShort  // required: must be evaluated at the call site — UAShort is a
+                               //   pointer-receiver method; dict values are NOT addressable, so
+                               //   after boxing it errors with `can't evaluate field UAShort`
+         "UI" $.UI)}}
+     Consumers: comment_fragment.html (HTMX fragment) · admin.html (font preview).
+     guestbook.html's message area is deliberately NOT unified: its cmt-del-btn sits
+     before cmt-item-main (a different structure) and it needs no font-workshop preview. */}}
+{{define "comment_item"}}
+    <div class="cmt-item{{if .C.Rid}} cmt-item-reply{{end}}" data-cmt-id="{{.C.ID}}" data-rid="{{.C.Rid}}">
+        <img class="cmt-avatar" src="{{if .C.Avatar}}{{.C.Avatar}}{{else}}{{asset "image/default-avatar.avif"}}{{end}}" alt="" referrerpolicy="no-referrer">
+        <div class="cmt-item-main">
+            <div class="cmt-item-meta">
+                {{if .C.Website}}<a href="{{.C.Website}}" target="_blank" rel="noopener" class="cmt-nick">{{.C.Nick}}</a>{{else}}<span class="cmt-nick">{{.C.Nick}}</span>{{end}}
+                <span class="cmt-date"><time datetime="{{.C.Date}}" data-ts="{{.C.Date}}">{{.C.Date}}</time></span>
+                {{if .C.UA}}<span class="cmt-ua">{{wrapUA .UAShort}}</span>{{end}}
+                <div class="cmt-item-actions">
+                    <button class="cmt-del-btn admin-control owner-control" data-id="{{.C.ID}}" title="{{.UI.common.action.delete}}">{{svg "trash"}}</button>
+                    <button class="cmt-like cmt-like-btn" data-id="{{.C.ID}}">
+                        {{svg "heart"}}
+                        <span class="cmt-like-cnt">{{.C.Likes}}</span>
+                    </button>
+                    <button class="cmt-reply cmt-reply-btn" data-id="{{.C.ID}}" data-nick="{{.C.Nick}}">
+                        {{svg "reply"}}
+                    </button>
+                </div>
+            </div>
+            <div class="cmt-content">{{.RenderedContent}}</div>
+        </div>
+    </div>
+{{end}}
+
+{{/* Archive year block (one full year of the timeline) — the single implementation.
+     Call: {{template "archive_year_block" (dict
+         "G" $g "UI" $.UI "Cats" $.CategoryAliases)}}
+     Consumers: posts.html (archive page) · admin.html (font preview archive scene).
+     Glass is carried by .ap-year-block itself (data-backdrop-scene="b" + triplet);
+     the outer .archive-panel has NO background/border/shadow in production (archive.css)
+     — do not add any. */}}
+{{define "archive_year_block"}}
+    <div class="ap-year-block" data-year="{{.G.Year}}" data-backdrop-scene="b">
+        <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div><div class="g-tint"></div><div class="g-noise"></div>
+        <div class="ap-year-header">
+            <div class="ap-col">
+                <div class="ap-node ap-year-node"></div>
+            </div>
+            <div class="ap-year-label">
+                {{/* Mixed scripts must be split into elements: digits go on --font-data,
+                     CJK on --font-caption; never mix two scripts in one element
+                     (it forces a fallback) */}}
+                <h2 class="ap-h1"><span class="ap-num">{{.G.Year}}</span><span class="ap-unit">{{.UI.posts.archive.year}}</span></h2>
+                <span class="ap-count"><span class="ap-unit">{{.UI.common.count.prefix}}</span> <span class="ap-num">{{len .G.Posts}}</span> <span class="ap-unit">{{.UI.posts.count.suffix}}</span></span>
+            </div>
+        </div>
+        <div class="ap-months-area">
+            {{range .G.Months}}
+            <div class="ap-month-block">
+                <div class="ap-month-header">
+                    <div class="ap-col">
+                        <div class="ap-node ap-month-node"></div>
+                    </div>
+                    <div class="ap-month-label">
+                        <h3 class="ap-h2"><span class="ap-num">{{.Month}}</span><span class="ap-unit">{{$.UI.posts.archive.month}}</span></h3>
+                        <span class="ap-count">{{len .Posts}} {{$.UI.posts.archive.post_unit}}</span>
+                    </div>
+                </div>
+                <div class="ap-posts-area">
+                    <ul class="ap-post-list">
+                        {{range $i, $p := .Posts}}
+                        <li class="ap-post-row" style="--i: {{$i}}">
+                            <div class="ap-col">
+                                <div class="ap-node ap-post-node"></div>
+                            </div>
+                            <div class="ap-post-link ink-row">
+                                <a href="{{ URLPost $p.ID }}" class="card-cover"></a>
+                                <span class="ap-date">{{$p.Date.Format "01-02"}}</span>
+                                {{if $p.Category}}<a href="{{ URLTopic (index $.Cats $p.Category) }}" class="ap-category"><span class="pill-label">{{$p.Category}}</span></a>{{end}}
+                                <span class="ap-title">{{$p.Title}}</span>
+                                {{if $p.Tags}}{{range $t := $p.Tags}}<a href="{{ URLTag $t }}" class="ap-tag" onclick="event.stopPropagation()">{{$t}}</a>{{end}}{{end}}
+                            </div>
+                        </li>
+                        {{end}}
+                    </ul>
+                </div>
+            </div>
+            {{end}}
+        </div>
+    </div>
+{{end}}
+
+{{/* Article body card (L1A reading surface) — the single implementation of the
+     post page's <article>.
+     Call: {{template "post_article_body" (dict
+         "P" .CurrentPost "UI" .UI "Cats" .CategoryAliases "Nick" .Nickname)}}
+     Consumers: post.html (post page) · admin.html (font preview article scene).
+     Glass is carried by this card itself (.post-article.glass + data-backdrop-scene="b"
+     + triplet); callers must NOT add background/border/box-shadow. Contains
+     id="article-meta/-title/-content/-tags" and .article-views__num[data-views], which
+     stats.js/main.js depend on — this partial should appear only ONCE per page. */}}
+{{define "post_article_body"}}
+                <article class="post-article glass" data-backdrop-scene="b">
+                    <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div><div class="g-tint"></div><div class="g-noise"></div>
+                <div class="article-meta ink-row" id="article-meta" hx-preserve>
+                    <a href="{{ URLTopic (index .Cats .P.Category) }}" class="post-cat"><span class="pill-label">{{.P.Category}}</span></a>
+                    <span class="article-date">{{svg "calendar"}}<span class="meta-text">{{.P.Date.Format "2006-01-02"}}</span></span>{{if not .P.UpdatedAt.IsZero}}{{/* "Recently updated" (CJK) and the date (digits) must be
+     split into independent elements, each carrying exactly one font — mixing two
+     scripts in one element is forbidden (it forces a fallback) */}}<span class="article-updated">{{svg "clock"}}<span class="meta-label">{{.UI.post.meta.updated}}</span><span class="meta-sep"></span><span class="meta-text">{{.P.UpdatedAt.Format "2006-01-02"}}</span></span>{{end}}
+                    <span class="article-words">{{svg "file"}}<b>{{.P.Words}}</b><i>{{.UI.common.unit.char}}</i></span>
+                    <span class="article-views">{{svg "view"}}<b class="article-views__num is-loading" data-views="{{.P.Views}}" data-post-id="{{.P.ID}}"></b><i>{{.UI.post.meta.reading}}</i></span>
+                    <a href="{{ URLPostEdit .P.ID }}" class="article-edit-btn admin-control">{{.UI.post.meta.edit}}</a>
+                </div>
+                <div class="article-title-row">
+                <h1 class="article-title" id="article-title">{{.P.Title}}</h1>
+                <div class="article-tags tag-side" id="article-tags">
+                    {{if .P.Tags}}{{range .P.Tags}}<a href="{{ URLTag . }}" class="tag"><span class="pill-label">{{.}}</span></a>{{end}}{{end}}
+                </div>
+                </div>
+                <div class="article-content" id="article-content">
+                    {{.P.Content}}
+                </div>
+                <div class="article-footer">
+                    <div class="article-footer-links">
+                        <span class="footer-meta">
+                            <span class="footer-label">{{.UI.post.meta.author}}</span>
+                            <a href="{{ URLAbout }}" class="footer-link">{{.Nick}}</a>
+                        </span>
+                        <span class="article-footer-sep"></span>
+                        <span class="footer-meta">
+                            <span class="footer-label">{{.UI.post.license.label}}</span>
+                            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener" class="footer-link">{{.UI.post.license.cc}}</a>
+                        </span>
+                        <span class="article-footer-sep"></span>
+                        <span class="footer-meta">
+                            <span class="footer-label">{{.UI.post.meta.sponsor}}</span>
+                            <a href="{{ URLSponsor }}" class="footer-link"><span class="emoji">🧋</span> {{.UI.post.license.emoji}}</a>
+                        </span>
+                    </div>
+                </div>
+            </article>
+{{end}}
+
+{{/* Home second-screen content (stats cards + latest posts) — single implementation.
+     Call: {{template "home_section_inner" (dict
+         "UI" .UI "Posts" .Posts "Categories" .Categories "AllTags" .AllTags
+         "VisitStats" .VisitStats "PinnedPost" .PinnedPost "LatestPost" .LatestPost)}}
+     Consumers: home.html (home second screen) · admin.html (font preview home scene).
+     This partial contains ONLY .home-section__inner — not the outer
+     <section class="home-section"> nor the .home-section__bg tangram layer; those belong
+     exclusively to the full-screen home structure. Glass is carried by the inner
+     .stat-card / .home-post-card themselves — callers must NOT add background/border/shadow. */}}
+{{define "home_section_inner"}}
+        <div class="home-section__inner">
+            <div class="home-section__heading">
+                <div class="home-section__heading-group">
+                    <h2 class="home-section__title">{{$.UI.home.section.title}}</h2>
+                    <span class="home-section__kicker">{{$.UI.home.section.kicker}}</span>
+                </div>
+            </div>
+
+            <div class="home-section__stats">
+                <div class="stat-card stat-card--visits" data-backdrop-scene="b" data-hover-glow>
+                    {{template "hover_layers" (dict "glow" true)}}<div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div>
+                    <div class="g-tint"></div>
+                    <div class="g-noise"></div>
+                    <span class="stat-card__value">{{.VisitStats.TodayPV}}</span>
+                    <span class="stat-card__label">{{$.UI.home.stat.today_views}}</span>
+                    <div class="stat-card__extra ink-row"><span>{{$.UI.home.stat.total_pv}}</span><span class="stat-card__num">{{.VisitStats.TotalPV}}</span><span class="stat-card__sep"></span><span>{{$.UI.home.stat.total_uv}}</span><span class="stat-card__num">{{.VisitStats.TotalUV}}</span></div>
+                </div>
+                <div class="stat-card stat-card--archive" data-backdrop-scene="b" data-hover-glow>
+                    {{template "hover_layers" (dict "glow" true)}}<div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div>
+                    <div class="g-tint"></div>
+                    <div class="g-noise"></div>
+                    <span class="stat-card__value">{{len .Posts}}</span>
+                    <span class="stat-card__label">{{$.UI.home.stat.posts}}</span>
+                    <div class="stat-card__extra ink-row"><span class="stat-card__num">{{len .Categories}}</span><span>{{$.UI.home.stat.cats}}</span><span class="stat-card__sep"></span><span class="stat-card__num">{{len .AllTags}}</span><span>{{$.UI.home.stat.tags}}</span></div>
+                </div>
+            </div>
+
+            <div class="home-section__heading home-section__heading--posts">
+                <div class="home-section__heading-group">
+                    <h2 class="home-section__title">{{$.UI.home.section.posts_title}}</h2>
+                    <span class="home-section__kicker">{{$.UI.home.section.posts_kicker}}</span>
+                </div>
+            </div>
+            <div class="home-section__posts">
+                {{if .PinnedPost}}
+                {{with .PinnedPost}}
+                <a href="{{ URLPost .ID }}" class="home-post-card has-ribbon has-badge" data-backdrop-scene="b" data-hover-glow>
+                    <div class="card-ribbon-clip"><div class="corner-ribbon"><span>{{$.UI.home.pinned.ribbon}}</span></div></div>
+                    <span class="badge-top-left pinned">
+                        {{svg "pin"}}<span class="badge-label">{{$.UI.home.pinned.badge}}</span>
+                    </span>
+                    {{template "hover_layers" (dict "glow" true)}}<div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div>
+                    <div class="g-tint"></div>
+                    <div class="g-noise"></div>
+                    <h4 class="home-post-card__title">{{.Title}}</h4>
+                    <p class="home-post-card__summary">{{.Summary}}</p>
+                    <div class="home-post-card__footer">
+                        <div class="footer-left ink-row"><span class="footer-item cat ink-row">{{svg "book"}}<span>{{.Category}}</span></span><span class="home-post-card__sep"></span><span class="footer-item date ink-row">{{svg "calendar"}}<span class="footer-item__num">{{.Date.Format "Jan 02 2006"}}</span></span><span class="home-post-card__sep"></span><span class="footer-item words ink-row">{{svg "file"}}<span class="footer-item__num">{{formatWords .Words}}</span><span class="words-unit">{{$.UI.home.stat.words_unit}}</span></span></div>
+                        <div class="footer-tags ink-row">
+                            {{range .Tags}}<span class="footer-tag">#{{.}}</span>{{end}}
+                        </div>
+                    </div>
+                </a>
+                {{end}}
+                {{end}}
+
+                {{if .LatestPost}}
+                {{with .LatestPost}}
+                <a href="{{ URLPost .ID }}" class="home-post-card has-badge" data-backdrop-scene="b" data-hover-glow>
+                    <span class="badge-top-left badge-new">
+                        {{svg "sparkle"}}<span class="badge-label">{{$.UI.home.latest.badge}}</span>
+                    </span>
+                    {{template "hover_layers" (dict "glow" true)}}<div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div>
+                    <div class="g-tint"></div>
+                    <div class="g-noise"></div>
+                    <h4 class="home-post-card__title">{{.Title}}</h4>
+                    <p class="home-post-card__summary">{{.Summary}}</p>
+                    <div class="home-post-card__footer">
+                        <div class="footer-left ink-row"><span class="footer-item cat ink-row">{{svg "book"}}<span>{{.Category}}</span></span><span class="home-post-card__sep"></span><span class="footer-item date ink-row">{{svg "calendar"}}<span class="footer-item__num">{{.Date.Format "Jan 02 2006"}}</span></span><span class="home-post-card__sep"></span><span class="footer-item words ink-row">{{svg "file"}}<span class="footer-item__num">{{formatWords .Words}}</span><span class="words-unit">{{$.UI.home.stat.words_unit}}</span></span></div>
+                        <div class="footer-tags ink-row">
+                            {{range .Tags}}<span class="footer-tag">#{{.}}</span>{{end}}
+                        </div>
+                    </div>
+                </a>
+                {{end}}
+                {{end}}
+            </div>
+        </div>
+{{end}}
+
+{{/* Photo wall (author page): vertical layout, three columns sharing card + add zone.
+     Lives in the shared set instead of author.html because page templates' {{define}}
+     blocks do not enter the shared set; registered here centrally.
+     Call: {{template "photo_card" (dict "P" $p "I" $i "Col" $col "Row" $row)}} —
+     P = Photo entry, I = row-major global index, Col = column (0/1/2), Row = index in column. */}}
+{{define "photo_card"}}
+            <div class="photo-card" data-id="{{.P.ID}}" style="--i:{{.I}}; --col:{{.Col}}; --row:{{.Row}};">
+                <div class="photo-card-img">
+                    <img class="blur-thumb" src="{{ URLThumbPhotoBlur .P.ID }}" alt="" draggable="false" data-glass-sync="true">
+                    <img class="full-img" data-full="{{ URLPhoto (print .P.ID ".avif") }}" alt="" draggable="false">
+                </div>
+                <div class="photo-card-glass"><p class="photo-card-label">{{.P.Label.Text}}{{.P.Label.Kaomoji}}</p></div>
+                <div class="photo-card-controls admin-control">
+                    <input type="checkbox" class="photo-select" name="ids" value="{{.P.ID}}" form="photo-batch-del">
+                </div>
+            </div>
+{{end}}
+
+{{define "photo_admin_tools"}}
+            <div class="photo-admin-tools admin-control">
+                <form method="POST" action="{{ URLCommit "photo/add" }}" class="photo-add-card">
+                    <button type="submit" class="photo-add-btn">+</button>
+                </form>
+                <div class="photo-add-card">
+                    <label class="photo-add-btn" style="cursor:pointer;font-size:0.9rem;display:flex;flex-direction:column;gap:4px;align-items:center;justify-content:center;">
+                        {{svg "camera"}}
+                        <span>{{.UI.author.photo.upload}}</span>
+                        <input type="file" accept="image/*" style="display:none" multiple id="photo-upload-input">
+                    </label>
+                </div>
+            </div>
+{{end}}

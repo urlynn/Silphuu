@@ -1,0 +1,10 @@
+[
+  {
+    "name": "Example Site",
+    "url": "https://example.com",
+    "desc": "示例友链：把这里换成你朋友的站点",
+    "icon": "github",
+    "tag": "GitHub",
+    "color": "#3B82F6"
+  }
+]

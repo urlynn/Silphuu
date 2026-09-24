@@ -1,0 +1,8 @@
+{{define "global_footer"}}
+<footer class="footer">
+    <div class="footer-inner">
+        {{template "footer_content" .}}
+        <p class="footer-support"><a href="/feed.xml" target="_blank" rel="noopener noreferrer" class="footer-rss" title="{{.UI.footer.support.rss}}">RSS</a>{{template "footer_attribution" .}}{{if creditName}}<span class="footer-sep"></span>{{if creditURL}}<a class="footer-credit" href="{{creditURL}}" target="_blank" rel="noopener noreferrer">{{creditName}}</a>{{else}}<span class="footer-credit">{{creditName}}</span>{{end}}{{end}}</p>
+    </div>
+</footer>
+{{end}}

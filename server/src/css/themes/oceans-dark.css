@@ -1,0 +1,115 @@
+/* Deepocean Dark - semantic layer (layer 2). Redesigned 2026-08-31:
+   deep-sea layering - navy base, bluish glass, bioluminescent teal accent. */
+
+[data-theme="oceans-dark"] {
+    /* Accent */
+  --accent: #64D8CB;
+  /* Darker accent-family edge color for separating white text on accent
+     surfaces. Derived from #64D8CB by lowering value only until contrast vs
+     --accent reaches 3.0 (WCAG non-text minimum): 3.03 vs accent, 5.20 vs white.
+     Defined only in oceans-dark; see docs/REMAINING-ISSUES-AUDIT.md section 11. */
+  --accent-edge: #377770;
+
+  /* Glass tokens, hex base */
+  --glass-tint: #16233C;
+  --glass-light: #C8DCF5;
+  --glass-dark: #000000;
+  
+  --glass-l1-alpha: 0.10;
+  --glass-l2-alpha: 0.16;
+  --glass-noise-opacity: 0;          /* Dark-theme banding guard (Chromium only) */
+  --bg-noise-opacity: 0;
+
+  /* Bioluminescent teal glow (replaces black shadows in dark mode, see /fun/error) */
+  --shadow-sm: 0 0 6px color-mix(in srgb, var(--accent) 25%, transparent);
+
+  /* Background */
+  --bg-body: #0A1628;
+  --bg-base: #0A1628;
+  --bg-glass-alt: rgba(16, 32, 54, 0.80);
+  --bg-nav: rgba(10, 24, 42, 0.55);
+  --bg-code: rgba(10, 24, 42, 0.55);
+  --bg-chroma: rgba(10, 24, 42, 0.55);
+  --bg-card: rgba(16, 32, 54, 0.40);
+  --bg-input: rgba(2, 8, 20, 0.35);
+  --bg-overlay: color-mix(in srgb, var(--glass-dark) 55%, transparent);
+
+  /* Surface */
+  --bg-subtle: color-mix(in srgb, var(--glass-light) calc(var(--surface-alpha) * 100%), transparent);
+  --bg-hover: color-mix(in srgb, var(--glass-light) 10%, transparent);
+  --bg-interactive: color-mix(in srgb, var(--glass-light) 8%, transparent);
+
+  /* Text */
+  --text-primary: #B5C2D2;
+  --text-muted: #A1AEBD;
+  --text-dim: #8996A5;
+  --timeline-line: color-mix(in srgb, var(--text-primary) 22%, transparent);
+  --timeline-node: color-mix(in srgb, var(--text-primary) 50%, transparent);
+
+  /* Accent (auto-derived) */
+  --accent-hover: #82AAFF;
+  --accent-soft: color-mix(in srgb, var(--accent) 15%, transparent);
+
+  /* Border (deep-sea glow edge) */
+  --border-light: color-mix(in srgb, var(--glass-light) 14%, transparent);
+  --border-medium: color-mix(in srgb, var(--accent) 26%, transparent);
+  --border-subtle: color-mix(in srgb, var(--glass-light) 10%, transparent);
+
+  /* Shadow */
+  --shadow-card: 0 0 8px color-mix(in srgb, var(--accent) 28%, transparent), 0 0 16px color-mix(in srgb, var(--accent) 14%, transparent);
+
+  /* Hover states */
+  --hover-bg: color-mix(in srgb, var(--accent) 8%, transparent);
+  --hover-text: var(--accent);
+  --hover-border: color-mix(in srgb, var(--accent) 35%, transparent);
+  --hover-blur: 8px;
+  --hover-bg-active: color-mix(in srgb, var(--accent) 12%, transparent);
+  --hover-text-active: #82AAFF;
+
+  /* Nav */
+  --nav-bg: rgba(10, 24, 42, 0.35);
+
+  /* Layout */
+  --sidebar-radius: var(--radius-md);
+  --blur-amount: 8px;
+
+  /* Group hover */
+  --group-hover-bg: color-mix(in srgb, var(--glass-light) 8%, transparent);
+  --group-hover-text: var(--accent);
+
+  /* Comment form */
+  --cmt-form-bg: #122036;
+  --cmt-input-color: var(--text-primary);
+  --cmt-input-placeholder: var(--text-muted);
+  --cmt-textarea-color: var(--text-primary);
+  --cmt-textarea-placeholder: var(--text-muted);
+  --cmt-textarea-focus: var(--text-primary);
+  --cmt-input-focus: var(--text-primary);
+  --cmt-submit-bg: var(--accent);
+
+
+  /* Chroma syntax highlighting */
+  --chroma-keyword: #82AAFF;
+  --chroma-function: #64D8CB;
+  --chroma-string: #C3E88D;
+  --chroma-comment: rgba(190, 215, 240, 0.38);
+  --chroma-number: #F78C6C;
+  --chroma-operator: #89DDFF;
+  --chroma-punctuation: #E2EAF2;
+  --chroma-tag: #F07178;
+  --chroma-deleted: #F07178;
+  --chroma-inserted: #C3E88D;
+
+  /* Decorative shapes: deep-sea light spots - low-contrast blues with fluorescent accents */
+  --shape-1: #1C3A5E;
+  --shape-2: #F07178;
+  --shape-3: #64D8CB;
+  --shape-4: #C792EA;
+  --shape-5: #F78C6C;
+  --shape-6: #2A4A73;
+  --shape-7: #82AAFF;
+  --shape-8: #16324F;
+  --shape-9: #89DDFF;
+  --shape-10: #2C5F8A;
+  --shape-blend: screen;
+}

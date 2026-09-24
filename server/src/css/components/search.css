@@ -1,0 +1,132 @@
+/* Search Results Component */
+
+.search-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 18px;
+    color: var(--text-muted);
+    font-size: 14px;
+    transition: background 0.15s;
+    border-bottom: 1px solid var(--border-light);
+}
+.search-item-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+/* Row separators and last-row rounding: the first and middle rows keep square
+   corners so they sit flush against the header divider and neighbouring rows;
+   the last row (.search-item:last-child, including a single result) drops the
+   bottom border and takes bottom rounding (var(--radius-xl)) to align flush
+   with the modal shell's bottom edge, so the hover highlight fits perfectly. */
+.search-item:last-child {
+    border-bottom: none;
+    border-bottom-left-radius: var(--radius-xl);
+    border-bottom-right-radius: var(--radius-xl);
+}
+.search-item:hover {
+    background: color-mix(in srgb, var(--glass-base) calc(var(--row-alpha) * 100%), transparent);
+    backdrop-filter: blur(var(--row-blur));
+    -webkit-backdrop-filter: blur(var(--row-blur));
+    border-color: var(--row-border-hover);
+    box-shadow: var(--row-shadow-hover);
+    color: var(--text-primary);
+}
+
+/* Search pills: identical to the post-list tags (.tag shared base, soft theme colour rather than the high-contrast category style) */
+.search-item-row .tag,
+.search-cat {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 5px;
+    border-radius: 4px;
+    font-family: var(--font-caption);
+    font-size: 12px;
+    line-height: 1;
+    flex-shrink: 0;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+.search-cat {
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+.search-cat:hover {
+    background: var(--bg-hover);
+    color: var(--accent-hover);
+}
+.search-item-row .tag {
+    background: var(--accent-2-soft);
+    color: var(--accent-2);
+}
+.search-item-row .tag:hover {
+    background: var(--bg-hover);
+    color: var(--accent-2-hover);
+}
+
+/* The excerpt is cut from the post body, whose characters are collected into the article
+   role, so the card has to render it with that role's family rather than the inherited
+   body one. */
+.search-snippet {
+    font-family: var(--font-article);
+}
+
+/* Search match highlight: padding: 0 / margin: 0 removes all extra side gaps around the characters */
+.search-snippet mark,
+.search-item mark,
+.search-highlight {
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 0;
+    margin: 0;
+    border-radius: 2px;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+    letter-spacing: inherit;
+}
+
+/* Result title: --font-subheading */
+.search-item .search-title {
+    font-family: var(--font-subheading);
+    font-weight: var(--font-subheading-weight, 600);
+    font-variation-settings: 'BEVL' var(--font-subheading-bevl, 100);
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+}
+
+/* Match snippet: strictly follows FONT.md's --font-article (extracted from the article body, 100% coverage) */
+.search-item-snippet {
+    font-family: var(--font-article);
+    font-weight: var(--font-article-weight, 400);
+    font-variation-settings: 'BEVL' var(--font-article-bevl, 100);
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* No-results hint: blends into the modal bottom — no extra floating glass or shadow, bottom edge aligned flush with the panel rounding */
+.search-empty {
+    padding: 20px 18px;
+    text-align: center;
+    font-family: var(--font-body);
+    font-weight: var(--font-body-weight, 400);
+    font-variation-settings: 'BEVL' var(--font-body-bevl, 100);
+    color: var(--text-dim);
+    font-size: 13px;
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: none;
+    border-bottom-left-radius: var(--radius-xl);
+    border-bottom-right-radius: var(--radius-xl);
+}

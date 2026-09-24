@@ -1,0 +1,10 @@
+/* Kaomoji wrapper (.sym): native --font-symbol system font, scaled by --font-symbol-ink-scale
+   and shifted by --font-symbol-shift (injected by main.go, pre-measured; tokens.css defaults
+   otherwise). Apple Symbols / Apple Color Emoji are explicit fallbacks for the shatter fragments. */
+.sym {
+    font-family: var(--font-symbol), 'Apple Symbols', 'Apple Color Emoji';
+    font-size: calc(1em * var(--font-symbol-ink-scale, 0.82));
+    translate: 0 calc(-1 * var(--font-symbol-shift, 0em));
+    font-style: normal;
+    font-weight: inherit;
+}

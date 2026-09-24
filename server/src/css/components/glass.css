@@ -1,0 +1,564 @@
+/* Glass card: the dense-text container (post body, comment form). Translucent
+   by default, near-opaque under data-read-mode="paper". */
+.glass {
+    background: color-mix(in srgb, var(--glass-base) calc(var(--panel-alpha) * 100%), transparent);
+    backdrop-filter: blur(var(--panel-blur));
+    -webkit-backdrop-filter: blur(var(--panel-blur));
+    border-radius: var(--radius-xl);
+    position: relative;
+    z-index: 1;
+    box-shadow: var(--panel-shadow);
+}
+.glass-wrap {
+    position: relative;
+}
+.glass-wrap::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: var(--radius-xl);
+    pointer-events: none;
+}
+
+/* Chromium rebuilds the effect from three layers: .g-blur carries the blur, .g-tint the
+   base colour, border and shadow, .g-noise the anti-banding dither; only .chromium (UA
+   class from head.html) activates them, and the blur layer must never wrap the card
+   content — see docs/GOTCHAS.md §chromium-backdrop. */
+
+/* Strips the card's own paint so it can be rebuilt on .g-tint (the card background sits
+   below its positive-z children and would be covered by the blur layer); isolation keeps
+   the negative-z layers inside the card. This rule must not set position — see
+   docs/GOTCHAS.md §glass-no-position. */
+.chromium [data-backdrop-scene] {
+    isolation: isolate;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: none !important;
+}
+
+/* The three layers are injected for every engine, so they must stay out of the
+   flow where they are unused. See docs/GOTCHAS.md §glass-layer-hidden. */
+[data-backdrop-scene] > .g-blur,
+[data-backdrop-scene] > .g-tint,
+[data-backdrop-scene] > .g-noise {
+    display: none;
+}
+.chromium [data-backdrop-scene] > .g-blur,
+.chromium [data-backdrop-scene] > .g-tint,
+.chromium [data-backdrop-scene] > .g-noise {
+    display: block;
+}
+
+/* Bottom to top: blur(-3), noise(-2), tint(-1). All three paint below the
+   content and stay inside the card's stacking context. */
+
+/* .g-blur matches the card and clips; .g-filter expands and blurs. Keeping the
+   expansion off .g-blur stops the blur spilling outside the card and stops
+   overflow from inflating scrollHeight on scrolling cards. */
+.chromium [data-backdrop-scene] > .g-blur {
+    position: absolute;
+    inset: 0;
+    z-index: -3;
+    overflow: hidden;
+    pointer-events: none;
+    border-radius: inherit;
+}
+
+/* The expansion follows the blur radius rather than staying at 20px — see
+   docs/GOTCHAS.md §glass-blur-expand. */
+.chromium [data-backdrop-scene] > .g-blur > .g-filter {
+    position: absolute;
+    /* Stops overflowing children from making the browser allocate a
+       full-screen blur buffer. */
+    overflow: hidden;
+    /* Engine-computed expansion, so dynamic blur strengths work. */
+    inset: calc(-1 * var(--glass-expand, calc(2 * var(--glass-blur-fallback, 10px))));
+}
+
+/* Scene A (hero): the expansion layer blurs and aligns the background image;
+   JS sets background-size/position on resize. Gaussian blur only — a saturate
+   step turns the wallpaper neon. */
+.chromium [data-backdrop-scene="a"] > .g-blur > .g-filter {
+    filter: blur(var(--glass-blur-fallback, 10px));
+    -webkit-filter: blur(var(--glass-blur-fallback, 10px));
+    background-repeat: no-repeat;
+}
+
+/* Scene B (bg-shapes): the expansion layer blurs and tints; .g-content carries
+   the clone. */
+.chromium [data-backdrop-scene="b"] > .g-blur > .g-filter {
+    filter: blur(var(--glass-blur-fallback, 10px));
+    -webkit-filter: blur(var(--glass-blur-fallback, 10px));
+    background-color: var(--glass-filter-bg, var(--bg-body));
+}
+
+/* Scene B clone layer, shared by all three modes: filter creates a containing block, so
+   absolute + transform instead of fixed; JS writes --g-vw/--g-vh because 100vw includes
+   the scrollbar — see docs/GOTCHAS.md §backdrop-vw. */
+.chromium [data-backdrop-scene="b"] > .g-blur .g-content {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: var(--g-vw, 100vw);
+    height: var(--g-vh, 100vh);
+    /* Clips wallpaper pixels outside the viewport, which removes the ghosting
+       they leave behind once scrolled off. */
+    overflow: hidden;
+    /* Edge mirror padding: box-reflect on a layer that clips mirrors the
+       clipped result and paints past its own overflow into .g-filter, giving
+       the blur clean edges to sample. */
+    -webkit-box-reflect: above 0px;
+    transform-origin: 0 0;
+    /* JS sets will-change inline on attach and revokes it on release — see
+       docs/GOTCHAS.md §backdrop-will-change. */
+}
+
+/* Mode sd (default, scroll-driven): follows the scroll entirely on the compositor.
+   Per-card constants live in `translate` so a variable update applies at once; keyframes
+   interpolate only --g-max-scroll, so a font/image shift never restarts the animation. */
+.chromium [data-backdrop-scene="b"][data-g-mode="sd"] > .g-blur .g-content {
+    translate: var(--g-card-x, 0px) var(--g-card-y0, 0px);
+    animation: g-shapes-follow linear both;
+    animation-timeline: scroll(root);
+}
+
+@keyframes g-shapes-follow {
+    from { transform: translateY(0px); }
+    to   { transform: translateY(var(--g-max-scroll, 0px)); }
+}
+
+@keyframes g-wp-scroll {
+    from { transform: translateY(0px); }
+    to   { transform: translateY(var(--g-max-scroll-neg, 0px)); }
+}
+
+.chromium [data-backdrop-scene="b"] > .g-blur .g-wp:not(.is-fixed) {
+    height: 100vh;
+    animation: g-wp-scroll linear both;
+    animation-timeline: scroll(root);
+}
+
+.chromium [data-backdrop-scene="b"] > .g-blur .g-content .g-fg-target {
+    animation: g-wp-scroll linear both;
+    animation-timeline: scroll(root);
+}
+
+/* Mode static: a card whose ancestor is fixed does not move, so the clone is
+   constant and scrolling costs nothing. Never sd here — see docs/GOTCHAS.md §backdrop-mode-static. */
+.chromium [data-backdrop-scene="b"][data-g-mode="static"] > .g-blur .g-content {
+    translate: var(--g-card-x, 0px) var(--g-card-y0, 0px);
+}
+
+/* Mode raf (fallback): no scroll-driven support, or a sticky ancestor makes
+   rect.top non-linear, so the rect is read every frame. */
+.chromium [data-backdrop-scene="b"][data-g-mode="raf"] > .g-blur .g-content {
+    transform: translate(var(--g-offset-x, 0px), var(--g-offset-y, 0px));
+}
+
+/* Anti-banding dither behind the glass, above the background shapes. It sits
+   outside the filter so the blur does not smear it; off by default. */
+.chromium [data-backdrop-scene] > .g-noise {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    opacity: var(--glass-noise-opacity, 0);
+    mix-blend-mode: var(--glass-noise-blend, overlay);
+    background-image: var(--glass-noise-url);
+    background-size: var(--glass-noise-size, 200px 200px);
+    background-repeat: repeat;
+    border-radius: inherit;
+    pointer-events: none;
+}
+
+/* Carries the card's glass tint and wets the noise layer underneath it. */
+.chromium [data-backdrop-scene] > .g-tint {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--glass-tint, rgba(0, 0, 0, 0.16));
+    box-sizing: border-box;
+    border: none !important;
+    pointer-events: none;
+    transition: background var(--duration-normal, 0.22s) ease;
+}
+
+/* Content layer: unchanged — the negative-z layers already paint below it. */
+
+/* Main layout */
+.main {
+    max-width: 1920px;
+    margin: 0 auto;
+    padding: 80px 24px 40px;
+}
+.main-content {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 80px 24px 40px;
+    position: relative;
+    /* No z-index: it created a stacking context that trapped descendant
+       backdrop-filters inside main — see docs/GOTCHAS.md §glass-no-zindex. */
+}
+
+/* Profile card (L1A panel shell) */
+.profile-card {
+    text-align: center;
+    padding: 48px 32px 36px;
+    margin-bottom: 24px;
+    background: color-mix(in srgb, var(--glass-base) calc(var(--panel-alpha) * 100%), transparent);
+    backdrop-filter: blur(var(--panel-blur));
+    -webkit-backdrop-filter: blur(var(--panel-blur));
+    border-radius: var(--radius-xl);
+    position: relative;
+    z-index: 1;
+    box-shadow: var(--panel-shadow);
+}
+
+/* Chromium rebuild of the panel glass. The card is preserved with hx-preserve
+   outside #content-wrapper, so it survives page swaps instead of being rebuilt;
+   the guestbook copy under .gb-list follows the same L1A shell. */
+.chromium .profile-card {
+    position: relative;
+    --glass-blur-fallback: var(--panel-blur);
+    --glass-tint: color-mix(in srgb, var(--glass-base) calc(var(--panel-alpha) * 100%), transparent);
+}
+
+.profile-card-wrap {
+    position: relative;
+}
+
+/* The card renders outside #content-wrapper (body-level anchor), so swapping
+   the wrapper does not rebuild it. Visibility is decided by :has() on page
+   content: browse pages carry #browse-body-area, the author page #photo-wall.
+   A body class would not work here — body_class is a single global define, so
+   one page's class leaks onto every other page. */
+.profile-card-anchor {
+    display: none;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 80px 24px 0;     /* Matches .main-content, clearing the fixed navbar. */
+}
+body:has(#browse-body-area) .profile-card-anchor,
+body:has(#photo-wall) .profile-card-anchor {
+    display: block;
+}
+/* The anchor already supplies the 80px top offset on these two pages. */
+body:has(#browse-body-area) .main-content,
+body:has(#photo-wall) .main-content {
+    padding-top: 0;
+}
+/* The card is present on every page, so its controls are gated per page. */
+body:not(:has(#browse-body-area)) .pc-add-btn { display: none; }
+body:not(:has(#photo-wall)) .motto--editable { pointer-events: none; cursor: default; }
+
+.avatar {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    margin: 0 auto 16px;
+    overflow: hidden;
+    border: 2px solid var(--border-light);
+    background: var(--bg-subtle);
+}
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.nickname {
+    font-family: var(--font-display-heading);
+    font-size: 24px;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+    letter-spacing: -0.5px;
+}
+
+.motto {
+    font-family: var(--font-display-body);
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+}
+
+.motto--editable {
+    cursor: pointer;
+}
+
+.social-links {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.social-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--bg-subtle);
+    color: var(--text-muted);
+    transition: all 0.25s;
+}
+.social-btn:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.social-btn svg {
+    display: block;
+    width: 20px;
+    height: 20px;
+}
+
+/* Social button ring: 1px stroke drawn clockwise on hover, retracted
+   counter-clockwise on leave, both in 0.5s. The icon itself never scales. */
+.social-btn {
+    position: relative !important;
+    border: none !important;
+    outline: none !important;
+    overflow: visible !important;
+}
+
+.social-btn .social-draw-svg {
+    position: absolute;
+    inset: 0;
+    width: 38px;
+    height: 38px;
+    pointer-events: none;
+    overflow: visible;
+    transform: rotate(-90deg); /* Starts the stroke at twelve o'clock. */
+    z-index: 2;
+    display: block !important;
+}
+
+.social-btn .social-draw-svg circle {
+    cx: 19;
+    cy: 19;
+    r: 18.5;
+    fill: none;
+    stroke: color-mix(in srgb, var(--accent) calc(0.95 * 100%), transparent);
+    stroke-width: 1px; /* Deliberately 1px: a thicker ring reads as a border. */
+    stroke-linecap: round;
+    stroke-dasharray: 116.24; /* 2 * PI * 18.5 */
+    stroke-dashoffset: 116.24; /* Nothing drawn at rest. */
+    /* Leaving retracts the stroke along the same path, in 0.5s. */
+    transition: stroke-dashoffset 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.social-btn:hover .social-draw-svg circle {
+    stroke-dashoffset: 0; /* The full ring, drawn in one pass. */
+    /* Hover draws the ring clockwise, in 0.5s. */
+    transition: stroke-dashoffset 0.5s cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+
+/* The icon fades back over 0.5s rather than snapping. */
+.social-btn svg:not(.social-draw-svg) {
+    transition: color 0.5s ease;
+}
+
+/* On hover the icon tints over 0.5s and keeps its size: no scale. */
+.social-btn:hover svg:not(.social-draw-svg) {
+    color: var(--accent) !important;
+    transform: none !important; /* Overrides any inherited scale. */
+    transition: color 0.5s ease;
+}
+
+/* Card cover link for hx-boost: fills entire card, overlays content */
+.card-cover {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+
+/* Unified subpixel overlay border. Every glass card strips its native border here and
+   draws the 1px ring on a dedicated overlay layer, removing Safari's 0.3px corner tearing
+   and Chromium double borders. A card must be registered in both lists below —
+   see docs/GOTCHAS.md §overlay-border-register. */
+
+/* 1. Strip the native border from every glass card. */
+.profile-card,
+.browse-header,
+.page-card,
+.post-article,
+.post-sidebar,
+.cmt-glass-panel,
+.guestbook-form .cmt-form-card,
+.ap-year-block,
+.home-post-card,
+.stat-card,
+.post-item,
+.page-notice,
+.nav-bubble--center .nav-group .dd,
+.nav-filter-panel__content,
+.search-modal__panel,
+.sponsor-qr-card,
+.sponsor-public-card,
+.status-stat-card,
+.status-cdt-panel,
+.status-log-panel,
+.friend-card,
+.hero__text,
+.hero__tag,
+/* The random error card: created by JS (initFunError in 12-lifecycle.js), so templates
+   only hold a <template> and grepping the class name finds nothing — see
+   docs/GOTCHAS.md §overlay-border-register. */
+.fun-error__card-inner,
+#theme-fab,
+#read-fab,
+.theme-picker {
+    border: none !important;
+}
+
+/* 2. The overlay ring itself. .sponsor-public-card and .post-item hang it on
+   ::before because their ::after carries the sweep animation (post-list.css). */
+.profile-card::after,
+.browse-header::after,
+.page-card::after,
+.post-article::after,
+.post-sidebar::after,
+.cmt-glass-panel::after,
+.fun-error__card-inner::after,
+.guestbook-form .cmt-form-card::after,
+.ap-year-block::after,
+.home-post-card::after,
+.stat-card::after,
+.ap-post-item::after,
+.page-notice::after,
+.status-top-panel::after,
+.nav-bubble--center .nav-group .dd::after,
+.nav-filter-panel__content::after,
+.search-modal__panel::after,
+.sponsor-qr-card::after,
+.status-stat-card::after,
+.status-cdt-panel::after,
+.status-log-panel::after,
+.friend-card::after,
+.hero__text::after,
+.hero__tag::after,
+.post-item::before,
+.sponsor-public-card::before,
+#theme-fab::after,
+#read-fab::after,
+.theme-picker::after {
+    content: '' !important;
+    display: block !important;
+    position: absolute !important;
+    inset: 0 !important;
+    border-radius: inherit !important;
+    box-sizing: border-box !important;
+    pointer-events: none !important;
+    z-index: 1 !important;
+    opacity: 1 !important;
+    background: transparent !important;
+    /* No translateZ / will-change / mask-image on this layer, and the border
+       colour has to jump rather than fade — see docs/GOTCHAS.md §overlay-border-no-composite. */
+    transition: none !important;
+}
+
+/* 2.1 L1A panel shell: never moves, and hover must not touch the ring. */
+.profile-card::after,
+.browse-header::after,
+.page-card::after,
+.post-article::after,
+.post-sidebar::after,
+.cmt-glass-panel::after,
+.fun-error__card-inner::after,
+.guestbook-form .cmt-form-card::after,
+.ap-year-block::after,
+.nav-bubble--center .nav-group .dd::after,
+.nav-filter-panel__content::after,
+.search-modal__panel::after,
+/* The two FABs and the theme picker belong to L1A: fixed, and hover changes
+   only their background and colour, so one static assignment is enough.
+   border-radius: inherit picks up the FAB's 50% circle. */
+#theme-fab::after,
+#read-fab::after,
+.theme-picker::after {
+    border: 1px solid var(--panel-border) !important;
+}
+
+/* 2.2 L1B card: hover highlights the ring and lifts the glow on the overlay,
+   so the card body is not repainted. .empty-card stays static. */
+.home-post-card::after,
+.stat-card::after,
+.ap-post-item::after,
+.post-item::before {
+    border: 1px solid var(--card-border) !important;
+}
+
+.home-post-card:hover::after,
+.stat-card:hover::after,
+.ap-post-item:hover::after,
+.post-item:not(.empty-card):hover::before,
+body.force-hover .home-post-card::after,
+body.force-hover .stat-card::after,
+body.force-hover .ap-post-item::after,
+body.force-hover .post-item:not(.empty-card)::before {
+    border-color: var(--card-border-hover) !important;
+}
+
+/* 2.3 L2A notice: blends in, no hover state. */
+.page-notice::after {
+    border: 1px solid var(--notice-border) !important;
+}
+
+/* 2.4 L3A widget: the QR card, the public sponsor card and the status panels. */
+.sponsor-qr-card::after,
+.sponsor-public-card::before,
+.status-stat-card::after,
+.status-cdt-panel::after,
+.status-log-panel::after {
+    border: 1px solid var(--widget-border) !important;
+}
+
+.sponsor-qr-card:hover::after,
+.sponsor-public-card:hover::before,
+.status-stat-card:hover::after,
+body.force-hover .sponsor-qr-card::after,
+body.force-hover .sponsor-public-card::before,
+body.force-hover .status-stat-card::after {
+    border-color: var(--widget-border-hover) !important;
+}
+
+/* 2.5 L3B friend card: a 360-degree sheen on hover. */
+.friend-card::after {
+    border: 1px solid var(--friend-border) !important;
+}
+
+.friend-card:hover::after,
+body.force-hover .friend-card::after {
+    border-color: var(--friend-border-hover) !important;
+}
+
+/* 2.6 Hero frame and tag: they read the --hero-* token family, not the L1 tokens, so
+   the declarations below mirror hero.css verbatim rather than reinterpreting them. No
+   hover state, hence one static assignment. */
+.hero__text::after {
+    border: 1px solid var(--hero-border, var(--hero-line-soft)) !important;
+}
+
+.hero__tag::after {
+    border: 1px solid var(--hero-tag-border, var(--hero-line-soft)) !important;
+}
+
+/* 3. Non-Chromium native glass: the panel blur moves down to ::before so that
+   nested glass cards still sample the page background — see docs/GOTCHAS.md §backdrop-root-nesting. */
+html:not(.chromium) .profile-card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+html:not(.chromium) .profile-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    z-index: -1;
+    pointer-events: none;
+    backdrop-filter: blur(var(--panel-blur));
+    -webkit-backdrop-filter: blur(var(--panel-blur));
+}

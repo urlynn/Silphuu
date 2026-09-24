@@ -1,0 +1,434 @@
+/* fun-error: random error-code pages. Cards reuse error/*.html with blog-level glass
+   overrides: accent colors (badge/text) are kept from the original files, while card
+   background/typography/layout, sizes and radii are driven by CSS variables (tokens). */
+
+:root {
+    --font-fun-pill-ink-weight: 0.136em;
+}
+
+.fun-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-5);
+    padding: var(--space-8) var(--space-4);
+    min-height: calc(100vh - 52px - var(--space-8));
+}
+
+/* Stage: positioning-only container (desktop), transparent, allows card rotation overflow */
+.fun-error__stage {
+    position: relative;
+    width: 360px;
+    height: 360px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-xl);
+    box-shadow: none;
+    overflow: visible;
+}
+
+/* L1A physical frosted-glass card (each card carries its own glass, background, border and shadow) */
+.fun-error__card-inner {
+    position: absolute;
+    inset: 0;
+    width: 360px;
+    height: 360px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--glass-base) calc(var(--panel-alpha) * 100%), transparent);
+    backdrop-filter: blur(var(--panel-blur));
+    -webkit-backdrop-filter: blur(var(--panel-blur));
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--panel-shadow);
+    overflow: hidden;
+}
+
+/* New card entrance: poker card spins in clockwise and slams down (z-index: 2).
+   Starts top-left with a -18deg counter-rotation, spinning clockwise back to 0deg.
+   Note: forwards pins the natural end state until removal at 560ms. */
+.fun-error__card-inner.is-incoming {
+    z-index: 2;
+    transform-origin: 20% 10%;
+    animation: funErrorPokerClockwiseIn 0.48s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Old card exit: poker card tilts clockwise and slides off (z-index: 1).
+   Pivots on the bottom-right corner, falling to the lower right (0deg -> 6deg -> 28deg) while sliding away.
+   Note: forwards pins the opacity:0 end state to prevent ghost revival. */
+.fun-error__card-inner.is-outgoing {
+    z-index: 1;
+    pointer-events: none;
+    transform-origin: 85% 100%;
+    animation: funErrorPokerClockwiseOut 0.52s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes funErrorPokerClockwiseIn {
+    0% {
+        transform: translate(-36px, -48px) rotate(-18deg) scale(0.91);
+        opacity: 0.15;
+    }
+    70% {
+        transform: translate(0, 3px) rotate(0.8deg) scale(1.008);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(0, 0) rotate(0deg) scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes funErrorPokerClockwiseOut {
+    0% {
+        transform: translate(0, 0) rotate(0deg) scale(1);
+        opacity: 1;
+    }
+    48% {
+        transform: translate(8px, 10px) rotate(6deg) scale(0.98);
+        opacity: 0.8;
+    }
+    72% {
+        transform: translate(26px, 38px) rotate(16deg) scale(0.42);
+        opacity: 0.42;
+    }
+    100% {
+        transform: translate(58px, 86px) rotate(28deg) scale(0.82);
+        opacity: 0;
+    }
+}
+
+/* Card background and layout: transparent base; the stage .fun-error__stage provides the uninterrupted frosted glass */
+.fun-error__card-inner .card {
+    width: 100% !important;
+    height: 100% !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    overflow: hidden !important;
+}
+
+.fun-error__card-inner .card-content {
+    flex: 1 !important;
+    width: 100% !important;
+    padding: 0 20px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+}
+
+.fun-error__card-inner .badge {
+    width: 128px !important;
+    height: 128px !important;
+    border-radius: 50% !important;
+    background: #ffffff !important;
+    border: 3px solid #58a6ff !important;
+    margin-bottom: 20px !important;
+    overflow: hidden !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 0 6px rgba(88, 166, 255, 0.45), 0 0 12px rgba(88, 166, 255, 0.2) !important;
+}
+
+.fun-error__card-inner .badge img {
+    width: calc(100% * 1192 / 1536) !important;
+    height: calc(100% * 1192 / 1536) !important;
+    object-fit: contain !important;
+    display: block !important;
+}
+
+/* 403 Lianlian-exclusive red theme and avatar scale (768/1536) */
+.fun-error__card-inner[data-fun-code="403"] .badge {
+    border-color: #ff4d4f !important;
+    box-shadow: 0 0 6px rgba(255, 77, 79, 0.45), 0 0 12px rgba(255, 77, 79, 0.2) !important;
+}
+.fun-error__card-inner[data-fun-code="403"] .badge img {
+    width: calc(100% * 768 / 1536) !important;
+    height: calc(100% * 768 / 1536) !important;
+}
+.fun-error__card-inner[data-fun-code="403"] .pill {
+    color: #ff4d4f !important;
+    background: rgba(255, 77, 79, 0.12) !important;
+    border: 1.5px solid #ff4d4f !important;
+}
+.fun-error__card-inner[data-fun-code="403"] .colored-desc {
+    color: #ff4d4f !important;
+}
+
+/* 404 blue theme */
+.fun-error__card-inner[data-fun-code="404"] .badge {
+    border-color: #58a6ff !important;
+    box-shadow: 0 0 6px rgba(88, 166, 255, 0.45), 0 0 12px rgba(88, 166, 255, 0.2) !important;
+}
+.fun-error__card-inner[data-fun-code="404"] .pill {
+    color: #58a6ff !important;
+    background: rgba(88, 166, 255, 0.12) !important;
+    border: 1.5px solid #58a6ff !important;
+}
+.fun-error__card-inner[data-fun-code="404"] .colored-desc {
+    color: #58a6ff !important;
+}
+
+/* 418 coral-red theme */
+.fun-error__card-inner[data-fun-code="418"] .badge {
+    border-color: #ff7b72 !important;
+    box-shadow: 0 0 6px rgba(255, 123, 114, 0.45), 0 0 12px rgba(255, 123, 114, 0.2) !important;
+}
+.fun-error__card-inner[data-fun-code="418"] .pill {
+    color: #ff7b72 !important;
+    background: rgba(255, 123, 114, 0.12) !important;
+    border: 1.5px solid #ff7b72 !important;
+}
+.fun-error__card-inner[data-fun-code="418"] .colored-desc {
+    color: #ff7b72 !important;
+}
+
+/* 429 orange theme (Too Many Requests / fainting Feifei) */
+.fun-error__card-inner[data-fun-code="429"] .badge {
+    border-color: #f0883e !important;
+    box-shadow: 0 0 6px rgba(240, 136, 62, 0.45), 0 0 12px rgba(240, 136, 62, 0.2) !important;
+}
+.fun-error__card-inner[data-fun-code="429"] .badge img {
+    width: calc(100% * 1187 / 1536) !important;
+    height: calc(100% * 1187 / 1536) !important;
+}
+.fun-error__card-inner[data-fun-code="429"] .pill {
+    color: #f0883e !important;
+    background: rgba(240, 136, 62, 0.12) !important;
+    border: 1.5px solid #f0883e !important;
+}
+.fun-error__card-inner[data-fun-code="429"] .colored-desc {
+    color: #f0883e !important;
+}
+
+/* 502 purple theme (Bad Gateway / sleeping Tataru) */
+.fun-error__card-inner[data-fun-code="502"] .badge {
+    border-color: #bc8cff !important;
+    box-shadow: 0 0 6px rgba(188, 140, 255, 0.45), 0 0 12px rgba(188, 140, 255, 0.2) !important;
+}
+.fun-error__card-inner[data-fun-code="502"] .pill {
+    color: #bc8cff !important;
+    background: rgba(188, 140, 255, 0.12) !important;
+    border: 1.5px solid #bc8cff !important;
+}
+.fun-error__card-inner[data-fun-code="502"] .colored-desc,
+.fun-error__card-inner[data-fun-code="502"] .desc {
+    color: #bc8cff !important;
+}
+
+/* Blog-styled fonts/text: h2 title + btn button + desc monospace + pill badge */
+.fun-error__card-inner .card .pill {
+    display: inline-block;
+    padding: 3px 10px;
+    box-sizing: border-box;
+    border-radius: 999px;
+    font-size: 11px;
+    line-height: 1.2;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    font-family: var(--font-fun-pill, var(--font-display-mono, var(--font-mono)));
+    font-weight: var(--font-fun-pill-weight, 700);
+    font-variation-settings: 'BEVL' var(--font-fun-pill-bevl, 100);
+}
+
+.fun-error__card-inner .card h2 {
+    font-size: 18px;
+    line-height: 1;
+    font-family: var(--font-fun-title, var(--font-heading));
+    font-weight: var(--font-fun-title-weight, 700);
+    font-variation-settings: 'BEVL' var(--font-fun-title-bevl, 100);
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+    white-space: nowrap;
+    margin: 0 0 12px;
+    text-align: center;
+}
+
+.fun-error__card-inner .card .colored-desc,
+.fun-error__card-inner .card .desc {
+    font-size: 14px;
+    line-height: 1;
+    font-family: var(--font-fun-desc, var(--font-serif, var(--font-mono)));
+    font-weight: var(--font-fun-desc-weight, 600);
+    font-variation-settings: 'BEVL' var(--font-fun-desc-bevl, 100);
+    letter-spacing: 0.3px;
+    text-transform: none;
+    margin-bottom: 0;
+}
+
+.fun-error__card-inner h2 .sym,
+.font-preview__lalafell-wrap h2 .sym,
+#preview-fun-title .sym,
+#preview-fun-title-sym {
+    display: inline-block;
+    font-family: var(--font-fun-title-sym);
+    font-weight: var(--font-fun-title-sym-weight, inherit);
+    font-style: normal;
+    margin-left: 1px;
+}
+
+/* Random Lalafell-specific dots: fixed end gaps and word spacing (.fun-dot / .fun-space) */
+.fun-error__card-inner .pill .fun-dot,
+.font-preview__lalafell-wrap .pill .fun-dot,
+#preview-fun-pill .fun-dot,
+.pill .fun-dot {
+    display: inline-block;
+    margin: 0 var(--fun-pill-dot-gap, 4px); /* 4px on each side of the pill dot (about 8px total) */
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: inherit;
+    vertical-align: baseline;
+    opacity: 0.85;
+}
+
+.fun-error__card-inner .pill .fun-space,
+.font-preview__lalafell-wrap .pill .fun-space,
+#preview-fun-pill .fun-space,
+.pill .fun-space {
+    display: inline-block;
+    width: var(--fun-pill-space-gap, 4px); /* fixed 4px gap between words inside the pill */
+}
+
+.fun-error__card-inner .colored-desc .fun-dot,
+.fun-error__card-inner .desc .fun-dot,
+.font-preview__lalafell-wrap .colored-desc .fun-dot,
+.font-preview__lalafell-wrap .desc .fun-dot,
+#preview-fun-desc .fun-dot,
+.colored-desc .fun-dot {
+    display: inline-block;
+    margin: 0 var(--fun-desc-dot-gap, 6px); /* 6px on each side of the description dot (about 12px total) */
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: inherit;
+    vertical-align: baseline;
+    opacity: 0.85;
+}
+
+.fun-error__card-inner .colored-desc .fun-space,
+.fun-error__card-inner .desc .fun-space,
+.font-preview__lalafell-wrap .colored-desc .fun-space,
+.font-preview__lalafell-wrap .desc .fun-space,
+#preview-fun-desc .fun-space,
+.colored-desc .fun-space {
+    display: inline-block;
+    width: var(--fun-desc-space-gap, 6px); /* fixed 6px gap between words in the English subtitle (replaces the 8.4px space) */
+}
+
+.fun-error__card-inner .card .horror-glitch {
+    display: inline-block;
+    animation: horrorGlitch 2.2s infinite;
+}
+
+@keyframes horrorGlitch {
+    0%, 100% { transform: translate(0); text-shadow: none; opacity: 1; }
+    15% { transform: translate(-2px, 1px) skewX(-4deg); text-shadow: -2.5px 0 #ff0055, 2.5px 0 #00ffff; opacity: 0.85; }
+    17% { transform: translate(2px, -1px); text-shadow: 2.5px 0 #ff0055, -2.5px 0 #00ffff; opacity: 0.6; }
+    19% { transform: translate(0); text-shadow: none; opacity: 1; }
+    55% { transform: translate(-1.5px, 0); text-shadow: -2px 0 #ff4d4f, 1.5px 0 #00ffff; opacity: 0.7; }
+    57% { transform: translate(0); text-shadow: none; opacity: 1; }
+    78% { opacity: 0.35; transform: skewX(5deg); text-shadow: -3px 0 #ff0055; }
+    80% { opacity: 1; transform: skewX(0); text-shadow: none; }
+    82% { transform: translate(2px, 0.5px); text-shadow: 3px 0 #ff0055, -1.5px 0 #00ffff; }
+    84% { transform: translate(0); text-shadow: none; }
+}
+
+.fun-error__card-inner .card .btn {
+    width: 100% !important;
+    padding: 13px 0 !important;
+    font-size: 14px !important;
+    font-family: var(--font-fun-btn, var(--font-body));
+    font-weight: var(--font-fun-btn-weight, 500);
+    font-variation-settings: 'BEVL' var(--font-fun-btn-bevl, 100);
+    background: var(--bento-dock-bg) !important;
+    backdrop-filter: blur(var(--bento-dock-blur)) !important;
+    -webkit-backdrop-filter: blur(var(--bento-dock-blur)) !important;
+    color: var(--text-muted) !important;
+    border: none !important;
+    border-top: 1px solid var(--panel-border) !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0 !important;
+    transition: all var(--duration-normal) !important;
+    flex-shrink: 0 !important;
+    letter-spacing: normal;
+    text-transform: none;
+}
+.fun-error__card-inner .card .btn svg,
+.font-preview__lalafell-wrap .card .btn svg,
+.card .btn svg,
+#preview-fun-btn svg {
+    display: block;
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+    flex-shrink: 0;
+}
+.fun-error__card-inner .card .btn:hover {
+    background: var(--bg-interactive) !important;
+    color: var(--accent) !important;
+}
+
+/* Reroll button (plugs into the site-wide .ink-row dynamic ink baseline) */
+.fun-error__reroll {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-5);
+    border-radius: var(--radius-full);
+    /* L1A glass capsule (standalone piece outside the stage, floating over the page background, no nested blur) */
+    border: 1px solid var(--panel-border);
+    background: color-mix(in srgb, var(--glass-base) calc(var(--panel-alpha) * 100%), transparent);
+    backdrop-filter: blur(var(--panel-blur));
+    -webkit-backdrop-filter: blur(var(--panel-blur));
+    color: var(--text-muted);
+    font-family: var(--font-fun-reroll, var(--font-body));
+    font-weight: var(--font-fun-reroll-weight, 400);
+    font-variation-settings: 'BEVL' var(--font-fun-reroll-bevl, 100);
+    font-size: calc(var(--font-scale-body, 0.9rem));
+    line-height: 1;
+    cursor: pointer;
+    transition: all var(--duration-normal);
+    user-select: none;
+}
+.fun-error__reroll svg {
+    display: block;
+    width: var(--icon-md);
+    height: var(--icon-md);
+    flex-shrink: 0;
+}
+
+/* Ink offsets come from --font-fun-*-shift. Wrappers are flex .ink-row (line-height:1), so <span> is a
+   blockified flex item and translate applies; in-card .pill/h2/.colored-desc sit in no .ink-row. */
+.fun-error__reroll > span {
+    translate: 0 calc(-1 * var(--font-fun-reroll-shift, 0em));
+}
+.fun-error__card-inner .card .btn > span {
+    translate: 0 calc(-1 * var(--font-fun-btn-shift, 0em));
+}
+.fun-error__reroll:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--bg-interactive);
+}
+
+
+/* Chromium fallback: fun-error card glass replication */
+.chromium .fun-error__card-inner {
+    position: absolute;
+    --glass-blur-fallback: var(--panel-blur);
+    --glass-tint: color-mix(in srgb, var(--glass-base) calc(var(--panel-alpha) * 100%), transparent);
+}

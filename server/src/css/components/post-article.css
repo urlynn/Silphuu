@@ -1,0 +1,263 @@
+/* Single post article: the article page layout. */
+.post-center {
+    flex: 2.963 1 0;   /* 800/270, keeping the ratio in step with the sidebar */
+    max-width: 800px;  /* exactly 800 at 1920px wide; the breakpoint below holds >=720 */
+    min-width: 0;      /* lets it shrink to viewport width on phones, no sideways overflow */
+    display: flex;
+    flex-direction: column;
+}
+
+.post-article {
+    flex: 1;
+    min-width: 0;
+    /* Single source: the pinned footer during .is-anim-height reads the same variable, so
+       it lines up with the glass padding. */
+    --post-glass-pad: 36px;
+    padding: var(--post-glass-pad);
+    overflow: hidden;
+}
+
+.article-title {
+    font-family: var(--font-heading);
+    font-weight: var(--font-heading-weight, 700);
+    font-variation-settings: 'BEVL' var(--font-heading-bevl, 100);
+    font-size: 26px;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    letter-spacing: -0.4px;
+    line-height: 1.3;
+}
+
+.article-content {
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--text-primary);
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+}
+/* Zero the first body element's top margin. It would otherwise collapse with
+   .article-title-row's 16px bottom margin and win at 24px, making the gap below the title
+   row wider than the gap above it. Zeroed, both sides are 16px. */
+.article-content > :first-child {
+    margin-top: 0;
+}
+
+.article-content table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    max-width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+}
+.article-content table th,
+.article-content table td {
+    padding: 8px 14px;
+    border: 1px solid var(--border-subtle);
+    text-align: left;
+    white-space: nowrap;
+}
+
+.article-content h1,
+.article-content h2,
+.article-content h3 {
+    color: var(--text-primary);
+    margin: 24px 0 10px;
+    letter-spacing: -0.2px;
+}
+.article-content h1 { font-size: 22px; }
+.article-content h2 { font-size: 19px; }
+.article-content h3 { font-size: 17px; }
+
+.article-content p {
+    margin-bottom: 14px;
+}
+
+.article-content hr {
+    border: none;
+    border-top: 1px solid var(--border-subtle);
+    margin: 28px 0;
+}
+
+.article-footer {
+    margin-top: 28px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.back-link {
+    font-size: 14px;
+    color: var(--text-dim);
+    transition: color 0.2s;
+}
+.back-link:hover {
+    color: var(--accent);
+}
+
+/* Scissors divider between the article and the comments. */
+.article-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 32px 0 28px;
+    line-height: 1;
+}
+.article-divider svg {
+    display: block;
+    width: var(--icon-sm);
+    height: var(--icon-sm);
+    flex-shrink: 0;
+    opacity: 0.6;
+}
+.article-divider-line {
+    flex: none;
+    width: 26px;
+    height: 1px;
+    border-top: 1px dashed var(--border-subtle);
+}
+.article-divider-line--flex {
+    flex: 1;
+    width: auto;
+}
+
+/* TOC reading progress indicator. */
+.toc-list {
+    position: relative;
+}
+#tocList a.toc-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 0;
+    position: relative;
+    z-index: 1;
+}
+#tocList {
+    position: relative;
+}
+.toc-indicator-bar {
+    position: absolute;
+    right: 0;
+    width: 3px;
+    border-radius: 2px;
+    /* Translucent grey on light themes, translucent white on dark; 25% keeps a 3px bar
+       legible. */
+    background: color-mix(in srgb, var(--text-primary) 25%, transparent);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    transition: top 0.15s ease, height 0.15s ease, opacity 0.15s ease;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0;
+}
+.toc-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+}
+
+/* Mode A: entering an article from outside; pure CSS on DOM insertion (htmx's
+   .htmx-settling is dead at 1ms), backwards fill returns the GPU layer so the glass stays
+   resident. Never hang the centre animation on the glass ancestor .post-center — its
+   transform is a Backdrop Root and the inner blur drops out. */
+@keyframes post-col-in-left {
+    from {
+        transform: translateX(-48px);
+    }
+}
+@keyframes post-col-in-center {
+    from {
+        transform: translateY(28px);
+    }
+}
+@keyframes post-col-in-right {
+    from {
+        transform: translateX(48px);
+    }
+}
+/* The comment section gets no entry animation, on first entry or on a page switch: it
+   loads dynamically and its spinner already is the animation. Stacking another one on top
+   makes the same-content morph rebuild flicker. */
+
+/* The three columns animate transform only, never opacity: an opacity animation makes
+   Safari withhold a glass card's backdrop layer until it ends, so the blur would arrive
+   after the glass. An element's own transform does not create a Backdrop Root. */
+
+/* Gated on body.app-ready: #content-wrapper is visibility:hidden until 12-lifecycle.js
+   adds it, and a CSS animation counts from DOM insertion — an unconditional rule would
+   finish before the element is shown. The Mode B block below carries equal specificity
+   and comes later, so internal page switches still zero these out — see
+   docs/GOTCHAS.md §entry-anim-app-ready. */
+body.app-ready .post-layout .post-sidebar {
+    animation: post-col-in-left 0.8s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+}
+body.app-ready .post-layout .post-center .post-article,
+body.app-ready .post-layout .post-center .article-divider {
+    animation: post-col-in-center 0.8s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+}
+/* .cmt-section > * is left without an animation; see above. */
+body.app-ready .post-layout .post-sidebar-right {
+    animation: post-col-in-right 0.8s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+}
+
+/* Mode B: switching between articles inside post/*.
+   html.is-internal-post-nav is set by 12-lifecycle.js on before:swap and removed 400ms
+   after after:settle. It lives on <html> because navbar.js clears <body>'s classes ahead
+   of a page-level swap. Under this flag:
+   - left column .post-sidebar: no animation at all, the fixed point
+   - right column .post-sidebar-right: no entry animation, height driven by the JS FLIP
+   - centre column: entry animations suppressed, leaving only a slight meta/title float
+     and the body expanding progressively */
+html.is-internal-post-nav .post-layout .post-sidebar,
+html.is-internal-post-nav .post-layout .post-center .post-article,
+html.is-internal-post-nav .post-layout .post-center .article-divider,
+html.is-internal-post-nav .post-layout .post-center .cmt-section > *,
+html.is-internal-post-nav .post-layout .post-sidebar-right {
+    animation: none;
+}
+/* Mode B hands .post-article's main-axis size back to the height property. See
+   docs/GOTCHAS.md §waapi-height-flex-basis. Scoped to the Mode B flag, so Mode A and the
+   resting layout are untouched. */
+html.is-internal-post-nav .post-layout .post-center .post-article {
+    flex: none;
+    min-height: 0;
+}
+/* While Mode B animates the glass height the footer is pinned absolutely, riding the
+   bottom edge instead of being clipped by overflow: hidden. No endpoint jump: the JS
+   measures the natural height with the footer still in flow, and the animation ends at
+   exactly that height. left/right/bottom share the .post-article padding variable. */
+html.is-internal-post-nav .post-layout .post-center .post-article.is-anim-height .article-footer {
+    position: absolute;
+    left: var(--post-glass-pad);
+    right: var(--post-glass-pad);
+    bottom: var(--post-glass-pad);
+    margin-top: 0;
+    /* z-index 3 clears the ink ghost layer at 2, so the footer is never hidden behind the
+       remains of the outgoing text. */
+    z-index: 3;
+}
+@keyframes post-title-in {
+    from {
+        opacity: 0.2;
+        transform: translateY(12px);
+    }
+}
+/* The body's and meta row's entries belong to the ink engine (13-ink-transition.js); a
+   translate here would contradict the meta row's fixed position. */
+html.is-internal-post-nav .post-layout .post-center .article-title-row {
+    animation: post-title-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .post-layout .post-sidebar,
+    .post-layout .post-center .post-article,
+    .post-layout .post-center .article-divider,
+    .post-layout .post-center .cmt-section > *,
+    .post-layout .post-sidebar-right,
+    html.is-internal-post-nav .post-layout .post-center .article-title-row {
+        animation: none !important;
+    }
+}
+

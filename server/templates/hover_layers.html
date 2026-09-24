@@ -1,0 +1,15 @@
+{{/*
+     Unified hover-glow layer engine (hg-*) — SSR-embedded, zero window/runtime injection;
+     htmx page switches use server-side full rendering, so this partial covers the swap path.
+
+     Usage (new card): 1) add data-hover-glow to the card tag; 2) include
+     {{template "hover_layers" (dict "glow" true)}} as the card's first child;
+     3) add --hg-glow-shadow for the card in assets/css/components/hover-layers.css
+     (the L1B family can omit it to use the default).
+
+     Layers are persistent — drawn once, never repainted; hover runs only opacity
+     compositor animations; paint properties (box-shadow/background) are forbidden in
+     transitions/keyframes. will-change pins the layer to prevent WebKit compositor
+     eviction (measured: Safari flashes square corners after ~3s eviction).
+*/}}
+{{define "hover_layers"}}{{if .glow}}<i class="hg-glow" aria-hidden="true"></i>{{end}}{{if .sweep}}<i class="hg-sweep" aria-hidden="true"></i>{{end}}{{end}}

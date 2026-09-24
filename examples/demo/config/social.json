@@ -1,0 +1,8 @@
+{
+  "_comment": "Social icons in the profile card, in this order. Each entry names an icon by its path under src/, so you can drop your own SVG at src/icon/<name>.svg and it wins over the engine's copy; label is the hover text. The engine ships no default list — delete this file and the row renders nothing.",
+  "links": [
+    { "icon": "icon/github.svg", "url": "https://github.com/yourname", "label": "GitHub" },
+    { "icon": "icon/email.svg", "url": "mailto:me@example.com", "label": "邮箱" },
+    { "icon": "icon/crates.svg", "url": "https://crates.io/users/yourname", "label": "crates.io" }
+  ]
+}

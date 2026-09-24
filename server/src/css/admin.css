@@ -1,0 +1,1708 @@
+/* Admin Styles */
+
+/* Font Config UI */
+.font-config {
+    text-align: left;
+    margin-top: var(--space-4);
+}
+.font-config__title {
+    font-size: 18px;
+    color: var(--text-primary);
+    margin-bottom: var(--space-1);
+}
+.font-config__desc {
+    color: var(--text-dim);
+    font-size: 13px;
+    margin-bottom: var(--space-4);
+}
+
+/* Preset picker */
+.font-config__preset-bar {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+    margin-bottom: var(--space-4);
+    flex-wrap: wrap;
+}
+.font-config__switch-form,
+.font-config__del-form,
+.font-config__new-form {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+.font-config__new-form {
+    flex: 1;
+    min-width: 180px;
+}
+.font-config__preset-select {
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-light);
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    cursor: pointer;
+}
+.font-config__preset-btn {
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-light);
+    background: var(--bg-subtle);
+    color: var(--text-muted);
+    font-size: 13px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all var(--duration-normal);
+}
+.font-config__preset-btn:hover {
+    border-color: var(--accent-soft);
+    color: var(--accent);
+}
+.font-config__preset-btn--delete {
+    border-color: var(--border-light);
+    background: rgba(230, 126, 128, 0.08);
+    color: rgba(230, 126, 128, 0.7);
+    font-size: 12px;
+}
+.font-config__preset-btn--delete:hover {
+    border-color: var(--danger-red);
+    color: var(--danger-red);
+}
+.font-config__new-input {
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-light);
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-size: 13px;
+    flex: 1;
+    min-width: 80px;
+}
+.font-config__new-btn {
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-sm);
+    border: none;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+/* Two-column split */
+.font-config__panels {
+    display: flex;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+}
+.font-config__panel {
+    flex: 1;
+    min-width: 280px;
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    background: color-mix(in srgb, var(--glass-base) calc(var(--glass-l2-alpha) * 100%), transparent);
+    backdrop-filter: var(--glass-l2-filter);
+    -webkit-backdrop-filter: var(--glass-l2-filter);
+    border: 1px solid var(--panel-border);
+}
+.font-config__panel-title {
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: var(--space-3);
+}
+.font-config__group-title {
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: var(--space-3) 0 var(--space-2);
+    padding-bottom: 2px;
+    border-bottom: 1px solid var(--border-subtle);
+    opacity: 0.7;
+}
+
+/* Left column: the font list */
+.font-config__row {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+    margin-bottom: var(--space-3);
+}
+.font-config__label {
+    color: var(--text-muted);
+    font-size: 14px;
+    min-width: 72px;
+    flex-shrink: 0;
+}
+.font-config__select {
+    flex: 1;
+    min-width: 0;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-light);
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    cursor: pointer;
+}
+.font-config__select:focus {
+    border-color: var(--accent);
+}
+.font-config__control {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex: 1;
+    min-width: 0;
+}
+.font-config__weight-box,
+.font-config__bevl-box {
+    display: inline-flex;
+    align-items: center;
+    background: var(--bg-input);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 0 var(--space-2);
+    height: 36px;
+    flex-shrink: 0;
+    transition: all var(--duration-fast);
+}
+.font-config__weight-box:focus-within,
+.font-config__bevl-box:focus-within {
+    border-color: var(--accent);
+}
+.font-weight-input,
+.font-bevl-input {
+    width: 48px;
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    text-align: right;
+    outline: none;
+    padding: 0;
+    -moz-appearance: textfield;
+}
+.font-weight-input::-webkit-outer-spin-button,
+.font-weight-input::-webkit-inner-spin-button,
+.font-bevl-input::-webkit-outer-spin-button,
+.font-bevl-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.font-weight-input:disabled,
+.font-bevl-input:disabled {
+    color: var(--text-dim);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+.font-config__weight-unit {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-left: 4px;
+    user-select: none;
+    font-family: var(--font-mono);
+}
+
+/* Scene-centric studio: live previews of every scene */
+.font-studio__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    background: color-mix(in srgb, var(--glass-base) calc(var(--glass-l2-alpha) * 100%), transparent);
+    backdrop-filter: var(--glass-l2-filter);
+    -webkit-backdrop-filter: var(--glass-l2-filter);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-lg);
+/* Reads the LAYER shadow token (--panel-shadow), not the retired glow. */
+    box-shadow: var(--panel-shadow);
+}
+.font-studio__name-box {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+.font-studio__name-input {
+    width: 140px;
+    height: 34px;
+    font-weight: 600;
+}
+.font-studio__tabs {
+    display: inline-flex;
+    background: var(--bg-input);
+    padding: 3px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-light);
+    gap: 2px;
+    flex-wrap: wrap;
+}
+.font-studio__tab-btn {
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    padding: 5px 12px;
+    border-radius: var(--radius-full);
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--duration-fast);
+    white-space: nowrap;
+}
+.font-studio__tab-btn:hover {
+    color: var(--text-primary);
+}
+.font-studio__tab-btn.is-active {
+    background: var(--accent);
+    color: var(--bg-body);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+
+.font-studio__scene-left {
+    display: none;
+    animation: fadeIn 0.2s ease-out;
+}
+.font-studio__scene-left.is-active {
+    display: block;
+}
+
+.font-preview-workshop {
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 20px;
+}
+.font-preview__scene {
+    display: none;
+    animation: fadeIn 0.2s ease-out;
+}
+.font-preview__scene.is-active {
+    display: block;
+}
+
+/* Scene 1: the home hero at 1:1; the stage only clips and rounds, visual weight comes
+   from the real component. The clone layer is hidden inside this panel only: the panel
+   carries scene B layers and would otherwise clone the 18 global shapes, blurring the
+   whole viewport. The hero sub-stage runs its own scene A. */
+.font-preview-workshop > .g-blur .g-content {
+    display: none;
+}
+.font-preview__hero-stage {
+    position: relative;
+    width: 100%;
+    height: 400px;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+}
+.font-preview__hero-stage .hero {
+    position: relative !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 400px !important;
+    max-height: 400px !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+}
+/* Hides the crosshair frame so the native scroll indicator shows. */
+.font-preview__hero-stage .hero__viewfinder {
+    display: none !important;
+}
+.font-preview__hero-stage .hero__scroll-hint {
+    display: flex !important;
+    bottom: 20px !important;
+    transform: translateX(-50%) !important;
+    z-index: 7 !important;
+    pointer-events: none !important;
+}
+
+/* Roomier margins on the parameter readout at the top. */
+.font-preview__hero-stage .hero__camera-params {
+    top: 18px !important;
+    left: 20px !important;
+    font-size: 11px !important;
+    line-height: 1.35 !important;
+    opacity: 0.75;
+}
+
+/* Roomier margins on the vertical badge rail on the right. */
+.font-preview__hero-stage .hero__rail {
+    right: 18px !important;
+    width: auto !important;
+    min-width: auto !important;
+    padding: 1.5rem 0.5rem !important;
+    gap: var(--space-3) !important;
+}
+.font-preview__hero-stage .hero__rail-vtext {
+    font-size: 14px !important;
+    letter-spacing: 0.3em !important;
+}
+.font-preview__hero-stage .hero__rail-line {
+    height: 36px !important;
+}
+.font-preview__hero-stage .hero__rail-micro {
+    font-size: 10.5px !important;
+}
+
+/* Profile card, a 1:1 copy of the home page design. */
+.font-preview__hero-stage .hero__content {
+    position: absolute !important;
+    left: 44% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    padding: 0 !important;
+    gap: var(--space-4) !important;
+    width: max-content !important;
+    max-width: calc(100% - 130px) !important;
+}
+.font-preview__hero-stage .hero__avatar-wrap {
+    width: 68px !important;
+    height: 68px !important;
+    border-radius: var(--radius-full) !important;
+    overflow: hidden !important;
+}
+.font-preview__hero-stage .hero__text {
+    padding: var(--space-4) var(--space-5) !important;
+    max-width: 480px !important;
+}
+.font-preview__hero-stage .hero__name {
+    font-size: 32px !important;
+    line-height: 1.1 !important;
+}
+.font-preview__hero-stage .hero__occupation {
+    font-size: 13px !important;
+    margin-top: var(--space-2) !important;
+    line-height: 1.5 !important;
+    white-space: normal !important;
+}
+.font-preview__hero-stage .hero__bio-row {
+    margin-top: var(--space-2) !important;
+}
+.font-preview__hero-stage .hero__bio {
+    font-size: 13px !important;
+}
+.font-preview__hero-stage .hero__tags {
+    margin-top: var(--space-3) !important;
+    gap: 8px !important;
+}
+.font-preview__hero-stage .hero__tag {
+    font-size: 11px !important;
+    padding: 3px 9px !important;
+}
+
+/* Scene 4: the random error card, wired straight to the real component. */
+.font-preview__lalafell-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-2) 0;
+}
+.font-preview__lalafell-wrap .fun-error {
+    min-height: auto !important;
+    padding: 0 !important;
+    gap: var(--space-3) !important;
+}
+.font-preview__lalafell-wrap .fun-error__stage {
+    width: 320px !important;
+    height: 320px !important;
+    min-width: 320px !important;
+    min-height: 320px !important;
+    border-radius: var(--radius-xl) !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+}
+/* Size and clipping only. Background, blur, border and shadow belong to the real
+   component: this stage renders the fun_error_stage template itself, so
+   admin.css must not restyle it. */
+.font-preview__lalafell-wrap .fun-error__card-inner {
+    width: 320px !important;
+    height: 320px !important;
+    border-radius: var(--radius-xl) !important;
+    overflow: hidden !important;
+}
+.font-preview__lalafell-wrap .fun-error__card-inner .card-content {
+    padding: 20px 16px 12px !important;
+}
+.font-preview__lalafell-wrap .fun-error__card-inner .badge img {
+    width: 80px !important;
+    height: 80px !important;
+    border-radius: 50% !important;
+    margin-bottom: 8px !important;
+    object-fit: cover !important;
+}
+.font-preview__lalafell-wrap .fun-error__card-inner .pill {
+    display: inline-block !important;
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+    letter-spacing: 0.6px !important;
+    padding: 3px 10px !important;
+    box-sizing: border-box !important;
+    border-radius: var(--radius-full) !important;
+    margin-bottom: 12px !important;
+}
+.font-preview__lalafell-wrap .fun-error__card-inner h2 {
+    font-size: 17px !important;
+    line-height: 1 !important;
+    margin-bottom: 12px !important;
+    color: var(--text-primary) !important;
+}
+.font-preview__lalafell-wrap .fun-error__card-inner .colored-desc,
+.font-preview__lalafell-wrap .fun-error__card-inner .desc {
+    font-size: 14px !important;
+    line-height: 1 !important;
+    margin-bottom: 0 !important;
+}
+.font-preview__lalafell-wrap .fun-error__card-inner .btn {
+    font-size: 14px !important;
+    padding: 11px 0 !important;
+    text-align: center !important;
+}
+
+/* Roll-again button on the random error card. */
+.font-preview__reroll-btn,
+.fun-error__reroll {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: 8px 20px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-medium);
+    background: var(--bg-card);
+    color: var(--text-muted);
+    font-family: var(--font-fun-reroll, var(--font-body)) !important;
+    font-weight: var(--font-fun-reroll-weight, 400) !important;
+    font-size: 13.5px;
+    cursor: pointer;
+    outline: none;
+    transition: all var(--duration-normal);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+.font-preview__reroll-btn svg,
+.fun-error__reroll svg {
+    display: block;
+    width: 16px;
+    height: 16px;
+    stroke-width: 2;
+}
+.font-preview__reroll-btn:hover,
+.fun-error__reroll:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--bg-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+/* Scene 1: the home second screen at 1:1, spaced comfortably and undistorted. */
+.font-preview__home-section {
+    position: relative !important;
+    height: auto !important;
+    min-height: auto !important;
+    padding: var(--space-4) var(--space-5) !important;
+    border-radius: var(--radius-xl) !important;
+}
+.font-preview__home-section .home-section__inner {
+    max-width: 100% !important;
+}
+.font-preview__home-section .home-section__heading,
+.font-preview__home-section .home-section__stats .stat-card,
+.font-preview__home-section .home-post-card {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+}
+.font-preview__home-section .home-section__heading {
+    margin-bottom: var(--space-3) !important;
+}
+.font-preview__home-section .home-section__stats {
+    margin-bottom: var(--space-3) !important;
+}
+.font-preview__home-section .stat-card {
+    padding: 16px 20px !important;
+}
+.font-preview__home-section .home-section__posts-title {
+    margin-bottom: var(--space-2) !important;
+}
+.font-preview__home-section .home-post-card {
+    padding: 14px 18px !important;
+}
+.font-preview__home-section .home-section__posts {
+    margin-bottom: 0 !important;
+}
+
+/* Scene 2: the article layout at 1:1. */
+.font-preview__post-center {
+    width: 100%;
+}
+/* Long demo bodies are elided in the middle rather than truncated at the tail, so the
+   preview keeps a real opening and closing. admin.html's trimPreviewArticle() hides the
+   middle blocks; this only styles the ellipsis marker it inserts. */
+.font-preview__omit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 10px 0;
+    padding: 6px 0;
+    font-size: 11.5px;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+    user-select: none;
+}
+.font-preview__omit::before,
+.font-preview__omit::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-light);
+}
+/* The meta row wraps when the preview column is too narrow. Inside this scene the whole
+   "last edited" column is dropped for width, and the row is pinned to nowrap — matching
+   the global nowrap in article-meta.css. */
+.font-preview__scene[data-scene="article"] .article-updated {
+    display: none !important;
+}
+.font-preview__scene[data-scene="article"] .article-meta {
+    flex-wrap: nowrap !important;
+}
+/* .post-article carries its own glass from glass.css. Overriding its background, border or
+   shadow here buries that glass under an opaque --bg-card — see docs/GOTCHAS.md §admin-preview-replica. */
+.font-preview__article-glass {
+    border-radius: var(--radius-xl) !important;
+    padding: var(--space-5) !important;
+    margin-bottom: 16px !important;
+}
+.font-preview__article-glass .article-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
+    font-family: var(--font-data, var(--font-mono));
+    font-weight: var(--font-data-weight, 400);
+    font-size: 12px;
+    color: var(--text-dim);
+}
+.font-preview__article-glass .article-title {
+    font-family: var(--font-heading) !important;
+    font-weight: var(--font-heading-weight, 700) !important;
+    font-size: 22px !important;
+    color: var(--text-primary) !important;
+    margin: 0 0 var(--space-3) !important;
+    line-height: 1.3 !important;
+}
+.font-preview__art-content p {
+    font-family: var(--font-article, var(--font-body)) !important;
+    font-weight: var(--font-article-weight, 400) !important;
+    font-size: 14.5px !important;
+    line-height: 1.75 !important;
+    color: var(--text-primary) !important;
+    margin-bottom: var(--space-3) !important;
+}
+.font-preview__art-content h2 {
+    font-family: var(--font-subheading, var(--font-heading)) !important;
+    font-weight: var(--font-subheading-weight, 600) !important;
+    font-size: 16px !important;
+    color: var(--text-primary) !important;
+    margin: var(--space-4) 0 var(--space-2) !important;
+}
+.font-preview__art-content blockquote {
+    font-family: var(--font-serif, var(--font-caption)) !important;
+    font-weight: var(--font-serif-weight, 400) !important;
+    font-size: 13.5px !important;
+    color: var(--text-muted) !important;
+    padding: var(--space-2) var(--space-4) !important;
+    border-left: 3px solid var(--accent) !important;
+    background: var(--bg-subtle) !important;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0 !important;
+    margin: 0 0 var(--space-3) !important;
+    font-style: italic !important;
+}
+.font-preview__art-codeblock pre {
+    background: var(--bg-code) !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: var(--radius-md) !important;
+    padding: var(--space-3) !important;
+    margin: 0 0 var(--space-4) !important;
+    overflow-x: auto !important;
+}
+.font-preview__art-codeblock code {
+    font-family: var(--font-mono) !important;
+    font-weight: var(--font-mono-weight, 400) !important;
+    font-size: 12.5px !important;
+    color: var(--accent) !important;
+    line-height: 1.5 !important;
+}
+.font-preview__art-footer {
+    border-top: 1px dashed var(--border-subtle) !important;
+    padding-top: var(--space-3) !important;
+    margin-top: var(--space-3) !important;
+}
+.font-preview__art-footer .article-footer-links {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: var(--space-4) !important;
+    font-size: 12.5px !important;
+    color: var(--text-dim) !important;
+}
+.font-preview__art-footer .footer-label {
+    font-family: var(--font-caption, var(--font-body)) !important;
+    font-weight: var(--font-caption-weight, 400) !important;
+    color: var(--text-dim) !important;
+    margin-right: 4px !important;
+}
+.font-preview__art-footer .footer-link {
+    font-family: var(--font-body) !important;
+    color: var(--text-muted) !important;
+    text-decoration: none !important;
+}
+
+/* Scene 3: archive and list at 1:1. */
+/* Production .archive-panel carries positioning and CSS variables only — no background,
+   border, radius or shadow; its glass comes from the inner .ap-year-block. See
+   docs/GOTCHAS.md §admin-preview-replica. */
+.font-preview__archive-panel {
+    padding: 0 !important;
+}
+.font-preview__archive-panel .ap-year-block {
+    margin-bottom: 0 !important;
+}
+/* .post-item comes from the post_card partial and brings its own backdrop scene and
+   border overlay. Overriding background, border or shadow here buries that glass; only
+   preview spacing belongs in this rule. */
+.font-preview__topic-panel {
+    margin-top: var(--space-3) !important;
+}
+
+/* Scene 4: comments at 1:1. */
+.font-preview__cmt-stage {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+/* .cmt-form-card is a flat solid canvas in production: cmt.css pins it to
+   box-shadow: none !important and backdrop-filter: none !important. See
+   docs/GOTCHAS.md §admin-preview-replica. */
+.font-preview__cmt-stage .cmt-form-card {
+    margin-bottom: 0 !important;
+    /* The form is a real partial carrying a real action and hx-post, but a font preview
+       only needs to render it, never to submit it. pointer-events blocks interaction
+       without touching rendering. */
+    pointer-events: none;
+}
+.font-preview__cmt-stage .cmt-textarea {
+    color: var(--text-primary) !important;
+}
+/* The copy lives in the overlay now, so the preview has to lift its colour the same way. */
+.font-preview__cmt-stage .cmt-placeholder {
+    color: var(--text-primary) !important;
+}
+.font-preview__cmt-stage .gb-list .profile-card {
+    margin-bottom: 0 !important;
+}
+/* Preview-only container with no production counterpart: it labels the footer font role
+   and borrows the shared notice-panel glass variables. */
+.font-preview__footer-box {
+    background: color-mix(in srgb, var(--glass-base) calc(var(--notice-alpha, 0.14) * 100%), transparent);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-3) var(--space-4);
+}
+.font-preview__footer-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: var(--space-2);
+}
+
+/* Scene 6: the full-role table, a two-column auto-fill grid. */
+.font-preview__scene.is-active[data-scene="all"] {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
+    gap: var(--space-3) !important;
+}
+.font-preview__scene[data-scene="all"] .font-preview__item {
+    margin-bottom: 0;
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+    border: 1px solid var(--card-border);
+}
+.font-preview__scene[data-scene="all"] .font-preview__label {
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: var(--space-1);
+}
+.font-preview__scene[data-scene="all"] .font-preview__text--display {
+    font-size: 24px;
+    color: var(--text-primary);
+    font-family: var(--font-display-heading);
+}
+.font-preview__scene[data-scene="all"] .font-preview__text--hero-body {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--text-muted);
+    font-family: var(--font-display-body);
+}
+.font-preview__scene[data-scene="all"] .font-preview__text--post-title {
+    font-size: 17px;
+    color: var(--text-primary);
+    font-family: var(--font-subheading);
+}
+.font-preview__scene[data-scene="all"] .font-preview__text--body {
+    font-size: 13.5px;
+    line-height: 1.65;
+    color: var(--text-muted);
+    font-family: var(--font-body);
+}
+.font-preview__scene[data-scene="all"] .font-preview__text--mono {
+    font-size: 12.5px;
+    background: var(--bg-code);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
+    color: var(--accent);
+    font-family: var(--font-mono);
+}
+.font-preview__scene[data-scene="all"] .font-preview__text--serif {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    font-family: var(--font-serif);
+}
+.font-preview__footer-box {
+    margin-top: var(--space-4);
+    padding-top: var(--space-3);
+    border-top: 1px dashed var(--border-subtle);
+}
+.font-preview__footer-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: var(--space-2);
+    font-family: var(--font-caption, var(--font-mono));
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.font-preview__text--footer {
+    font-size: 12.5px !important;
+    color: var(--text-dim) !important;
+    font-family: var(--font-footer) !important;
+    font-weight: var(--font-footer-weight, 400) !important;
+    font-variation-settings: 'BEVL' var(--font-footer-bevl, 100) !important;
+}
+
+
+.font-config__save {
+    margin-top: var(--space-4);
+    padding: var(--space-2) var(--space-5);
+    border-radius: var(--radius-md);
+    border: none;
+    background: var(--accent);
+    color: var(--bg-body);
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* Uniform SVG size for the admin page's icon buttons. admin.html leans on inline-styled
+   buttons containing an <svg>; pinning --icon-sm keeps the icon from filling its box. */
+.bg-delete-btn,
+.sponsor-del-btn,
+.sponsor-public-del-btn,
+.pc-add-btn,
+.sticker-add-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+.bg-delete-btn {
+    width: 24px;
+    height: 24px;
+    border: 1px solid var(--border-light);
+    border-radius: 5px;
+    background: var(--bg-subtle);
+    color: var(--text-dim);
+    cursor: pointer;
+    padding: 0;
+}
+.bg-delete-btn:hover { color: var(--danger-red); border-color: var(--danger-red); }
+/* Decoration tone switch (light / dark). */
+.bg-tone-btn {
+    height: 24px;
+    padding: 0 8px;
+    border: 1px solid var(--border-light);
+    border-radius: 5px;
+    background: var(--bg-subtle);
+    color: var(--text-muted);
+    font-size: 11px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.bg-tone-btn:hover { color: var(--accent); border-color: var(--accent); }
+.sponsor-del-btn {
+    width: 22px;
+    height: 22px;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    padding: 0;
+}
+.sponsor-del-btn:hover { color: var(--danger-red); }
+.sponsor-public-del-btn {
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 5px;
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    padding: 0;
+}
+.sponsor-public-del-btn:hover { color: var(--danger-red); }
+.pc-add-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    border: 1px solid var(--border-light);
+    background: var(--bg-subtle);
+    color: var(--text-dim);
+    cursor: pointer;
+    text-decoration: none;
+}
+.pc-add-btn:hover { color: var(--accent); border-color: var(--accent); }
+.sticker-add-btn {
+    width: 32px;
+    height: 32px;
+    border: 1px dashed var(--border-light);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+}
+.sticker-add-btn:hover { color: var(--accent); border-color: var(--accent); }
+/* Uniform SVG size inside every admin button. */
+.admin-icon-btn,
+.bg-delete-btn,
+.sponsor-del-btn,
+.sponsor-public-del-btn,
+.pc-add-btn,
+.sticker-add-btn {
+    overflow: hidden;
+}
+.bg-delete-btn svg,
+.sponsor-del-btn svg,
+.sponsor-public-del-btn svg,
+.pc-add-btn svg,
+.sticker-add-btn svg,
+.photo-add-btn svg,
+.admin-page button svg {
+    display: block;
+    width: var(--icon-sm);
+    height: var(--icon-sm);
+    flex-shrink: 0;
+}
+/* Aligns icon and label in buttons that carry text (shuffle, refresh stickers). */
+.admin-page button svg {
+    vertical-align: middle;
+    margin-right: 2px;
+}
+.photo-add-btn svg {
+    width: var(--icon-md);
+    height: var(--icon-md);
+}
+
+/* Toast. */
+.admin-toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    z-index: 10000;
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-md);
+    background: var(--bg-nav);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--panel-border);
+    color: var(--accent);
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity var(--duration-normal), transform var(--duration-normal);
+    pointer-events: none;
+}
+.admin-toast--show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+.admin-toast--error {
+    color: var(--danger-red);
+    border-color: var(--danger-red);
+}
+
+/* Submit button while an AJAX request is in flight. */
+.admin-page form button[type="submit"] {
+    transition: opacity var(--duration-normal);
+}
+.admin-page form.is-loading button[type="submit"] {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Login */
+.login-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 360px;
+    padding: 36px 28px;
+    text-align: center;
+}
+
+.login-title {
+    font-size: 22px;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    letter-spacing: -0.3px;
+}
+
+.flash-msg {
+    color: var(--danger-red);
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.login-input {
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-subtle);
+    color: var(--text-primary);
+    font-size: 15px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.login-input:focus {
+    border-color: var(--border-light);
+}
+
+.login-btn {
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    background: var(--accent);
+    color: var(--bg-body);
+    font-size: 15px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.login-btn:hover {
+    background: var(--accent-hover);
+}
+
+/* Background Grid */
+.bg-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.bg-grid-item {
+    position: relative;
+    width: 140px;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.bg-grid-item:hover {
+    transform: scale(1.12);
+    z-index: 3;
+}
+.bg-grid-item:hover .bg-preview-overlay {
+    opacity: 1;
+}
+
+.bg-grid-item--mobile {
+    width: 78px;
+}
+
+.bg-preview {
+    width: 140px;
+    height: 78px;
+    border-radius: 10px;
+    border: 1px solid var(--border-subtle);
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-subtle);
+}
+.bg-preview--mobile {
+    width: 78px;
+    height: 140px;
+}
+.bg-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.bg-preview-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 6px;
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+.bg-tone-form {
+    display: inline;
+    margin: 0;
+}
+.bg-delete-form {
+    display: inline;
+    margin: 0;
+}
+
+
+
+/* Admin Dashboard & Cards */
+.admin-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    margin-bottom: var(--space-6);
+}
+
+/* Main console container, inheriting the translucent L1 glass base of
+   .profile-card.page-card. */
+.admin-dashboard {
+    text-align: left;
+    padding: 36px 40px;
+    margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+    .admin-dashboard {
+        padding: 24px 20px;
+    }
+}
+
+/* Module layout conventions. */
+.admin-module {
+    margin-top: var(--space-5);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--panel-border);
+}
+
+.admin-module__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+    flex-wrap: wrap;
+}
+
+.admin-module__title-wrap {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.admin-module__icon {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.admin-module__icon svg {
+    width: 17px;
+    height: 17px;
+}
+
+.admin-module__title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+}
+
+.admin-module__desc {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin: 3px 0 0 0;
+    line-height: 1.4;
+}
+
+/* Maintenance and cache-rebuild grid. */
+.admin-maint-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: var(--space-3);
+}
+
+.admin-maint-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-3);
+    border-radius: var(--radius-lg);
+    background: color-mix(in srgb, var(--glass-base) calc(var(--glass-l2-alpha) * 100%), transparent);
+    border: 1px solid var(--panel-border);
+    backdrop-filter: var(--glass-l2-filter);
+    -webkit-backdrop-filter: var(--glass-l2-filter);
+    /* box-shadow stays out of the transition, as LAYER.md requires: the glow lives on
+       its own .hg-glow layer. */
+    transition: border-color var(--duration-fast), transform var(--duration-fast);
+}
+
+.admin-maint-card:hover {
+    border-color: var(--border-medium);
+    transform: translateY(-1px);
+}
+
+.admin-maint-card__icon {
+    width: 30px;
+    height: 30px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-subtle);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.admin-maint-card__icon svg {
+    width: 15px;
+    height: 15px;
+}
+
+.admin-maint-card__body {
+    flex: 1;
+    min-width: 0;
+}
+
+.admin-maint-card__title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.admin-maint-card__desc {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin: 2px 0 0 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+}
+
+.admin-rebuild-form {
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.admin-rebuild-all-btn {
+    padding: 8px 18px;
+    font-size: 13.5px;
+}
+
+/* Two-column workspace grid. */
+.admin-workspace-grid {
+    display: grid;
+    grid-template-columns: 1.08fr 0.92fr;
+    gap: var(--space-4);
+    margin-top: var(--space-5);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--panel-border);
+}
+
+@media (max-width: 1024px) {
+    .admin-workspace-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.admin-panel-col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    min-width: 0;
+}
+
+/* Sub-panel cards: the translucent L2 glass layer, letting the theme background and the
+   tangram decoration show through. */
+.admin-panel {
+    border-radius: var(--radius-lg);
+    background: color-mix(in srgb, var(--glass-base) calc(var(--glass-l2-alpha) * 100%), transparent);
+    border: 1px solid var(--panel-border);
+    backdrop-filter: var(--glass-l2-filter);
+    -webkit-backdrop-filter: var(--glass-l2-filter);
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-panel__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.admin-panel__title-wrap {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.admin-panel__icon {
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-xs);
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.admin-panel__icon svg {
+    width: 13px;
+    height: 13px;
+}
+
+.admin-panel__title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.admin-panel__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-subgrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+}
+
+/* List items (posts / sponsors). */
+.admin-post-list,
+.admin-sponsor-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.admin-list-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 9px 4px;
+    border-bottom: 1px solid var(--border-subtle);
+    transition: background var(--duration-fast);
+}
+
+.admin-list-item:last-child {
+    border-bottom: none;
+}
+
+.admin-list-item:hover {
+    background: var(--bg-hover);
+    border-radius: var(--radius-sm);
+}
+
+.admin-list-item__link {
+    flex: 1;
+    color: var(--text-primary);
+    font-size: 13.5px;
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: color var(--duration-fast);
+}
+
+.admin-list-item__link:hover {
+    color: var(--accent);
+}
+
+.admin-list-item__date {
+    color: var(--text-dim);
+    font-size: 12px;
+    font-family: var(--font-mono);
+    flex-shrink: 0;
+    min-width: 80px;
+}
+
+.admin-list-item__name {
+    color: var(--text-primary);
+    font-size: 13.5px;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.admin-list-item__action {
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.admin-sponsor-amount {
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 13px;
+    margin: 0 4px;
+    font-family: var(--font-mono);
+}
+
+.admin-sponsor-actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.sponsor-del-form {
+    margin: 0;
+}
+
+.sponsor-del-btn,
+.sponsor-edit-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: var(--radius-xs);
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all var(--duration-fast);
+}
+
+.sponsor-edit-btn:hover {
+    color: var(--accent);
+    background: var(--hover-bg);
+}
+
+.sponsor-del-btn:hover {
+    color: var(--danger-red);
+    background: rgba(230, 126, 128, 0.12);
+}
+
+.sponsor-del-btn svg,
+.sponsor-edit-btn svg {
+    width: 12px;
+    height: 12px;
+}
+
+/* Tags and badges. */
+.admin-badge {
+    font-size: 11px;
+    padding: 1px 7px;
+    border-radius: var(--radius-full);
+    background: var(--bg-subtle);
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    border: 1px solid var(--border-light);
+}
+
+.admin-tag {
+    font-size: 11.5px;
+    color: var(--text-dim);
+    padding: 1px 8px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-light);
+    background: var(--bg-subtle);
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.admin-tag--accent {
+    color: var(--accent);
+    border-color: var(--accent-soft);
+    background: var(--accent-soft);
+}
+
+.admin-tag--pinned {
+    color: #fff !important;
+    background: var(--accent) !important;
+    border-color: var(--accent) !important;
+    font-weight: 600;
+    gap: 3px;
+}
+
+.admin-tag--pinned svg {
+    width: 10px;
+    height: 10px;
+}
+
+.admin-list-item.is-pinned {
+    background: color-mix(in srgb, var(--accent) calc(0.05 * 100%), transparent);
+    border-left: 2.5px solid var(--accent);
+    padding-left: 6px;
+}
+
+.admin-subheading {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+}
+
+.admin-bg-actions {
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--border-subtle);
+}
+
+.admin-card__empty {
+    color: var(--text-dim);
+    font-size: 13px;
+    padding: var(--space-3) 0;
+    text-align: center;
+    margin: 0;
+}
+
+/* Forms and inputs. */
+.admin-form-row {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.admin-form-col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+}
+
+.admin-input {
+    padding: 7px 11px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-light);
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
+}
+
+.admin-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.admin-file-input {
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* Buttons. */
+.admin-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 7px 15px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    border: 1px solid transparent;
+    transition: all var(--duration-normal);
+}
+
+.admin-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+.admin-btn--primary {
+    background: var(--accent);
+    color: var(--bg-body);
+    font-weight: 600;
+    border: none;
+}
+
+.admin-btn--primary:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.admin-btn--primary:active {
+    transform: translateY(0);
+}
+
+.admin-btn--subtle {
+    border-color: var(--border-light);
+    background: var(--bg-subtle);
+    color: var(--text-muted);
+}
+
+.admin-btn--subtle:hover {
+    border-color: var(--accent-soft);
+    background: var(--bg-hover);
+    color: var(--accent);
+}
+
+.admin-btn--danger {
+    padding: 3px 8px;
+    border-radius: var(--radius-xs);
+    font-size: 11.5px;
+    background: rgba(230, 126, 128, 0.12);
+    border-color: rgba(230, 126, 128, 0.25);
+    color: var(--danger-red);
+}
+
+.admin-btn--danger:hover {
+    background: var(--danger-red);
+    color: var(--text-primary);
+    border-color: var(--danger-red);
+}
+
+.admin-btn--sm {
+    padding: 4px 10px;
+    font-size: 12px;
+    border-radius: var(--radius-xs);
+}
+
+.admin-btn--xs {
+    padding: 3px 7px;
+    font-size: 11px;
+    border-radius: var(--radius-xs);
+}
+
+.admin-btn--block {
+    width: 100%;
+}
+
+.admin-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-light);
+    background: var(--bg-subtle);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all var(--duration-normal);
+}
+
+.admin-icon-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--bg-hover);
+}
+
+.admin-icon-btn--sm {
+    width: 26px;
+    height: 26px;
+}
+
+.admin-icon-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Chromium fallback: the admin glass replica. */
+.chromium .admin-dashboard {
+    position: relative;
+    --glass-blur-fallback: var(--glass-l1-blur);
+    --glass-tint: color-mix(in srgb, var(--glass-base) calc(var(--glass-l1-alpha) * 100%), transparent);
+}
+.chromium .admin-maint-card {
+    position: relative;
+    --glass-blur-fallback: var(--glass-l2-blur);
+    --glass-tint: color-mix(in srgb, var(--glass-base) calc(var(--glass-l2-alpha) * 100%), transparent);
+}
+.chromium .admin-panel {
+    position: relative;
+    --glass-blur-fallback: var(--glass-l2-blur);
+    --glass-tint: color-mix(in srgb, var(--glass-base) calc(var(--glass-l2-alpha) * 100%), transparent);
+}
+.chromium .font-config__panel {
+    position: relative;
+    --glass-blur-fallback: var(--glass-l2-blur);
+    --glass-tint: color-mix(in srgb, var(--glass-base) calc(var(--glass-l2-alpha) * 100%), transparent);
+}
+.chromium .admin-toast {
+    position: fixed;
+    --glass-blur-fallback: 16px;
+    --glass-tint: var(--bg-nav);
+}

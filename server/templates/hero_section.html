@@ -1,0 +1,74 @@
+{{define "hero_section"}}
+<section class="hero hero--avatar-{{.HeroBg.AvatarPos}} hero--tone-{{.HeroBg.Tone}}" style="--ox:{{if .HeroBg.OffsetX}}{{printf "%.4f" .HeroBg.OffsetX}}{{else}}0.4200{{end}};--oy:{{if .HeroBg.OffsetY}}{{printf "%.4f" .HeroBg.OffsetY}}{{else}}0.5000{{end}};">
+    {{if not .IsPreview}}
+    <div class="bg-blur" id="wpBlur"></div>
+    <div class="bg-sharp" id="wpSharp"></div>
+    <div class="mask"></div>
+    {{end}}
+    {{with .HeroBg}}
+    {{if .Src}}
+    <picture>
+        {{/* Narrow viewports get their own file, chosen by media query — never by the
+             server, or the home page could not be published as one static file. Mobile
+             sources must come first (<picture> takes the first match); the admin preview has none. */}}
+        {{if $.HeroBgMobile}}
+        {{with picSrc $.HeroBgMobile.Src "jxl"}}<source media="(max-width: 768px)" srcset="{{.}}" type="image/jxl">{{end}}
+        {{with picSrc $.HeroBgMobile.Src "avif"}}<source media="(max-width: 768px)" srcset="{{.}}" type="image/avif">{{end}}
+        {{end}}
+        {{with picSrc .Src "jxl"}}<source srcset="{{.}}" type="image/jxl">{{end}}
+        <img class="hero__bg" src="{{picSrc .Src "avif"}}" alt="">
+    </picture>
+    {{end}}
+    {{end}}
+
+    <div class="hero__viewfinder" aria-hidden="true">
+        <span class="hero__vf hero__vf--tl"></span>
+        <span class="hero__vf hero__vf--tr"></span>
+        <span class="hero__vf hero__vf--bl"></span>
+        <span class="hero__vf hero__vf--br"></span>
+    </div>
+
+    <div class="hero__camera-params" aria-hidden="true">
+        <span>{{.UI.home.brand.decor}}</span>
+        <span>{{.UI.home.hero.blog}}</span>
+        <span>{{.UI.home.hero.open}}</span>
+        <span>IO  2026</span>
+    </div>
+
+    <div class="hero__content">
+        <div class="hero__avatar-wrap">
+            <span class="hero__avatar-ring"></span>
+            {{with avatarURL}}<img src="{{.}}" alt="avatar" loading="lazy" class="hero__avatar">{{end}}
+        </div>
+        <div class="hero__text" data-backdrop-scene="a">
+            <div class="g-blur"><div class="g-filter"></div></div>
+            <div class="g-tint"></div>
+            <div class="g-noise"></div>
+            <span class="hero__eyebrow">{{.UI.home.hero.eyebrow}}</span>
+            <h1 class="hero__name">{{.Nickname}}</h1>
+            <p class="hero__occupation" id="motto-text" title="{{.UI.home.hero.signature_edit}}">{{.HomeMotto}}</p>
+            <div class="hero__bio-row">
+                <span class="hero__bio-decor" aria-hidden="true"></span>
+                <p class="hero__bio">{{if eq .Title (printf "管理 - %s" author)}}{{author}}'s Blog{{else}}{{.Title}}{{end}}</p>
+            </div>
+            <div class="hero__tags">
+                <span class="hero__tag" data-backdrop-scene="a"><span class="g-blur"><span class="g-filter"></span></span><span class="g-tint"></span><span class="g-noise"></span>{{.UI.home.hero.tag.rust}}</span>
+                <span class="hero__tag" data-backdrop-scene="a"><span class="g-blur"><span class="g-filter"></span></span><span class="g-tint"></span><span class="g-noise"></span>{{.UI.home.hero.tag.backend}}</span>
+                <span class="hero__tag" data-backdrop-scene="a"><span class="g-blur"><span class="g-filter"></span></span><span class="g-tint"></span><span class="g-noise"></span>{{.UI.home.hero.tag.linux}}</span>
+            </div>
+        </div>
+    </div>
+
+    <aside class="hero__rail" aria-hidden="true">
+        <span class="hero__pill">{{.UI.home.rail.label}}</span>
+        <span class="hero__rail-vtext">{{.UI.home.brand.full}}</span>
+        <span class="hero__rail-line"></span>
+        <span class="hero__rail-micro">{{.UI.home.rail.micro1}}</span>
+    </aside>
+
+    <button class="hero__scroll-hint" id="scrollHint" aria-label="{{.UI.home.rail.scroll_stats}}">
+        <span class="hero__scroll-text">{{.UI.home.rail.scroll}}</span>
+        <span class="hero__scroll-arrow"></span>
+    </button>
+</section>
+{{end}}

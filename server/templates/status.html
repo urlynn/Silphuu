@@ -1,0 +1,330 @@
+{{define "status.html"}}
+{{template "base_layout" .}}
+{{end}}
+
+{{define "main_class"}}main-content admin-page status-main{{end}}
+
+{{define "head_extra"}}
+    <meta name="theme-color" content="#232A2E">
+    <link rel="stylesheet" href="{{asset "css/admin.bundle.css"}}">
+{{end}}
+
+{{define "content"}}
+    <!-- Global status page vector symbol table (single source of truth) -->
+    <svg style="display: none;" xmlns="http://www.w3.org/2000/svg"><defs>
+        <g id="status-icon-arrow"><line x1="12" y1="22" x2="12" y2="2"/><polyline points="5 9 12 2 19 9"/></g>
+        <g id="status-icon-sync"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M21 21v-5h-5"/></g>
+        <g id="status-icon-search"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></g>
+        <g id="status-icon-filter"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></g>
+        <g id="status-icon-sort"><path d="M4 6h16M4 12h10M4 18h6"/></g>
+        <g id="status-icon-pause"><rect x="5" y="4" width="4" height="16" rx="1"/><rect x="15" y="4" width="4" height="16" rx="1"/></g>
+        <g id="status-icon-play"><polygon points="5 3 19 12 5 21 5 3"/></g>
+        <g id="status-icon-check"><polyline points="20 6 9 17 4 12"/></g>
+        <g id="status-icon-cross"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></g>
+    </defs></svg>
+
+    <div class="profile-card page-card status-card">
+
+        <!-- Compact page-top title and status row -->
+        <div class="status-header-row">
+            <div class="page-title-row">
+                <h1 class="page-title-h1">{{.UI.status.header.title}}</h1>
+            </div>
+            <div class="status-header-meta">
+                <div class="status-badge status-badge--warn" id="poll-badge">
+                    <span class="status-badge__dot"></span>
+                    <span id="poll-status">连接中...</span>
+                </div>
+                <button type="button" class="status-action-btn status-action-btn--retry" id="stream-action-btn" onclick="handleStreamAction()" title="重新连接">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><use href="#status-icon-sync"/></svg>
+                    <span>重试</span>
+                </button>
+                <span class="status-meta-time" id="update-time">--:--:--</span>
+            </div>
+        </div>
+
+        <!-- 1. Core rates and hardware status grid -->
+        <div class="status-grid">
+            <!-- Inbound rate (Rx) -->
+            <div class="status-stat-card" data-backdrop-scene="b" data-hover-glow>
+                {{template "hover_layers" (dict "glow" true)}}<div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div><div class="g-tint"></div><div class="g-noise"></div>
+                <div class="status-stat-card__top">
+                    <span class="status-stat-card__label">{{.UI.status.metrics.rx_rate}}</span>
+                    <span class="status-stat-card__tag">RX</span>
+                </div>
+                <div class="status-stat-card__val" id="speed-rx"><svg viewBox="0 0 24 24" class="status-arrow-svg status-arrow-down"><use href="#status-icon-arrow"/></svg>0.0 <small>KB/s</small></div>
+                <div class="status-stat-card__sub">
+                    <span>今日 <strong id="traffic-rx-daily">-- MB</strong></span>
+                    <span>本月 <strong id="traffic-rx-total">-- MB</strong></span>
+                </div>
+            </div>
+
+            <!-- Outbound rate (Tx) -->
+            <div class="status-stat-card" data-backdrop-scene="b" data-hover-glow>
+                {{template "hover_layers" (dict "glow" true)}}<div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div><div class="g-tint"></div><div class="g-noise"></div>
+                <div class="status-stat-card__top">
+                    <span class="status-stat-card__label">{{.UI.status.metrics.tx_rate}}</span>
+                    <span class="status-stat-card__tag status-stat-card__tag--accent">TX</span>
+                </div>
+                <div class="status-stat-card__val" id="speed-tx" style="color: var(--accent);"><svg viewBox="0 0 24 24" class="status-arrow-svg"><use href="#status-icon-arrow"/></svg>0.0 <small>KB/s</small></div>
+                <div class="status-stat-card__sub">
+                    <span>今日 <strong id="traffic-tx-daily">-- MB</strong></span>
+                    <span>本月 <strong id="traffic-tx-total">-- MB</strong></span>
+                </div>
+            </div>
+
+            <!-- CPU load & disk -->
+            <div class="status-stat-card" data-backdrop-scene="b" data-hover-glow>
+                {{template "hover_layers" (dict "glow" true)}}<div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div><div class="g-tint"></div><div class="g-noise"></div>
+                <div class="status-stat-card__top">
+                    <span class="status-stat-card__label">{{.UI.status.metrics.cpu}}</span>
+                    <span class="status-stat-card__tag">CPU</span>
+                </div>
+                <div class="status-stat-card__val" id="sys-cpu">0%</div>
+                <div class="status-progress-bar">
+                    <div class="status-progress-fill" id="cpu-bar" style="width: 0%;"></div>
+                </div>
+                <div class="status-stat-card__sub">
+                    <span>负载 <strong id="sys-load5m">0.00</strong></span>
+                    <span>硬盘 <strong id="sys-disk">--%</strong></span>
+                </div>
+            </div>
+
+            <!-- Memory usage (dynamic kernel MemTotal) -->
+            <div class="status-stat-card" data-backdrop-scene="b" data-hover-glow>
+                {{template "hover_layers" (dict "glow" true)}}<div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div><div class="g-tint"></div><div class="g-noise"></div>
+                <div class="status-stat-card__top">
+                    <span class="status-stat-card__label">{{.UI.status.metrics.memory}}</span>
+                    <span class="status-stat-card__tag">RAM</span>
+                </div>
+                <div class="status-stat-card__val" id="sys-ram-pct">0%</div>
+                <div class="status-progress-bar">
+                    <div class="status-progress-fill" id="ram-bar" style="width: 0%;"></div>
+                </div>
+                <div class="status-stat-card__sub">
+                    <span>已用 / 总量</span>
+                    <strong id="sys-ram">-- / --</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Alibaba Cloud CDT 20GB reconciliation panel -->
+        <div class="status-cdt-panel" data-backdrop-scene="b">
+            <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div><div class="g-tint"></div><div class="g-noise"></div>
+            <div class="status-panel-header">
+                <h3 class="status-panel-title">{{.UI.status.cdt.title}}</h3>
+                <div class="status-cdt-action-group">
+                    <span class="status-cdt-auto-badge" id="cdt-sync-time">1h 自动刷新</span>
+                    <button type="button" class="status-sync-btn" onclick="syncOfficialCDT(this)" title="立即同步官方 CDT 账单">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><use href="#status-icon-sync"/></svg>
+                        <span>{{.UI.status.cdt.sync_btn}}</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="status-cdt-metrics">
+                <div class="status-cdt-item">
+                    <span class="status-cdt-item__label">{{.UI.status.cdt.total}}</span>
+                    <span class="status-cdt-item__val">20.00 GB</span>
+                </div>
+                <div class="status-cdt-item">
+                    <span class="status-cdt-item__label">{{.UI.status.cdt.used}}</span>
+                    <span class="status-cdt-item__val" id="cdt-used">-- GB</span>
+                </div>
+                <div class="status-cdt-item">
+                    <span class="status-cdt-item__label">{{.UI.status.cdt.remaining}}</span>
+                    <span class="status-cdt-item__val" id="cdt-remaining" style="color: var(--accent);">-- GB</span>
+                </div>
+                <div class="status-cdt-item">
+                    <span class="status-cdt-item__label">{{.UI.status.cdt.percent}}</span>
+                    <span class="status-cdt-item__val" id="cdt-percent">0.0%</span>
+                </div>
+            </div>
+
+            <div class="status-progress-bar" style="height: 6px;">
+                <div class="status-progress-fill" id="cdt-bar" style="width: 0%;"></div>
+            </div>
+            
+            <div style="font-size: 12px; color: var(--text-dim);">
+                <span>IPv6: <b id="traffic-v6-tx" style="color: var(--accent); font-family: var(--font-mono);">--</b> · IPv4: <b id="traffic-v4-tx" style="font-family: var(--font-mono);">--</b></span>
+            </div>
+        </div>
+
+        <!-- 3. Nginx access log -->
+        <div class="status-log-panel" data-backdrop-scene="b">
+            <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div><div class="g-tint"></div><div class="g-noise"></div>
+            <div class="status-log-toolbar">
+                <div class="status-log-left-group">
+                    <div class="status-log-title-wrap">
+                        <h3 class="status-panel-title">{{.UI.status.logs.title}}</h3>
+                    </div>
+                    <div class="status-log-search">
+                        <span class="status-log-search__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><use href="#status-icon-search"/></svg></span>
+                        <input type="text" id="search-input" class="status-log-search__input" placeholder="{{with .UI.status.logs.search_placeholder}}{{.}}{{else}}搜索 路径 | IP | UA{{end}}" oninput="filterLogs()">
+                        <button type="button" id="search-clear-btn" class="status-log-search__clear" onclick="clearSearch()" style="display: none;" title="清空搜索">✕</button>
+                        <div class="status-log-count-segment" id="log-count" title="当前展示日志数量 / 总拉取数">0条</div>
+                    </div>
+                </div>
+                <div class="status-fetch-group">
+                    <!-- XD minimal dual-mode toggle: [ time | count ] -->
+                    <div class="status-mode-toggle">
+                        <button type="button" id="mode-btn-time" class="status-mode-btn active" onclick="switchFetchMode('time')" title="按时间模式">时间</button>
+                        <button type="button" id="mode-btn-count" class="status-mode-btn" onclick="switchFetchMode('count')" title="按条数模式">条数</button>
+                    </div>
+
+                    <!-- Mode 1: manual count input group (free numeric entry) -->
+                    <div id="fetch-count-wrap" class="status-fetch-input-wrap" style="display: none;">
+                        <input type="number" id="log-limit-input" placeholder="100" min="1" max="10000" class="status-fetch-input" title="显示与拉取条数" oninput="onLimitInputChange()">
+                        <span class="status-fetch-unit">条</span>
+                    </div>
+
+                    <!-- Mode 2: time collapse sub-interaction (strictly size-aligned with the count input) -->
+                    <div id="fetch-time-wrap" class="status-fetch-time-wrap" style="display: inline-flex;">
+                        <button type="button" id="time-filter-popover-btn" class="status-time-popover-btn" onclick="toggleTimePopoverMenu(event)" title="选择时间或区间">
+                            <span id="time-popover-label">今日</span>
+                            <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 9 12 15 18 9"/></svg>
+                        </button>
+                        <div id="time-popover-menu" class="status-popover-dropdown" style="display: none;">
+                            <!-- 1. Common presets (single-row pill segment) -->
+                            <div class="status-popover-title">常用预设</div>
+                            <div class="status-popover-segment">
+                                <button type="button" class="status-popover-seg-btn" id="pop-pill-5m" onclick="selectTimePreset('5m', '5分')">5分</button>
+                                <button type="button" class="status-popover-seg-btn" id="pop-pill-1h" onclick="selectTimePreset('1h', '1时')">1时</button>
+                                <button type="button" class="status-popover-seg-btn active" id="pop-pill-today" onclick="selectTimePreset('today', '今日')">今日</button>
+                                <button type="button" class="status-popover-seg-btn" id="pop-pill-yesterday" onclick="selectTimePreset('yesterday', '昨日')">昨日</button>
+                            </div>
+                            
+                            <div class="status-dropdown-divider"></div>
+                            
+                            <!-- 2. Manual relative time input -->
+                            <div class="status-popover-title">相对时间</div>
+                            <div class="status-popover-relative-row">
+                                <span class="status-popover-text">最近</span>
+                                <input type="number" id="relative-num-input" class="status-popover-num-input" value="15" min="1" max="999" oninput="onRelativeTimeChange()" onchange="onRelativeTimeChange()">
+                                <select id="relative-unit-select" class="status-popover-select" onchange="onRelativeTimeChange()">
+                                    <option value="m">分钟</option>
+                                    <option value="h">小时</option>
+                                    <option value="d">天</option>
+                                </select>
+                            </div>
+
+                            <div class="status-dropdown-divider"></div>
+
+                            <!-- 3. Custom start/end range -->
+                            <div class="status-popover-title">起止区间</div>
+                            <div class="status-popover-range-form">
+                                <div class="status-popover-range-item">
+                                    <span class="status-popover-text">开始</span>
+                                    <input type="datetime-local" id="range-start-input" class="status-popover-datetime" oninput="onCustomRangeChange()" onchange="onCustomRangeChange()">
+                                </div>
+                                <div class="status-popover-range-item">
+                                    <span class="status-popover-text">结束</span>
+                                    <input type="datetime-local" id="range-end-input" class="status-popover-datetime" oninput="onCustomRangeChange()" onchange="onCustomRangeChange()">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Far top-right: fetch history button -->
+                    <button type="button" class="status-fetch-btn" onclick="fetchManualHistoricalLogs(this)" title="手动拉取历史日志">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><use href="#status-icon-sync"/></svg>
+                        <span>拉取历史</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="status-table-wrap">
+                <table class="status-log-table">
+                    <thead>
+                        <tr>
+                            <th class="status-col-time">
+                                <div class="status-th-ip-wrap">
+                                    <div class="status-th-sort-wrap" onclick="sortTable('time')" style="cursor: pointer; flex: 1;">
+                                        <span>{{.UI.status.logs.th_time}}</span>
+                                        <span id="sort-icon-time" class="status-sort-indicator"></span>
+                                    </div>
+                                    <button type="button" id="time-filter-trigger" class="status-filter-btn" onclick="toggleTimeFilterMenu(event)" title="筛选时间范围">
+                                        <svg class="status-th-filter-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><use href="#status-icon-filter"/></svg>
+                                    </button>
+                                </div>
+                                <div id="time-filter-menu" class="status-dropdown-menu" style="display: none;"></div>
+                            </th>
+                            <th class="status-col-ip">
+                                <div class="status-th-ip-wrap">
+                                    <span onclick="sortTable('ip')" style="cursor: pointer; flex: 1;">{{.UI.status.logs.th_ip}}</span>
+                                    <div class="status-th-btn-group">
+                                        <button type="button" id="ip-sort-mode-trigger" class="status-filter-btn" onclick="toggleIpMenuSortMode(event)" title="切换列表排序：数量榜 / 字母序">
+                                            <svg class="status-th-filter-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><use href="#status-icon-sort"/></svg>
+                                        </button>
+                                        <button type="button" id="ip-filter-trigger" class="status-filter-btn" onclick="toggleIpFilterMenu(event)" title="筛选 IP">
+                                            <svg class="status-th-filter-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><use href="#status-icon-filter"/></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="ip-filter-menu" class="status-dropdown-menu" style="display: none;"></div>
+                            </th>
+                            <th class="status-col-via">
+                                <div class="status-th-center-wrap">
+                                    <span onclick="sortTable('via')" style="cursor: pointer;" title="点击按来源排序">{{with .UI.status.logs.th_via}}{{.}}{{else}}来源{{end}}</span>
+                                    <button type="button" id="via-filter-trigger" class="status-filter-btn" onclick="toggleViaFilterMenu(event)" title="筛选来源分类">
+                                        <svg class="status-th-filter-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><use href="#status-icon-filter"/></svg>
+                                    </button>
+                                </div>
+                                <div id="via-filter-menu" class="status-dropdown-menu" style="display: none;"></div>
+                            </th>
+                            <th onclick="sortTable('ua')" class="status-col-ua">{{with .UI.status.logs.th_ua}}{{.}}{{else}}UA{{end}}</th>
+                            <th class="status-col-status">
+                                <div class="status-th-center-wrap">
+                                    <span onclick="sortTable('status')" style="cursor: pointer;" title="点击按状态码排序">{{.UI.status.logs.th_status}}</span>
+                                    <button type="button" id="status-filter-trigger" class="status-filter-btn" onclick="toggleStatusFilterMenu(event)" title="筛选状态码">
+                                        <svg class="status-th-filter-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><use href="#status-icon-filter"/></svg>
+                                    </button>
+                                </div>
+                                <div id="status-filter-menu" class="status-dropdown-menu" style="display: none;"></div>
+                            </th>
+                            <th class="status-col-path">
+                                <div class="status-th-path-wrap">
+                                    <div class="status-th-sort-wrap" onclick="sortTable('path')" style="cursor: pointer; flex: 1;">
+                                        <span>{{.UI.status.logs.th_path}}</span>
+                                        <span id="sort-icon-path" class="status-sort-indicator"></span>
+                                    </div>
+                                    <div class="status-th-btn-group">
+                                        <button type="button" id="path-sort-mode-trigger" class="status-filter-btn" onclick="togglePathMenuSortMode(event)" title="切换列表排序：数量榜 / 字母序">
+                                            <svg class="status-th-filter-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><use href="#status-icon-sort"/></svg>
+                                        </button>
+                                        <button type="button" id="path-filter-trigger" class="status-filter-btn" onclick="togglePathFilterMenu(event)" title="筛选路径分类">
+                                            <svg class="status-th-filter-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><use href="#status-icon-filter"/></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="path-filter-menu" class="status-dropdown-menu" style="display: none;"></div>
+                            </th>
+                            <th onclick="sortTable('bytes')" class="status-col-bytes">
+                                <div class="status-th-sort-wrap status-th-centered-sort">
+                                    <span class="status-th-spacer"></span>
+                                    <span class="status-th-title">{{.UI.status.logs.th_bytes}}</span>
+                                    <span id="sort-icon-bytes" class="status-sort-indicator"></span>
+                                </div>
+                            </th>
+                            <th onclick="sortTable('cost')" class="status-col-cost">
+                                <div class="status-th-sort-wrap status-th-centered-sort">
+                                    <span class="status-th-spacer"></span>
+                                    <span class="status-th-title">{{.UI.status.logs.th_cost}}</span>
+                                    <span id="sort-icon-cost" class="status-sort-indicator"></span>
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="logs-tbody">
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 24px 0; color: var(--text-dim);">等待数据接入，或点击上方“拉取历史”</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+<script src="{{asset "js/admin.bundle.js"}}" defer></script>
+{{end}}

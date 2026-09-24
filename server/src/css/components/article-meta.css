@@ -1,0 +1,318 @@
+/* Article meta */
+.article-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+/* No wrapping: wrapping puts each meta item on its own baseline and breaks ink alignment. */
+    white-space: nowrap;
+    margin-bottom: 16px;
+/* base is factored out for the digit slots, as on .stat-card__extra: CJK slots
+   are round(up, base * ink-scale), digit slots are base. Dividing 1em by scale
+   instead would divide the already rounded parent size and oversize the digits
+   by 0.7px. */
+    --meta-base: 12.5px;
+    font-size: round(up, calc(var(--meta-base) * var(--font-caption-ink-scale)), 1px);
+    font-family: var(--font-caption);
+    font-weight: var(--font-caption-weight, 400);
+    font-variation-settings: 'BEVL' var(--font-caption-bevl, 100);
+    line-height: 1;
+}
+/* Shared by the four meta items; the font size is inherited from .article-meta. */
+.article-date,
+.article-words,
+.article-updated,
+.article-views {
+    color: var(--text-dim);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+/* Digit slots use the monospace font so widths stay constant through the reel animation
+   (no ghosting). One font per character, never a fallback stack — split mixed scripts
+   into separate elements. The .article-meta prefix outranks the later b weight reset:
+   the weight decides which ink compensation is looked up (they differ by 0.137px). */
+.article-meta .article-date .meta-text,
+.article-meta .article-updated .meta-text,
+.article-meta .article-words b,
+.article-meta .article-views__num,
+.article-meta .ink-reel {
+    font-family: var(--font-data);
+    /* The digits' ink must not exceed the CJK's: data inks 0.98094em vs caption
+       0.92484em, so the digit size is divided by the ratio (1.0607). Scale exactly
+       once — .ink-reel sits inside .article-views__num and is excluded with :not()
+       so it inherits the already-scaled parent size. */
+    font-weight: var(--font-data-weight, 500);
+    font-variation-settings: 'BEVL' var(--font-data-bevl, 100);
+}
+.article-date .meta-text,
+.article-updated .meta-text,
+.article-words b,
+.article-views__num {
+    /* Digit slots are base, the same convention as .stat-card__num. */
+    font-size: var(--meta-base, 12.5px);
+}
+/* Pure digit leaves trim to [cap height, baseline] instead of the 1em line box.
+   Blink quantises the strut baseline (baseline - box top) to whole CSS px while
+   WebKit keeps the exact fraction: at line-height:1 MapleMono's spec baseline is
+   10.75px, so Chrome floors it to 10 and the digits ride 0.75px high, while
+   LemiMuhe (13.157 -> 13) loses only 0.157px and the CJK slots drift the other
+   way. Trimming removes the strut from the sum — the baseline follows capHeight,
+   which both engines agree on to 1/64px. Measured: cap alphabetic gives Chrome
+   9.125 = Safari 9.125 (MapleMono) and 9.797 = 9.797 (LemiMuhe). Do NOT use the
+   `text` edge: its over-edge differs 2.25px between the two engines.
+   The reel host (.article-views__num) is excluded on purpose — it is an
+   inline-flex with an explicit height:1em + overflow clip, and already lands on
+   the caption ink line through the .odometer nudge below. */
+.article-meta .article-date .meta-text,
+.article-meta .article-updated .meta-text,
+.article-meta .article-words b {
+    text-box: trim-both cap alphabetic;
+}
+/* Inherits the size without scaling again, so every data slot on the meta row
+   is exactly the same size. */
+.article-views__num .ink-reel,
+.article-meta .ink-reel {
+    font-size: 1em;
+}
+
+/* The reel's digits sat high; same 0.5px compensation as .stat-card__num. Written as
+   transform, not translate, because the inline el.style.translate outranks stylesheet
+   rules — see docs/GOTCHAS.md §ink-inline-translate-wins. */
+.article-meta .odometer {
+    transform: translateY(0.5px);
+}
+
+/* An inline-block sits on the baseline, which adds descender space to the wrapping b —
+   the box grows past 1em while the viewport clips at 1em, pinning the digits to the top.
+   display: inline-flex blockifies the odometer and the visible digits land centred. */
+.article-views__num {
+    display: inline-flex;
+    align-items: center;
+}
+/* CJK slots: last edited, word count, views. */
+.article-meta i,
+.article-meta .meta-label {
+    font-family: var(--font-caption);
+    font-weight: var(--font-caption-weight, 400);
+    font-variation-settings: 'BEVL' var(--font-caption-bevl, 100);
+}
+
+/* Role variables apply on the first frame; each leaf matches the font it actually
+   renders: digit slots are data-font and numeric, so they take data-num; CJK slots take
+   the caption role. translate reaches these leaves because they are blockified flex items. */
+.article-meta .article-date .meta-text,
+.article-meta .article-updated .meta-text,
+.article-meta .article-words b,
+.article-meta .article-views__num {
+    translate: 0 calc(-1 * var(--font-data-num-shift, 0em));
+}
+.article-meta i,
+.article-meta .meta-label {
+    translate: 0 calc(-1 * var(--font-caption-shift, 0em));
+}
+/* Separator: a geometric dot, like every other separator in the engine. A glyph separator
+   reads as hanging below the line beside the smaller digits, its ink sitting low in the em;
+   a dot has no ink to compensate, and align-items: center already puts it on the row's
+   centre. Spacing comes from the flex gap on .article-updated. */
+.article-meta .meta-sep {
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+}
+/* b and i drop bold and italic; .ink-row manages the translate (ink-row.css). */
+.article-meta b,
+.article-meta i,
+.article-meta .meta-num {
+    font-weight: inherit;
+    font-style: normal;
+}
+/* Article Views Dynamic Slot Reel */
+.article-views__num {
+    display: inline-block;
+    height: 1em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    vertical-align: baseline;
+    position: relative;
+    color: inherit;
+    overflow: hidden;
+}
+/* The digit-count change is a 480ms FLIP in playMeta(), not CSS: the odometer left-pads
+   the old string with zeros and rolls the new digits in. Do not add a fixed min-width —
+   it is a disguised leading-zero placeholder and conflicts with that contract. */
+
+.article-views__num.is-loading {
+    opacity: 0.8;
+}
+
+.views-slot-spinner {
+    display: inline-block;
+    height: 1em;
+    overflow: hidden;
+    position: relative;
+    vertical-align: top;
+    width: 0.6em;
+}
+
+.views-slot-track {
+    display: flex;
+    flex-direction: column;
+    animation: viewsSlotSpin var(--slot-speed, 0.35s) linear infinite;
+    animation-delay: var(--slot-delay, 0s);
+    will-change: transform;
+}
+
+.views-slot-track > span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 1em;
+    line-height: 1;
+    font-size: inherit;
+    font-weight: inherit;
+}
+
+@keyframes viewsSlotSpin {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(calc(-1em * 10)); }
+}
+/* Every SVG on the meta row: fixed size, display: block to remove the baseline gap. */
+.article-meta svg {
+    display: block;
+    width: var(--icon-sm);
+    height: var(--icon-sm);
+    flex-shrink: 0;
+    opacity: 0.55;
+}
+.article-edit-btn {
+    font-size: 12px;
+    color: var(--text-dim);
+    text-decoration: none;
+    padding: 1px 5px;
+    border-radius: 4px;
+    transition: all 0.15s;
+    margin-left: auto;
+}
+.article-edit-btn:hover {
+    color: var(--accent);
+    background: var(--hover-bg);
+}
+.article-tags {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 20px;
+}
+
+/* Tag beside the heading: flex centre alignment instead of table-cell. */
+.tag-side {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    white-space: nowrap;
+/* On its own line the tag list needs a 20px bottom margin; beside the heading the title
+   row owns it — a margin here would shift the flex centre by 10px. */
+    margin-bottom: 0;
+}
+.tag-side .tag {
+    margin-right: 0;
+}
+
+/* Tag pills (article page sidebar & inline) */
+.tag {
+    background: var(--accent-2-soft);
+    color: var(--accent-2);
+}
+.tag:hover {
+    background: var(--bg-hover);
+    color: var(--accent-2-hover);
+}
+/* Heading and tag pill on one row: flex centre alignment. */
+.article-title-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+/* The item sets its own line-height rather than inheriting body's 1.7, which
+   would make align-items: center use the inflated row centre and push both items
+   to the top, a ~10px misalignment. */
+    line-height: 1;
+}
+.article-title:has(+ .article-tags.tag-side),
+.article-title-row .article-title {
+    margin-top: 0;
+    margin-bottom: 0;
+    white-space: nowrap;
+    padding-right: 0;
+    line-height: 1;
+/* Ink centring through the heading role variable — the pure role value is the only
+   producer. The title is centred inside its own box; cross-element optical symmetry
+   is not attempted here. */
+    translate: 0 calc(-1 * var(--font-heading-shift, 0em));
+}
+
+/* Article Footer Meta & Back Link */
+.back-link {
+    font-size: 14px;
+    color: var(--text-dim);
+    transition: color 0.2s;
+}
+.back-link:hover {
+    color: var(--accent);
+}
+
+.article-footer-links {
+    --caption-base: 13px; /* The unrounded design base, which .emoji and other system-font elements that
+   do not take ink-scale anchor to. */
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    font-size: round(up, calc(var(--caption-base) * var(--font-caption-ink-scale)), 1px);
+    font-family: var(--font-caption);
+    color: var(--text-dim);
+}
+/* Separator dot at the foot of the post body. Carries --font-caption-shift; whether
+   that matches the role of the adjacent .footer-label / .footer-link text is unverified. */
+.article-footer-sep {
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+    transform: translateY(var(--font-caption-shift, 0em));
+}
+.footer-meta {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-dim);
+}
+.footer-label {
+    color: var(--text-dim);
+    text-box: trim-both ideographic-ink ideographic-ink;
+}
+.footer-link {
+    color: var(--accent);
+    text-decoration: none;
+    transition: color 0.15s;
+    text-box: trim-both ideographic-ink ideographic-ink;
+}
+.footer-link:hover {
+    color: var(--accent-hover);
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .article-footer-links {
+        --caption-base: 12px;
+        flex-wrap: nowrap;
+        gap: 4px;
+        font-size: 12px;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+}

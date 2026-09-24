@@ -1,0 +1,66 @@
+[
+  {
+    "path": "/",
+    "label": {
+      "text": "这里是首页",
+      "kaomoji": ""
+    },
+    "w": 0
+  },
+  {
+    "path": "/about",
+    "label": {
+      "text": "这里是关于我",
+      "kaomoji": ""
+    },
+    "w": 0
+  },
+  {
+    "path": "/friends",
+    "label": {
+      "text": "这里是友情链接",
+      "kaomoji": ""
+    },
+    "w": 0
+  },
+  {
+    "path": "/sponsor",
+    "label": {
+      "text": "这里是赞助页面",
+      "kaomoji": ""
+    },
+    "w": 0
+  },
+  {
+    "path": "/guestbook",
+    "label": {
+      "text": "这里是留言区",
+      "kaomoji": ""
+    },
+    "w": 0
+  },
+  {
+    "path": "/lalafell",
+    "label": {
+      "text": "这里是拉拉肥",
+      "kaomoji": ""
+    },
+    "w": 0
+  },
+  {
+    "path": "/search",
+    "label": {
+      "text": "这里是搜索页",
+      "kaomoji": ""
+    },
+    "w": 0
+  },
+  {
+    "path": "/archive",
+    "label": {
+      "text": "这里是归档",
+      "kaomoji": ""
+    },
+    "w": 0
+  }
+]

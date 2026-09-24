@@ -1,0 +1,7 @@
+{
+  "_comment": "Category registry. key = ASCII slug = the posts/ subdirectory and the /topic/ URL segment; name = display name (change it freely, it is not part of any URL); order = dropdown and navbar position, ties break on name. A declared category appears even with no post in it.",
+  "tutorial": {"name": "教程", "desc": "简单的入门教程", "order": 1},
+  "software": {"name": "软件", "desc": "个人的软件项目", "order": 2},
+  "hardware": {"name": "硬件", "desc": "个人的硬件项目", "order": 3},
+  "essay": {"name": "随笔", "desc": "记录生活与日常", "order": 4}
+}

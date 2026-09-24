@@ -1,0 +1,579 @@
+{
+  "admin": {
+    "font": {
+      "desc": {
+        "text": "左侧选择字体，右侧实时预览。预设可通过选择框切换。",
+        "role": "body"
+      },
+      "title_sub": {
+        "text": "副标题",
+        "role": "body"
+      },
+      "body_short": {
+        "text": "短篇正文",
+        "role": "body"
+      },
+      "footer_copy": {
+        "text": "页脚版权",
+        "role": "body"
+      },
+      "group_display": {
+        "text": "展示",
+        "role": "body"
+      },
+      "art_body": {
+        "text": "艺术正文",
+        "role": "body"
+      },
+      "serif": {
+        "text": "衬线",
+        "role": "body"
+      },
+      "body_long": {
+        "text": "长篇正文",
+        "role": "body"
+      },
+      "title_main": {
+        "text": "主标题",
+        "role": "body"
+      },
+      "current": {
+        "text": "(当前)",
+        "role": "body"
+      },
+      "new_name": {
+        "text": "新预设名称",
+        "role": "body"
+      },
+      "preset_delete": {
+        "text": "删除当前预设",
+        "role": "native"
+      },
+      "new_btn": {
+        "text": "+ 新建",
+        "role": "body"
+      },
+      "panel_title": {
+        "text": "字体选择",
+        "role": "body"
+      },
+      "data_text": {
+        "text": "数据文字",
+        "role": "body"
+      },
+      "comment": {
+        "text": "评论字体",
+        "role": "body"
+      },
+      "attach_text": {
+        "text": "附属文字",
+        "role": "body"
+      },
+      "code": {
+        "text": "代码块",
+        "role": "body"
+      },
+      "save": {
+        "text": "保存修改",
+        "role": "body"
+      },
+      "unspecified": {
+        "text": "(不指定)",
+        "role": "body"
+      },
+      "deco_mono": {
+        "text": "装饰等宽",
+        "role": "body"
+      },
+      "deco_jp": {
+        "text": "艺术日文",
+        "role": "body"
+      },
+      "deco_i18n": {
+        "text": "多语言昵称",
+        "role": "body"
+      },
+      "art_title": {
+        "text": "艺术标题",
+        "role": "body"
+      },
+      "preset_title": {
+        "text": "字体预设",
+        "role": "body"
+      },
+      "preset_name": {
+        "text": "预设名",
+        "role": "body"
+      },
+      "title_group": {
+        "text": "标题",
+        "role": "body"
+      },
+      "body_group": {
+        "text": "正文",
+        "role": "body"
+      },
+      "code_group": {
+        "text": "代码",
+        "role": "body"
+      },
+      "tab_home": {
+        "text": "🏠 首页展示",
+        "role": "body"
+      },
+      "tab_article": {
+        "text": "📖 文章正文",
+        "role": "body"
+      },
+      "tab_archive": {
+        "text": "🗂️ 归档列表",
+        "role": "body"
+      },
+      "tab_comment": {
+        "text": "💬 评论站底",
+        "role": "body"
+      },
+      "tab_lalafell": {
+        "text": "🧩 随机拉拉肥",
+        "role": "body"
+      },
+      "tab_sponsor": {
+        "text": "🧧 赞助卡片",
+        "role": "body"
+      },
+      "tab_all": {
+        "text": "🔬 全角色总览",
+        "role": "body"
+      },
+      "fun_pill": {
+        "text": "错误码",
+        "role": "body"
+      },
+      "fun_title": {
+        "text": "提示标题",
+        "role": "body"
+      },
+      "fun_title_sym": {
+        "text": "标题感叹号",
+        "role": "body"
+      },
+      "fun_desc": {
+        "text": "英文提示",
+        "role": "body"
+      },
+      "fun_btn": {
+        "text": "返回博客",
+        "role": "body"
+      },
+      "fun_reroll": {
+        "text": "再掷按钮",
+        "role": "body"
+      },
+      "preview_title": {
+        "text": "实时预览",
+        "role": "body"
+      }
+    },
+    "bg": {
+      "manage": {
+        "text": "背景图管理",
+        "role": "body"
+      },
+      "upload": {
+        "text": "上传文件（支持多选）",
+        "role": "body"
+      },
+      "url_input": {
+        "text": "输入图片/视频 URL",
+        "role": "body"
+      },
+      "hint": {
+        "text": "支持 jpg/png/gif/webp/avif | 可多选上传 | 删除时自动清理文件",
+        "role": "body"
+      },
+      "set_current": {
+        "text": "设为当前背景",
+        "role": "native"
+      },
+      "set": {
+        "text": "设为背景",
+        "role": "native"
+      },
+      "empty": {
+        "text": "暂无背景图",
+        "role": "body"
+      },
+      "mode_random": {
+        "text": "随机",
+        "role": "body"
+      },
+      "mode_order": {
+        "text": "顺序",
+        "role": "body"
+      }
+    },
+    "preview": {
+      "display2": {
+        "text": "Silphuu Blog v2.0",
+        "role": "display_heading"
+      },
+      "serif_sample_btn": {
+        "text": "拯救锅里面的拉拉肥->",
+        "role": "serif"
+      },
+      "serif_sample_title": {
+        "text": "拉拉菲尔无情的拒绝了你的请求！",
+        "role": "serif"
+      },
+      "serif_lorem": {
+        "text": "404 NOT FOOD - Lalafell says No!",
+        "role": "serif"
+      },
+      "hero_body": {
+        "text": "8 年后端 + 10 年嵌入式 · 2026 掌握 2 门语言",
+        "role": "display_body"
+      },
+      "body_sample2": {
+        "text": "嵌入式 #1 — 2026 目标掌握 Rust + Go 后端开发",
+        "role": "body"
+      },
+      "serif_sample": {
+        "text": "作者 Silphuu · 许可 CC BY-NC-SA 4.0 · 赞助 🧋 请喝奶茶",
+        "role": "serif"
+      },
+      "post_title": {
+        "text": "最新文章 Latest 第 42 期 · PV 12,345 次",
+        "role": "subheading"
+      },
+      "mono_meta": {
+        "text": "v2.0.1 · 2026-07-15 · build #1024",
+        "role": "mono"
+      },
+      "jp_sample": {
+        "text": "アタシ 再生産",
+        "role": "display_jp"
+      },
+      "sponsor_nick": {
+        "text": "七月七なな",
+        "role": "display_i18n"
+      },
+      "comment_sample": {
+        "text": "Silphuu:这篇文章写得很棒!2026 年 Go + Rust 双语言路线很实用 👍",
+        "role": "body"
+      },
+      "display1": {
+        "text": "探索 2026 Web 3.0 + AI 融合的 12 个方向",
+        "role": "display_heading"
+      },
+      "body_sample1": {
+        "text": "OpenWrt 25.12 版本的 Release 在 2026 年的今天部署到 ProxmoxVE 7.0 版本的 Lxc 容器",
+        "role": "body"
+      },
+      "symbol_label": {
+        "text": "颜文字/符号",
+        "role": "body"
+      },
+      "mono_code": {
+        "text": "fmt.Println(\"Hello, World!\")",
+        "role": "mono"
+      },
+      "mono_stat": {
+        "text": "2026-07-15 · 42 篇 · 1,234 PV",
+        "role": "mono"
+      }
+    },
+    "sponsor": {
+      "empty": {
+        "text": "暂无赞助记录",
+        "role": "body"
+      },
+      "manage": {
+        "text": "赞助管理",
+        "role": "body"
+      }
+    },
+    "image": {
+      "format": {
+        "text": "目标格式:",
+        "role": "body"
+      },
+      "fmt_avif": {
+        "text": "AVIF（浏览器兼容性好）",
+        "role": "body"
+      },
+      "ratio": {
+        "text": "比例 %",
+        "role": "body"
+      },
+      "width": {
+        "text": "宽度 px",
+        "role": "body"
+      },
+      "scale": {
+        "text": "缩放:",
+        "role": "body"
+      },
+      "fmt_jxl": {
+        "text": "JPEG XL（压缩率更高）",
+        "role": "body"
+      },
+      "title": {
+        "text": "图片转换",
+        "role": "body"
+      },
+      "or": {
+        "text": "或",
+        "role": "body"
+      }
+    },
+    "rebuild": {
+      "btn": {
+        "text": "重建字体",
+        "role": "body"
+      },
+      "title": {
+        "text": "字体子集重建",
+        "role": "body"
+      },
+      "desc": {
+        "text": "重新运行 Python 子集化脚本，更新所有字体文件的字符集。文章内容更新后需手动执行此操作。",
+        "role": "body"
+      }
+    },
+    "sticker": {
+      "hint": {
+        "text": "添加表情文件到 static/sticker/ 目录后，点击刷新按钮重新加载",
+        "role": "body"
+      },
+      "refresh": {
+        "text": "刷新表情缓存",
+        "role": "body"
+      },
+      "manage": {
+        "text": "表情管理",
+        "role": "body"
+      }
+    },
+    "maintenance": {
+      "title": {
+        "text": "系统运维与缓存重建",
+        "role": "body"
+      },
+      "desc": {
+        "text": "全站文章内存索引、搜索数据池、静态资源 Bundle 与字体子集的统一维护中心。内容更新后可在此一键或分项调度重构。",
+        "role": "body"
+      },
+      "all": {
+        "text": "一键全量重建",
+        "role": "body"
+      },
+      "posts": {
+        "text": "重扫文章与搜索",
+        "role": "body"
+      },
+      "sticker": {
+        "text": "刷新表情贴纸",
+        "role": "body"
+      },
+      "font": {
+        "text": "重构字体子集",
+        "role": "body"
+      },
+      "bundle": {
+        "text": "重拼静态资源",
+        "role": "body"
+      },
+      "sync": {
+        "text": "双机边缘同步",
+        "role": "body"
+      }
+    },
+    "posts": {
+      "new": {
+        "text": "写新文章",
+        "role": "body"
+      },
+      "empty": {
+        "text": "还没有文章",
+        "role": "body"
+      },
+      "manage": {
+        "text": "文章管理",
+        "role": "body"
+      },
+      "pin": {
+        "text": "置顶",
+        "role": "body"
+      },
+      "pinned": {
+        "text": "已置顶",
+        "role": "body"
+      },
+      "pinned_tag": {
+        "text": "置顶",
+        "role": "body"
+      },
+      "pinned_title": {
+        "text": "当前首页置顶文章",
+        "role": "body"
+      },
+      "confirm_pin": {
+        "text": "确认将该文章设为首页置顶？",
+        "role": "body"
+      },
+      "confirm_unpin": {
+        "text": "确认取消该文章置顶？",
+        "role": "body"
+      },
+      "pin_action": {
+        "text": "置顶此文章",
+        "role": "body"
+      },
+      "unpin_action": {
+        "text": "取消置顶",
+        "role": "body"
+      }
+    },
+    "db": {
+      "rebuild": {
+        "text": "重建文章数据库",
+        "role": "body"
+      },
+      "desc": {
+        "text": "当磁盘上的文章物理文件与数据库状态不一致（如手动删改 md 文件后有残留）时，可在此进行数据库强制重构。重建会安全保留阅读量和文章摘要，并自动清理静态缓存目录。",
+        "role": "body"
+      },
+      "title": {
+        "text": "数据库维护",
+        "role": "body"
+      }
+    },
+    "signature": {
+      "title": {
+        "text": "个人签名",
+        "role": "body"
+      }
+    }
+  },
+  "status": {
+    "header": {
+      "title": {
+        "text": "实例状态",
+        "role": "mono"
+      }
+    },
+    "badge": {
+      "realtime": {
+        "text": "实时 · 1s",
+        "role": "mono"
+      },
+      "dormant": {
+        "text": "待机 · 1min",
+        "role": "mono"
+      }
+    },
+    "metrics": {
+      "rx_rate": {
+        "text": "入站速率",
+        "role": "mono"
+      },
+      "tx_rate": {
+        "text": "出站速率",
+        "role": "mono"
+      },
+      "total_rx": {
+        "text": "总入站",
+        "role": "mono"
+      },
+      "total_tx": {
+        "text": "总出站",
+        "role": "mono"
+      },
+      "cpu": {
+        "text": "CPU 负载",
+        "role": "mono"
+      },
+      "memory": {
+        "text": "内存占用",
+        "role": "mono"
+      },
+      "disk": {
+        "text": "磁盘空间",
+        "role": "mono"
+      },
+      "uptime": {
+        "text": "运行时间",
+        "role": "mono"
+      }
+    },
+    "cdt": {
+      "title": {
+        "text": "阿里云 CDT 流量",
+        "role": "mono"
+      },
+      "total": {
+        "text": "总额度",
+        "role": "mono"
+      },
+      "used": {
+        "text": "已用",
+        "role": "mono"
+      },
+      "remaining": {
+        "text": "剩余",
+        "role": "mono"
+      },
+      "percent": {
+        "text": "用量",
+        "role": "mono"
+      },
+      "sync_btn": {
+        "text": "同步",
+        "role": "mono"
+      }
+    },
+    "logs": {
+      "title": {
+        "text": "访问日志",
+        "role": "mono"
+      },
+      "search_placeholder": {
+        "text": "搜索 路径 | IP | UA",
+        "role": "mono"
+      },
+      "th_time": {
+        "text": "时间",
+        "role": "mono"
+      },
+      "th_ip": {
+        "text": "客户端 IP",
+        "role": "mono"
+      },
+      "th_method": {
+        "text": "方法",
+        "role": "mono"
+      },
+      "th_path": {
+        "text": "请求路径",
+        "role": "mono"
+      },
+      "th_status": {
+        "text": "状态",
+        "role": "mono"
+      },
+      "th_bytes": {
+        "text": "传输流量",
+        "role": "mono"
+      },
+      "th_cost": {
+        "text": "响应耗时",
+        "role": "mono"
+      },
+      "th_ua": {
+        "text": "UA",
+        "role": "mono"
+      }
+    }
+  },
+  "_comment": "admin 页与 status 页独立文件（admin 单独子集化）。结构：page -> module -> {text, role}。"
+}

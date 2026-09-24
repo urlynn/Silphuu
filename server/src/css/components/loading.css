@@ -1,0 +1,63 @@
+/* App loading — first-visit resource loading screen.
+   Shows a spinner until all assets (fonts/images/CSS/JS) finish loading, then reveals
+   the page. Not triggered by htmx page switches (not a page load); only first visits
+   and hard refreshes. */
+
+/* First-paint white background: fallback before theme CSS loads, preventing the browser's dark default flash */
+html {
+    background: #fff;
+}
+
+/* Content initially hidden, shown after app-ready. Use visibility, not an opacity fade:
+   ancestor opacity < 1 promotes the subtree to its own compositing group, so descendant
+   backdrop-filters sample no real background and glass cards flash transparent. The .app-loading overlay itself may fade (fixed sibling, not an ancestor). */
+#content-wrapper {
+    visibility: hidden;
+}
+
+body.app-ready #content-wrapper {
+    visibility: visible;
+}
+
+/* Home page animations only play after loading completes */
+body:not(.app-ready) #content-wrapper *,
+body:not(.app-ready) #content-wrapper *::before,
+body:not(.app-ready) #content-wrapper *::after {
+    animation-play-state: paused !important;
+}
+
+/* Loading overlay: plain white background + simple spinner */
+.app-loading {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    transition: opacity 0.3s ease;
+}
+
+body.app-ready .app-loading {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Spinner: fixed colors (no theme variables, so it stays visible on white) */
+.app-loading__spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid rgba(0, 0, 0, 0.08);
+    border-top-color: rgba(0, 0, 0, 0.4);
+    border-radius: 50%;
+    animation: app-loading-spin 0.8s linear infinite;
+}
+
+@keyframes app-loading-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* prefers-reduced-motion: degrade */
+@media (prefers-reduced-motion: reduce) {
+    .app-loading__spinner { animation-duration: 2s; }
+}

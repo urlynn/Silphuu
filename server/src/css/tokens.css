@@ -1,0 +1,380 @@
+/* Primitive tokens, layer 1.
+   Raw design values, theme-agnostic.
+   Architecture: primitive -> semantic -> component. */
+
+:root {
+  --glass-base: var(--glass-tint);
+
+  /* Accent 2: the second accent on two-tone themes, falling back to the first on
+     single-tone ones. */
+  --accent-2: var(--accent);
+  --accent-2-hover: var(--accent-hover);
+  --accent-2-soft: var(--accent-soft);
+  --accent-2-edge: var(--accent-edge, rgba(0, 0, 0, 0.25));
+
+  /* Border radius. */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 999px;
+
+  /* Contrast base: pure black on light themes, pure white on dark. */
+  --contrast-base-rgb: 0, 0, 0;
+
+  /* Glass levels L0-L3: L0 solid canvas (no blur/glow/shadow), L1 panel shell L1A /
+     card L1B, L2 notice bar L2A / inline row L2B, L3 mini card L3A / glow badge L3B.
+     Every component reads var(--<component>-<property>, var(--<level>-<property>)). */
+
+  /* Accent RGB triplet. Each theme overrides it to match --accent exactly; the default is
+     the engine's own fallback. */
+
+  /* 0. L0 solid medium (light default). */
+  --l0a-border:        rgba(255, 255, 255, 0.30);
+  --l0a-border-hover:  rgba(255, 255, 255, 0.32);
+  --l0a-shadow:        0 4px 16px rgba(0, 0, 0, 0.50);
+  --l0a-shadow-hover:  0 4px 32px rgba(0, 0, 0, 0.75);
+  --l0b-bg:            var(--cmt-form-bg, #ffffff);
+  --l0b-border:        var(--border-light);
+  --l0c-bg:            color-mix(in srgb, var(--glass-tint) calc(0.08 * 100%), transparent);
+  --l0c-bg-hover:      color-mix(in srgb, var(--glass-tint) calc(0.16 * 100%), transparent);
+  --l0c-border:        var(--border-light);
+  --l0c-border-hover:  color-mix(in srgb, var(--accent) 70%, white 30%);
+
+  /* 1. L1-L3 light-theme baseline values. */
+  --l1a-blur:          20px;
+  --l1a-alpha:         0.07;
+  --l1b-blur:          24px;
+  --l1b-alpha:         0.09;
+  --l2a-blur:          28px;
+  --l2a-alpha:         0.13;
+  --l2b-blur:          16px;
+  --l2b-alpha:         0.08;
+  --l3a-blur:          40px;
+  --l3a-alpha:         0.20;
+  --l3b-blur:          40px;
+  --l3b-alpha:         0.20;
+
+  /* 2. Component-level override slots. */
+  --article-alpha:     0.34;
+  --article-blur:      20px;
+  --hero-blur:         20px;
+
+  /* 3. Easing curves. */
+  --card-ease:          cubic-bezier(0.2, 0.9, 0.4, 1);
+  --card-ease-title:    cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* 4. Light-theme borders and shadows. */
+  --l1a-border:        color-mix(in srgb, color-mix(in srgb, var(--accent) calc(0.10 * 100%), transparent) 0%, color-mix(in srgb, var(--glass-light) calc(0.10 * 100%), transparent) 100%);
+  --l1a-shadow:        0 2px 32px rgba(0, 0, 0, 0.32);
+  --l1b-border:        color-mix(in srgb, color-mix(in srgb, var(--accent) calc(0.15 * 100%), transparent) 0%, color-mix(in srgb, var(--glass-light) calc(0.15 * 100%), transparent) 100%);
+  --l1b-border-hover:  color-mix(in srgb, color-mix(in srgb, var(--accent) calc(0.20 * 100%), transparent) 0%, color-mix(in srgb, var(--glass-light) calc(0.20 * 100%), transparent) 100%);
+  --l1b-shadow:        0 4px 9px rgba(0, 0, 0, 0.18);
+  --l1b-shadow-hover:  0 4px 18px rgba(0, 0, 0, 0.36);
+  --l2a-border:        transparent;
+  --l2a-shadow:        0 0 24px rgba(0, 0, 0, 0.08);
+  --l2b-border-hover:  color-mix(in srgb, color-mix(in srgb, var(--accent) calc(0.20 * 100%), transparent) 20%, color-mix(in srgb, var(--glass-light) calc(0.20 * 100%), transparent) 80%);
+  --l2b-shadow-hover:  none;
+  --l3a-border:        color-mix(in srgb, color-mix(in srgb, var(--accent) calc(0.08 * 100%), transparent) 0%, color-mix(in srgb, var(--glass-light) calc(0.08 * 100%), transparent) 100%);
+  --l3a-border-hover:  color-mix(in srgb, color-mix(in srgb, var(--accent) calc(0.16 * 100%), transparent) 0%, color-mix(in srgb, var(--glass-light) calc(0.16 * 100%), transparent) 100%);
+  --l3a-shadow:        0 0 8px rgba(0, 0, 0, 0.16);
+  --l3a-shadow-hover:  0 0 16px rgba(0, 0, 0, 0.32);
+  --l3b-border:        color-mix(in srgb, color-mix(in srgb, var(--accent) calc(0.10 * 100%), transparent) 0%, color-mix(in srgb, var(--glass-light) calc(0.10 * 100%), transparent) 100%);
+  --l3b-border-hover:  color-mix(in srgb, color-mix(in srgb, var(--accent) calc(0.75 * 100%), transparent) 100%, color-mix(in srgb, var(--glass-light) calc(0.75 * 100%), transparent) 0%);
+  --l3b-shadow:        0 0 8px rgba(0, 0, 0, 0.16);
+  --l3b-shadow-hover:  0 0 16px color-mix(in srgb, var(--accent) calc(0.32 * 100%), transparent);
+
+  /* 5. Semantic aliases — the only names components should consume. */
+  --photo-border:       var(--l0a-border);
+  --photo-border-hover: var(--l0a-border-hover);
+  --photo-shadow:       var(--l0a-shadow);
+  --photo-shadow-hover: var(--l0a-shadow-hover);
+  --form-bg:            var(--l0b-bg);
+  --form-border:        var(--l0b-border);
+  --control-bg:         var(--l0c-bg);
+  --control-bg-hover:   var(--l0c-bg-hover);
+  --control-border:     var(--l0c-border);
+  --control-border-hover: var(--l0c-border-hover);
+
+  --panel-blur:         var(--l1a-blur);
+  --panel-alpha:        var(--l1a-alpha);
+  --panel-border:       var(--l1a-border);
+  --panel-shadow:       var(--l1a-shadow);
+
+  --card-blur:          var(--l1b-blur);
+  --card-alpha:         var(--l1b-alpha);
+  --card-border:        var(--l1b-border);
+  --card-border-hover:  var(--l1b-border-hover);
+  --card-shadow:        var(--l1b-shadow);
+  --card-shadow-hover:  var(--l1b-shadow-hover);
+
+  --notice-blur:        var(--l2a-blur);
+  --notice-alpha:       var(--l2a-alpha);
+  --notice-border:      var(--l2a-border);
+  --notice-shadow:      var(--l2a-shadow);
+
+  --row-blur:           var(--l2b-blur);
+  --row-alpha:          var(--l2b-alpha);
+  --row-border-hover:   var(--l2b-border-hover);
+  --row-shadow-hover:   var(--l2b-shadow-hover);
+
+  --widget-blur:        var(--l3a-blur);
+  --widget-alpha:       var(--l3a-alpha);
+  --widget-border:      var(--l3a-border);
+  --widget-border-hover:var(--l3a-border-hover);
+  --widget-shadow:      var(--l3a-shadow);
+  --widget-shadow-hover:var(--l3a-shadow-hover);
+
+  --friend-blur:        var(--l3b-blur);
+  --friend-alpha:       var(--l3b-alpha);
+  --friend-border:      var(--l3b-border);
+  --friend-border-hover:var(--l3b-border-hover);
+  --friend-shadow:      var(--l3b-shadow);
+  --friend-shadow-hover:var(--l3b-shadow-hover);
+  --friend-glow-bg:     linear-gradient(150deg, color-mix(in srgb, var(--accent) calc(0.33 * 100%), transparent) 0%, color-mix(in srgb, var(--accent) calc(0.099 * 100%), transparent) 37.5%, transparent 75%);
+  --friend-glow-hover-opacity: 1;
+
+  --nav-bubble-shadow:  0 0 16px rgba(0, 0, 0, 0.32);
+
+  /* Bento dock semantic tokens. */
+  --bento-dock-bg:      rgba(0, 0, 0, 0.05);
+  --bento-dock-blur:    var(--l2a-blur, 28px);
+
+  /* Bridges kept for older call sites. */
+  --glass-l1-blur:      var(--l1a-blur);
+  --glass-l1-alpha:     var(--l1a-alpha);
+  --glass-l2-blur:      var(--l2a-blur);
+  --glass-l2-alpha:     var(--l2a-alpha);
+  --glass-l1-filter:    blur(var(--l1a-blur));
+  --glass-l2-filter:    blur(var(--l2a-blur));
+
+  /* Surface fill alpha for small non-glass surfaces: buttons, code blocks, inputs. */
+  --surface-alpha: 0.08;
+
+  /* Semantic danger colour, constant across themes. --shape-red is a decorative tangram
+     alias whose value varies per theme (an orange on golden-light), so a danger cue
+     needs its own, always-recognisable token. */
+  --danger-red: #EB4D4B;
+
+  /* Semantic success colour, constant across themes: --shape-green is a decorative tangram
+     alias and is not green on 4 of the 12 themes. */
+  --success-green: #10B981;
+
+  /* Chromium's CSS-filter replica of backdrop-filter. Off by default so it costs nothing;
+     noise opacity defaults to 0. */
+  --glass-noise-opacity: 0;          /* Off by default: no rendering cost. */
+  --bg-noise-opacity: 0;
+  --glass-noise-blend: overlay;
+  --glass-noise-size: 200px 200px;   /* Square, so stretching cannot coarsen the grain. */
+  --glass-noise-url: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.99' numOctaves='1' stitchTiles='stitch' result='hi'/%3E%3CfeTurbulence type='turbulence' baseFrequency='0.4' numOctaves='1' stitchTiles='stitch' result='lo'/%3E%3CfeComposite in='lo' in2='hi' operator='arithmetic' k1='0' k2='0.6' k3='0.4' k4='0' result='mixed'/%3E%3CfeColorMatrix in='mixed' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.33 0.33 0.33 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --border-light: color-mix(in srgb, var(--glass-light) calc(0.08 * 100%), transparent);
+  --border-medium: color-mix(in srgb, var(--glass-light) calc(0.12 * 100%), transparent);
+
+  /* Font roles: heading / subheading / display-* / article / body / caption / mono / data /
+     cmt / serif. Family and weight are injected server-side from the active preset; the
+     engine ships no fonts — the site supplies them (Fonts/ dir, font_map.json). */
+  --font-heading:         system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+  --font-subheading:      system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+  --font-display-heading: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+  --font-display-body:    system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+  --font-display-mono:    ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-article:         system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+  --font-body:            system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+  --font-caption:         system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+  --font-footer:          system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+  /* cmt is the only role allowed to be unset (the admin form has an empty <option>); it
+     must fall back to the system stack, never to another role's font — that would hide
+     the missing configuration behind a plausible-looking font. */
+  --font-cmt:            system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+  --font-data:            ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-data-override-en:  system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+  --font-data-override-num: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-data-override-sym: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono:            ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-serif:           Georgia, 'Times New Roman', 'Songti SC', serif;
+  --font-symbol:         system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+  font-variation-settings: 'BEVL' 100;
+
+  /* Font ink shift: offset of a role's ink centre, injected into :root by the server from
+     preset.Metrics measured with canvas.measureText; positive means the ink sits low. Applied
+     as translate: 0 calc(-1 * var(--font-xxx-shift)); unmeasured roles fall back to 0em. */
+  --font-heading-shift:        0em;
+  --font-subheading-shift:     0em;
+  --font-display-heading-shift:0em;
+  --font-display-body-shift:   0em;
+  --font-display-mono-shift:   0em;
+  --font-article-shift:        0em;
+  --font-body-shift:           0em;
+  --font-caption-shift:        0em;
+  --font-footer-shift:         0em;
+  --font-data-shift:           0em;
+  --font-mono-shift:           0em;
+  --font-serif-shift:          0em;
+  --font-cmt-shift:            0em;
+  --font-symbol-shift:         0em;
+
+  /* Ink height and scale: injected by the server from build-time precomputation plus
+     canvas.measureText — (ascent+descent)/font-size against a 0.72 CJK reference gives
+     ink-scale = reference / measured, applied as font-size * scale for a shared ink height. */
+  --font-heading-ink-height:        0em;
+  --font-subheading-ink-height:     0em;
+  --font-display-heading-ink-height:0em;
+  --font-display-body-ink-height:   0em;
+  --font-display-mono-ink-height:   0em;
+  --font-article-ink-height:        0em;
+  --font-body-ink-height:           0em;
+  --font-caption-ink-height:       0em;
+  --font-footer-ink-height:         0em;
+  --font-data-ink-height:           0em;
+  --font-mono-ink-height:           0em;
+  --font-serif-ink-height:          0em;
+  --font-cmt-ink-height:            0em;
+  --font-symbol-ink-height:         0em;
+
+  --font-heading-ink-scale:        1;
+  --font-subheading-ink-scale:     1;
+  --font-display-heading-ink-scale:1;
+  --font-display-body-ink-scale:   1;
+  --font-display-mono-ink-scale:   1;
+  --font-article-ink-scale:        1;
+  --font-body-ink-scale:           1;
+  --font-caption-ink-scale:       1;
+  --font-footer-ink-scale:         1;
+  --font-data-ink-scale:           1;
+  --font-mono-ink-scale:           1;
+  --font-serif-ink-scale:          1;
+  --font-cmt-ink-scale:            1;
+  --font-symbol-ink-scale:         0.82; /* A near-equal-height default; main.go injects the measured value over it. */
+
+  /* Weights, one per font role; the admin page rewrites them from the chosen preset. */
+  --font-heading-weight:        700;
+  --font-subheading-weight:     600;
+  --font-display-heading-weight:700;
+  --font-display-body-weight:   300;
+  --font-display-mono-weight:   600;
+  --font-article-weight:        400;
+  --font-body-weight:           400;
+  --font-caption-weight:        400;
+  --font-footer-weight:         400;
+  --font-cmt-weight:            400;
+  --font-data-weight:           500;
+  --font-mono-weight:           400;
+  --font-serif-weight:          400;
+  --font-symbol-weight:         400;
+}
+
+/* [data-font-scheme] is deprecated: the font preset sets the --font-* variables from JS. */
+
+:root {
+  /* Spacing, 4px base. */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+
+  /* Transitions. */
+  --duration-fast: 0.15s;
+  --duration-normal: 0.2s;
+  --duration-slow: 0.3s;
+
+  /* Icon sizes. Every svg-plus-label pair uses one of these three; the SVG files carry no
+     width or height of their own, so CSS has full control. */
+  --icon-sm: 14px;   /* small: meta rows, tag prefixes, notices */
+  --icon-md: 18px;   /* default: nav, comments, buttons */
+  --icon-lg: 22px;   /* large: cards, beside titles */
+}
+
+/* Dark-theme L0-L3 values. */
+html[data-theme$="-dark"],
+[data-theme$="-dark"] {
+  --contrast-base-rgb: 255, 255, 255;
+  /* 0. L0 solid photo paper and canvas. */
+  --l0a-border:        rgba(255, 255, 255, 0.20);
+  --l0a-border-hover:  rgba(255, 255, 255, 0.32);
+  --l0a-shadow:        0 4px 16px rgba(0, 0, 0, 1.0);
+  --l0a-shadow-hover:  0 4px 32px rgba(0, 0, 0, 1.0);
+  --l0b-bg:            var(--cmt-form-bg, #0f141c);
+  --l0b-border:        var(--border-light);
+  --l0c-bg:            color-mix(in srgb, var(--glass-tint) calc(0.12 * 100%), transparent);
+  --l0c-bg-hover:      color-mix(in srgb, var(--glass-tint) calc(0.20 * 100%), transparent);
+  --l0c-border:        var(--border-light);
+  --l0c-border-hover:  color-mix(in srgb, var(--accent) 70%, white 30%);
+
+  /* 1. L1-L3 dark-theme values. */
+  --l1a-blur:          20px;
+  --l1a-alpha:         0.10;
+  --l1b-blur:          24px;
+  --l1b-alpha:         0.12;
+  --l2a-blur:          28px;
+  --l2a-alpha:         0.16;
+  --l2b-blur:          16px;
+  --l2b-alpha:         0.14;
+  --l3a-blur:          40px;
+  --l3a-alpha:         0.26;
+  --l3b-blur:          40px;
+  --l3b-alpha:         0.26;
+
+  /* 2. Dark-theme component override slots. */
+  --article-alpha:     0.42;
+  --article-blur:      20px;
+  --hero-blur:         20px;
+
+  /* 3. Dark-theme borders and glow. */
+  --l1a-border:        color-mix(in srgb, color-mix(in srgb, var(--accent) calc(0.20 * 100%), transparent) 60%, rgba(255, 255, 255, 0.20) 40%);
+  --l1a-shadow:        none;
+  --panel-border:      var(--l1a-border);
+  --panel-shadow:      var(--l1a-shadow);
+
+  --l1b-border:        color-mix(in srgb, color-mix(in srgb, var(--accent) calc(0.20 * 100%), transparent) 60%, rgba(255, 255, 255, 0.20) 40%);
+  --l1b-border-hover:  color-mix(in srgb, color-mix(in srgb, var(--accent) calc(0.50 * 100%), transparent) 70%, rgba(255, 255, 255, 0.50) 30%);
+  /* The resting shadow is a transparent placeholder shaped exactly like the hover glow, so
+     the declaration is always present and WebKit keeps a stable paint bounds. Hover then
+     only ramps the alpha from 0 to 0.36, and leaving fades it back. */
+  --l1b-shadow:        0 0 8px 1px color-mix(in srgb, var(--accent) calc(0 * 100%), transparent);
+  --l1b-shadow-hover:  0 0 8px 1px color-mix(in srgb, var(--accent) calc(0.36 * 100%), transparent);
+  --card-border:       var(--l1b-border);
+  --card-border-hover: var(--l1b-border-hover);
+  --card-shadow:       var(--l1b-shadow);
+  --card-shadow-hover: var(--l1b-shadow-hover);
+
+  --l2a-border:        transparent;
+  --l2a-shadow:        none;
+  --notice-border:     var(--l2a-border);
+  --notice-shadow:     var(--l2a-shadow);
+
+  --l2b-border-hover:  color-mix(in srgb, color-mix(in srgb, var(--accent) calc(0.10 * 100%), transparent) 70%, rgba(255, 255, 255, 0.10) 30%);
+  --l2b-shadow-hover:  none;
+  --row-border-hover:  var(--l2b-border-hover);
+  --row-shadow-hover:  var(--l2b-shadow-hover);
+
+  --l3a-border:        color-mix(in srgb, color-mix(in srgb, var(--accent) calc(0.04 * 100%), transparent) 30%, rgba(255, 255, 255, 0.04) 70%);
+  --l3a-border-hover:  color-mix(in srgb, color-mix(in srgb, var(--accent) calc(0.50 * 100%), transparent) 70%, rgba(255, 255, 255, 0.50) 30%);
+  --l3a-shadow:        0 0 10px color-mix(in srgb, var(--accent) calc(0 * 100%), transparent);
+  --l3a-shadow-hover:  0 0 10px color-mix(in srgb, var(--accent) calc(0.50 * 100%), transparent);
+  --widget-border:     var(--l3a-border);
+  --widget-border-hover: var(--l3a-border-hover);
+  --widget-shadow:     var(--l3a-shadow);
+  --widget-shadow-hover: var(--l3a-shadow-hover);
+
+  --l3b-border:        color-mix(in srgb, color-mix(in srgb, var(--accent) calc(0.04 * 100%), transparent) 30%, rgba(255, 255, 255, 0.04) 70%);
+  --l3b-border-hover:  color-mix(in srgb, color-mix(in srgb, var(--accent) calc(0.50 * 100%), transparent) 70%, rgba(255, 255, 255, 0.50) 30%);
+  --l3b-shadow:        0 0 10px color-mix(in srgb, var(--accent) calc(0 * 100%), transparent);
+  --l3b-shadow-hover:  0 0 10px color-mix(in srgb, var(--accent) calc(0.50 * 100%), transparent);
+  --friend-border:     var(--l3b-border);
+  --friend-border-hover: var(--l3b-border-hover);
+  --friend-shadow:     var(--l3b-shadow);
+  --friend-shadow-hover: var(--l3b-shadow-hover);
+  --friend-alpha-hover: 0.32;
+  --friend-glow-bg:    linear-gradient(color-mix(in srgb, var(--accent) calc(0.53 * 100%), transparent), color-mix(in srgb, var(--accent) calc(0.53 * 100%), transparent)), linear-gradient(color-mix(in srgb, var(--glass-tint) calc(1 * 100%), transparent), color-mix(in srgb, var(--glass-tint) calc(1 * 100%), transparent));
+  --friend-glow-hover-opacity: 0.08;
+
+  --nav-bubble-shadow: none;
+
+  /* Bento dock: 4% white wash on dark. */
+  --bento-dock-bg:     rgba(255, 255, 255, 0.04);
+  --bento-dock-blur:   var(--l2a-blur, 28px);
+}
