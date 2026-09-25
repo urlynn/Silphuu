@@ -221,8 +221,9 @@ func categoryToAlias(cat string) string {
 	return cat
 }
 
-// aliasToCategory returns the display name for a /topic/ segment: a registry key, a
-// pre-registry display name, or the segment itself for an undeclared directory.
+// aliasToCategory resolves a /topic/ segment to its display name. Only a registry key
+// resolves; every other segment returns "" so the caller answers 404. An undeclared
+// posts/ directory has no page until the registry declares it.
 func aliasToCategory(alias string) string {
 	reg := loadCategoryRegistry()
 	for _, c := range reg {
@@ -230,12 +231,7 @@ func aliasToCategory(alias string) string {
 			return c.Name
 		}
 	}
-	for _, c := range reg {
-		if c.Name == alias {
-			return c.Name
-		}
-	}
-	return alias
+	return ""
 }
 
 // loadTopicDescs maps a display name to its registry description.

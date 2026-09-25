@@ -315,24 +315,14 @@ func listPageURLs() []string {
 	return dedupePaths(urls...)
 }
 
-// topicURLs returns every URL that reaches one category page.
-//
-// There are two. The templates link the *alias* (post_card and navbar build /topic/… from
-// CategoryAliases), while handleCategory runs the path through aliasToCategory, which falls
-// back to the raw name when nothing matches — so `/topic/essay` and `/topic/随笔` are two
-// URLs for the same page, cached independently. Purging only the raw name left the one that
-// is actually linked stale at the edge for a year. Both URLs must be purged/warmed —
-// see docs/GOTCHAS.md §topic-dual-url.
+// topicURLs returns the one URL a category page is reachable at: /topic/<registry key>.
+// A display name is not a URL form and gets no URL of its own.
 func topicURLs(category string) []string {
 	cat := strings.TrimSpace(category)
 	if cat == "" {
 		return nil
 	}
-	urls := []string{"/topic/" + cat}
-	if alias := categoryToAlias(cat); alias != cat {
-		urls = append(urls, "/topic/"+alias)
-	}
-	return urls
+	return []string{"/topic/" + categoryToAlias(cat)}
 }
 
 // postDependentURLs returns every URL whose content depends on one post: its own page, the

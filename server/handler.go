@@ -557,6 +557,11 @@ func handleArchive(w http.ResponseWriter, r *http.Request) {
 func handleCategory(w http.ResponseWriter, r *http.Request) {
 	alias := r.PathValue("category")
 	cat := aliasToCategory(alias)
+	if cat == "" {
+		// The segment is not a registry key, so no page exists under it.
+		http.NotFound(w, r)
+		return
+	}
 	posts, err := loadPostsByCategory(cat)
 	if err != nil {
 		http.NotFound(w, r)
