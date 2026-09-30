@@ -1,0 +1,110 @@
+/* Nord Dark - semantic layer (layer 2). Cold Nordic dark theme:
+   polar-night blue tint, ice-blue glow, aurora accents. */
+
+[data-theme="frozen-dark"] {
+    /* Accent */
+  --accent: #88C0D0;
+
+  /* Glass tokens, hex base */
+  --glass-tint: #3F485A;
+  --glass-light: #ECEFF4;
+  --glass-dark: #000000;
+  
+  --glass-l1-alpha: 0.10;
+  --glass-l2-alpha: 0.16;
+  --glass-noise-opacity: 0;
+  --bg-noise-opacity: 0;
+
+  /* Polar ice-blue glow (replaces black shadows in dark mode, see /fun/error) */
+  --shadow-sm: 0 0 6px color-mix(in srgb, var(--accent) 25%, transparent);
+
+  /* Background */
+  --bg-body: #2E3440;
+  --bg-base: #2E3440;
+  --bg-glass-alt: rgba(46, 52, 64, 0.90);
+  --bg-nav: rgba(40, 45, 55, 0.60);
+  --bg-code: rgba(40, 45, 55, 0.60);
+  --bg-chroma: rgba(40, 45, 55, 0.60);
+  --bg-card: rgba(46, 52, 64, 0.40);
+  --bg-input: rgba(16, 20, 28, 0.30);
+  --bg-overlay: color-mix(in srgb, var(--glass-dark) 55%, transparent);
+
+  /* Surface */
+  --bg-subtle: color-mix(in srgb, var(--glass-light) calc(var(--surface-alpha) * 100%), transparent);
+  --bg-hover: color-mix(in srgb, var(--glass-light) 10%, transparent);
+  --bg-interactive: color-mix(in srgb, var(--glass-light) 8%, transparent);
+
+  /* Text */
+  --text-primary: #E3E6EB;
+  --text-muted: #CCCFD4;
+  --text-dim: #B1B4B9;
+  --timeline-line: color-mix(in srgb, var(--text-primary) 22%, transparent);
+  --timeline-node: color-mix(in srgb, var(--text-primary) 50%, transparent);
+
+  /* Accent (auto-derived) */
+  --accent-hover: #5E81AC;
+  --accent-soft: color-mix(in srgb, var(--accent) 15%, transparent);
+
+  /* Border (ice-blue glow edge) */
+  --border-light: color-mix(in srgb, var(--glass-light) 14%, transparent);
+  --border-medium: color-mix(in srgb, var(--accent) 26%, transparent);
+  --border-subtle: color-mix(in srgb, var(--glass-light) 10%, transparent);
+
+  /* Shadow */
+  --shadow-card: 0 0 8px color-mix(in srgb, var(--accent) 28%, transparent), 0 0 16px color-mix(in srgb, var(--accent) 14%, transparent);
+
+  /* Hover states */
+  --hover-bg: color-mix(in srgb, var(--accent) 8%, transparent);
+  --hover-text: var(--accent);
+  --hover-border: color-mix(in srgb, var(--accent) 35%, transparent);
+  --hover-blur: 8px;
+  --hover-bg-active: color-mix(in srgb, var(--accent) 12%, transparent);
+  --hover-text-active: #B48EAD;
+
+  /* Nav */
+  --nav-bg: rgba(16, 20, 28, 0.30);
+
+  /* Layout */
+  --sidebar-radius: var(--radius-md);
+  --blur-amount: 8px;
+
+  /* Group hover */
+  --group-hover-bg: color-mix(in srgb, var(--glass-light) 8%, transparent);
+  --group-hover-text: var(--accent);
+
+  /* Comment form */
+  --cmt-form-bg: #3B4252;
+  --cmt-input-color: var(--text-primary);
+  --cmt-input-placeholder: var(--text-muted);
+  --cmt-textarea-color: var(--text-primary);
+  --cmt-textarea-placeholder: var(--text-muted);
+  --cmt-textarea-focus: var(--text-primary);
+  --cmt-input-focus: var(--text-primary);
+  --cmt-submit-bg: var(--accent);
+
+
+  /* Chroma */
+  --chroma-keyword: #81A1C1;
+  --chroma-function: #88C0D0;
+  --chroma-string: #A3BE8C;
+  --chroma-comment: rgba(216, 222, 233, 0.40);
+  --chroma-number: #B48EAD;
+  --chroma-operator: #81A1C1;
+  --chroma-punctuation: #E5E9F0;
+  --chroma-tag: #BF616A;
+  --chroma-deleted: #BF616A;
+  --chroma-inserted: #A3BE8C;
+
+  /* Decorative shapes: aurora greens/purples/teals over polar night */
+  --shape-1: #A3BE8C;
+  --shape-2: #BF616A;
+  --shape-3: #88C0D0;
+  --shape-4: #B48EAD;
+  --shape-5: #D08770;
+  --shape-6: #EBCB8B;
+  --shape-7: #8FBCBB;
+  --shape-8: #81A1C1;
+  --shape-9: #5E81AC;
+  --shape-10: #4C566A;
+  --shape-blend: screen;
+}

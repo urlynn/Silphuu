@@ -1,0 +1,37 @@
+{{/* page_header: title area shared by friends/sponsor/guestbook
+     Params (passed via dict):
+       Icon    string  - SVG name (required)
+       Title   string  - title text (required)
+       Subtitle string - subtitle (optional, not rendered when empty)
+      Notice  string  - notice text (optional, not rendered when empty). Effect markers
+                         in it are already resolved by loadUIStrings, so print as-is.
+      Accent  bool    - accent-color modifier (default false)
+      Center  bool    - centered modifier (default false)
+      Level   string  - heading level "h1" or "h2" (default "h2", kept for SEO)
+      NoticeIcon string - notice icon SVG name (default "check")
+*/}}
+{{define "page_header"}}
+<div class="page-title-row{{if .Center}} page-title-row--center{{end}}">
+    <div class="page-title-icon">
+        {{svg .Icon}}
+    </div>
+    {{if eq .Level "h1"}}
+    <h1 class="page-title-h2{{if .Accent}} page-title-h2--accent{{end}}">{{.Title}}</h1>
+    {{else}}
+    <h2 class="page-title-h2{{if .Accent}} page-title-h2--accent{{end}}">{{.Title}}</h2>
+    {{end}}
+</div>
+{{if .Subtitle}}
+<p class="page-subtitle">{{.Subtitle}}</p>
+{{end}}
+{{if .Notice}}
+<div class="page-notice{{if .Accent}} page-notice--accent{{end}}" data-backdrop-scene="b">
+    <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div>
+    <div class="g-tint"></div><div class="g-noise"></div>
+    <div class="page-notice-inner">
+        {{svg (or .NoticeIcon "check")}}
+        <p class="page-notice-text">{{.Notice}}</p>
+    </div>
+</div>
+{{end}}
+{{end}}

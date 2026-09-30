@@ -1,0 +1,103 @@
+/* Solarized Light — Semantic Layer (Layer 2) */
+/* Parchment tint + dual warm/cool accents: cyan links with orange highlights. */
+
+[data-theme="cyanic-light"] {
+    /* Accent (theme primary color) */
+  --accent: #2AA198;
+
+  /* Glass hex base */
+  --glass-tint: #EEE8D5;
+  --glass-light: #657B83;
+  --glass-dark: #000000;
+  
+
+  /* Restrained compact shadow with warm hue */
+  --shadow-sm: 0 2px 6px rgba(88, 72, 48, 0.07);
+
+  /* Background */
+  --bg-body: #FDF6E3;
+  --bg-base: #FDF6E3;
+  --bg-glass-alt: rgba(253, 246, 227, 0.80);
+  --bg-nav: rgba(253, 246, 227, 0.85);
+  --bg-code: rgba(238, 232, 213, 0.70);
+  --bg-chroma: rgba(238, 232, 213, 0.70);
+  --bg-card: rgba(101, 123, 131, 0.06);
+  --bg-input: rgba(0, 0, 0, 0.04);
+  --bg-overlay: color-mix(in srgb, var(--glass-dark) 35%, transparent);
+
+  /* Surface */
+  --bg-subtle: color-mix(in srgb, var(--glass-light) calc(var(--surface-alpha) * 100%), transparent);
+  --bg-hover: color-mix(in srgb, var(--glass-light) 10%, transparent);
+  --bg-interactive: color-mix(in srgb, var(--glass-light) 8%, transparent);
+
+  /* Text */
+  --text-primary: #3A4F56;
+  --text-muted: #52676F;
+  --text-dim: #71878F;
+  --timeline-line: color-mix(in srgb, var(--text-primary) 18%, transparent);
+  --timeline-node: color-mix(in srgb, var(--text-primary) 35%, transparent);
+
+  /* Accent (auto-derived) */
+  --accent-hover: #268BD2;
+  --accent-soft: color-mix(in srgb, var(--accent) 15%, transparent);
+
+  /* Border */
+  --border-subtle: color-mix(in srgb, var(--glass-light) 8%, transparent);
+
+  /* Shadow */
+  --shadow-card: 0 4px 14px rgba(88, 72, 48, 0.09);
+
+  /* Hover states */
+  --hover-bg: color-mix(in srgb, var(--accent) 10%, transparent);
+  --hover-text: var(--accent);
+  --hover-border: color-mix(in srgb, var(--glass-light) 10%, transparent);
+  --hover-blur: 12px;
+  --hover-bg-active: color-mix(in srgb, var(--accent) 12%, transparent);
+  --hover-text-active: #268BD2;
+
+  /* Nav */
+  --nav-bg: rgba(0, 0, 0, 0.10);
+
+  /* Layout */
+  --sidebar-radius: 10px;
+  --blur-amount: 20px;
+
+  /* Group hover */
+  --group-hover-bg: color-mix(in srgb, var(--glass-light) 8%, transparent);
+  --group-hover-text: var(--accent);
+
+  /* Comment form */
+  --cmt-form-bg: #FDF6E3;
+  --cmt-input-color: var(--text-primary);
+  --cmt-input-placeholder: var(--text-muted);
+  --cmt-textarea-color: var(--text-primary);
+  --cmt-textarea-placeholder: var(--text-muted);
+  --cmt-textarea-focus: var(--text-primary);
+  --cmt-input-focus: var(--text-primary);
+  --cmt-submit-bg: var(--accent);
+
+
+  /* Chroma syntax highlighting */
+  --chroma-keyword: #859900;
+  --chroma-function: #268BD2;
+  --chroma-string: #2AA198;
+  --chroma-comment: #93A1A1;
+  --chroma-number: #D33682;
+  --chroma-operator: #CB4B16;
+  --chroma-punctuation: #93A1A1;
+  --chroma-tag: #CB4B16;
+  --chroma-deleted: #DC322F;
+  --chroma-inserted: #859900;
+
+  /* Decorative shapes */
+  --shape-1: #859900;
+  --shape-2: #DC322F;
+  --shape-3: #2AA198;
+  --shape-4: #D33682;
+  --shape-5: #CB4B16;
+  --shape-6: #B58900;
+  --shape-7: #268BD2;
+  --shape-8: #6C71C4;
+  --shape-9: #93A1A1;
+  --shape-10: #EEE8D5;
+}

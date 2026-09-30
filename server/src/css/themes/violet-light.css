@@ -1,0 +1,103 @@
+/* Catppuccin Latte — Semantic Layer (Layer 2) */
+/* Soft pastel light theme: creamy tint + pink/peach hover accent. */
+
+[data-theme="violet-light"] {
+    /* Accent (theme primary color) */
+  --accent: #8839EF;
+
+  /* Glass hex base */
+  --glass-tint: #F3EEE9;
+  --glass-light: #4C4F69;
+  --glass-dark: #000000;
+  
+
+  /* Restrained compact shadow with warm-gray hue */
+  --shadow-sm: 0 2px 6px rgba(76, 66, 84, 0.07);
+
+  /* Background */
+  --bg-body: #EFF1F5;
+  --bg-base: #EFF1F5;
+  --bg-glass-alt: rgba(239, 241, 245, 0.80);
+  --bg-nav: rgba(239, 241, 245, 0.85);
+  --bg-code: rgba(230, 233, 239, 0.70);
+  --bg-chroma: rgba(230, 233, 239, 0.70);
+  --bg-card: rgba(76, 79, 105, 0.06);
+  --bg-input: rgba(0, 0, 0, 0.04);
+  --bg-overlay: color-mix(in srgb, var(--glass-dark) 35%, transparent);
+
+  /* Surface */
+  --bg-subtle: color-mix(in srgb, var(--glass-light) calc(var(--surface-alpha) * 100%), transparent);
+  --bg-hover: color-mix(in srgb, var(--glass-light) 10%, transparent);
+  --bg-interactive: color-mix(in srgb, var(--glass-light) 8%, transparent);
+
+  /* Text */
+  --text-primary: #444761;
+  --text-muted: #5C5F7A;
+  --text-dim: #7B7E9A;
+  --timeline-line: color-mix(in srgb, var(--text-primary) 18%, transparent);
+  --timeline-node: color-mix(in srgb, var(--text-primary) 35%, transparent);
+
+  /* Accent (auto-derived) */
+  --accent-hover: #EA76CB;
+  --accent-soft: color-mix(in srgb, var(--accent) 15%, transparent);
+
+  /* Border */
+  --border-subtle: color-mix(in srgb, var(--glass-light) 8%, transparent);
+
+  /* Shadow */
+  --shadow-card: 0 4px 14px rgba(76, 66, 84, 0.09);
+
+  /* Hover states */
+  --hover-bg: color-mix(in srgb, var(--accent) 12%, transparent);
+  --hover-text: var(--accent);
+  --hover-border: color-mix(in srgb, var(--glass-light) 10%, transparent);
+  --hover-blur: 12px;
+  --hover-bg-active: color-mix(in srgb, var(--accent) 12%, transparent);
+  --hover-text-active: #D20F39;
+
+  /* Nav */
+  --nav-bg: rgba(0, 0, 0, 0.10);
+
+  /* Layout */
+  --sidebar-radius: 10px;
+  --blur-amount: 20px;
+
+  /* Group hover */
+  --group-hover-bg: color-mix(in srgb, var(--glass-light) 8%, transparent);
+  --group-hover-text: var(--accent);
+
+  /* Comment form */
+  --cmt-form-bg: #FFFFFF;
+  --cmt-input-color: var(--text-primary);
+  --cmt-input-placeholder: var(--text-muted);
+  --cmt-textarea-color: var(--text-primary);
+  --cmt-textarea-placeholder: var(--text-muted);
+  --cmt-textarea-focus: var(--text-primary);
+  --cmt-input-focus: var(--text-primary);
+  --cmt-submit-bg: var(--accent);
+
+
+  /* Chroma syntax highlighting */
+  --chroma-keyword: #8839EF;
+  --chroma-function: #1E66F5;
+  --chroma-string: #40A02B;
+  --chroma-comment: #7C7F93;
+  --chroma-number: #FE640B;
+  --chroma-operator: #04A5E5;
+  --chroma-punctuation: #6C6F85;
+  --chroma-tag: #D20F39;
+  --chroma-deleted: #D20F39;
+  --chroma-inserted: #40A02B;
+
+  /* Decorative shapes (full Latte pastel palette) */
+  --shape-1: #40A02B;
+  --shape-2: #D20F39;
+  --shape-3: #179299;
+  --shape-4: #EA76CB;
+  --shape-5: #FE640B;
+  --shape-6: #DF8E1D;
+  --shape-7: #1E66F5;
+  --shape-8: #8839EF;
+  --shape-9: #04A5E5;
+  --shape-10: #DD7878;
+}

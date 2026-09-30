@@ -1,0 +1,38 @@
+{{if .Pending}}
+<div class="page-title-row page-title-row--h3" style="margin-top:20px;margin-bottom:16px;">
+    <div class="page-title-icon">{{svg "clock"}}</div>
+    <h3 class="page-title-h3 page-title-h3--accent">{{.UI.friends.pending.title}}</h3>
+    <span class="page-title-count">({{len .Pending}})</span>
+</div>
+<div class="friend-grid">
+    {{range $i, $a := .Pending}}
+    <div class="friend-card" style="--i: {{$i}}" data-backdrop-scene="b">
+        {{template "hover_layers" (dict "glow" true)}}<div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div><div class="g-tint"></div><div class="g-noise"></div>
+        <div class="friend-actions admin-control">
+            <form method="POST" action="{{ URLCommit "friend/approve" }}" style="display:inline;margin:0;">
+                <input type="hidden" name="staged" value="{{$a.Staged}}">
+                <input type="hidden" name="redirect" value="{{ URLFriends }}">
+                <button type="submit" class="friend-action-btn" title="{{$.UI.friends.pending.approve}}">{{svg "check"}}</button>
+            </form>
+        </div>
+        {{if $a.Tag}}
+        <span class="friend-card-badge"{{if $a.Color}} style="--badge-color: {{$a.Color}};"{{end}}>{{$a.Tag}}</span>
+        {{end}}
+
+        <!-- Same layers as a live card, so a pending entry reads as one of them -->
+        <div class="friend-card-default">
+            <div class="friend-card-icon">{{svg "link"}}</div>
+            <div class="friend-card-info">
+                <div class="friend-card-header"><h3 class="friend-card-title">{{$a.Name}}</h3></div>
+                <p class="friend-card-desc">{{$a.URL}}</p>
+            </div>
+        </div>
+
+        <div class="friend-card-overlay">
+            <h3 class="friend-card-overlay-title">{{$a.Name}}{{svg "link"}}</h3>
+            <p class="friend-card-overlay-desc">{{$a.Desc}}</p>
+        </div>
+    </div>
+    {{end}}
+</div>
+{{end}}

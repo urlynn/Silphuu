@@ -1,0 +1,37 @@
+{{/* Signature edit JS. The profile card carries the site-wide signature and is the only
+     editable copy of it; author.html binds the editor on click.
+     The hero's own line is edited through the hero panel, not in place.
+*/}}
+{{define "signature_edit"}}
+<script>
+(function() {
+    var el = document.getElementById('signature-text');
+    if (!el) return;
+    el.addEventListener('click', function() {
+        if (!(document.body.classList.contains('is-admin') || document.documentElement.classList.contains('is-admin'))) return;
+        el.contentEditable = 'true';
+        el.focus();
+        var r = document.createRange();
+        r.selectNodeContents(el);
+        var s = window.getSelection();
+        s.removeAllRanges();
+        s.addRange(r);
+    });
+    el.addEventListener('blur', function() {
+        if (!(document.body.classList.contains('is-admin') || document.documentElement.classList.contains('is-admin'))) return;
+        el.contentEditable = 'false';
+        var val = el.innerText.trim();
+        if (!val) return;
+        fetch(window.SITE_URLS.commit.config, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'signature=' + encodeURIComponent(val)
+        });
+    });
+    el.addEventListener('keydown', function(e) {
+        if (!(document.body.classList.contains('is-admin') || document.documentElement.classList.contains('is-admin'))) return;
+        if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
+    });
+})();
+</script>
+{{end}}

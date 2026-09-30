@@ -1,0 +1,15 @@
+/* Kaomoji wrapper (.sym): native --font-symbol system font, scaled by --font-symbol-ink-scale
+   and shifted by --font-symbol-shift (injected by main.go, pre-measured; buildInkVarsCSS defaults
+   otherwise).
+   The size anchors to the container's unrounded --caption-base, never to the inherited em: the
+   em already carries the web-font role's ink-scale, so inheriting it scales the kaomoji by that
+   role's ratio and leaves the kaomoji/text proportion unchanged. The var() fallback covers
+   containers that declare no base.
+   Apple Symbols / Apple Color Emoji are explicit fallbacks for the shatter fragments. */
+.sym {
+    font-family: var(--font-symbol), 'Apple Symbols', 'Apple Color Emoji';
+    font-size: calc(var(--caption-base, 1em) * var(--font-symbol-ink-scale, 0.82));
+    translate: 0 calc(-1 * var(--font-symbol-shift, 0em));
+    font-style: normal;
+    font-weight: inherit;
+}

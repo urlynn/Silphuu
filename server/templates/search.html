@@ -1,0 +1,40 @@
+{{define "search.html"}}
+{{template "base_layout" .}}
+{{end}}
+
+{{define "main_class"}}main{{end}}
+
+{{define "head_extra"}}
+<link rel="stylesheet" href="{{asset "css/browse.bundle.css"}}">
+<script src="{{asset "js/browse.bundle.js"}}" defer></script>
+{{end}}
+
+{{define "content"}}
+        {{/* A static shell. The query never reaches the server, so every ?q= variant renders the
+             same bytes and a one-year CDN copy can never go stale.
+
+             It pre-renders every post's card — the cards are the query-independent superset, and
+             referencing post_card here rather than rebuilding its markup in JavaScript is what
+             keeps a single implementation of the card. initSearchPage in
+             src/js/parts/06-search.js then decides which cards belong to this search and swaps
+             in the excerpt cut from the post body.
+
+             The list starts hidden so a visitor never sees every card before the query is
+             applied. The empty card is pre-rendered for the same single-implementation reason
+             and shown only when nothing matched. */}}
+        <div style="max-width:720px;margin:0 auto;">
+            <h1 style="font-size:1.3rem;color:#D3C6AA;margin-bottom:4px;">{{.UI.search.header.title}}</h1>
+            <p id="searchPageCount"
+               data-prefix="{{.UI.common.count.prefix}}"
+               data-suffix="{{.UI.search.count.suffix}}"
+               style="color:rgba(211,198,170,0.40);font-size:0.85rem;margin-bottom:20px;"></p>
+            <div class="post-list-container post-list" id="searchPageResults" style="display:none">
+                {{range $i, $p := .Posts}}
+                {{template "post_card" (dict "P" $p "I" $i "Cats" $.CategoryAliases "Snippet" true)}}
+                {{end}}
+                <div id="searchPageEmpty" style="display:none">
+                    {{template "post_empty_card" (dict "Msg" .UI.search.list.empty)}}
+                </div>
+            </div>
+        </div>
+{{end}}

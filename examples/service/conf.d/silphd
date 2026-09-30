@@ -1,0 +1,86 @@
+# /etc/conf.d/silphd — every variable the status daemon reads at runtime.
+#
+# The daemon is a separate binary from the engine (tools/silphd, Rust) and serves two
+# WebTransport endpoints over UDP: one for browsers, which the site's status page opens a
+# session to, and one for the peer node, which carries the sync link. Its service script sits
+# beside this file, at init.d/silphd.
+#
+# The engine reads three of these — SILPHD_IP_V4, SILPHD_IP_V6 and SILPHD_PORT — because the
+# status page hands them to the browser. /etc/conf.d/silphuu sources this file rather than
+# holding a second copy; see the note at its end.
+#
+# Values are placeholders.
+
+# The addresses a browser connects to. The page is handed one of these, so each has to be
+# reachable from outside. At least one of these two or SILPHD_HOSTS must be set: the daemon
+# refuses to start with none, rather than generating a certificate for a name nobody can
+# reach.
+# export SILPHD_IP_V4="203.0.113.10"
+# export SILPHD_IP_V6="2001:db8::10"
+
+# Additional names for the same certificate, comma-separated. Use this when browsers reach
+# the daemon through a hostname rather than an address.
+# export SILPHD_HOSTS="status.example.com"
+
+# The browser endpoint. UDP, so it can share its number with a TCP service on the same host.
+export SILPHD_PORT="4433"
+
+# The peer endpoint, where the other node's sync link arrives. Leave it out on a single node.
+# export SILPHD_PEER_PORT="4434"
+
+# This node's certificate for the peer link. It is presented to the peer, which verifies it
+# against SYNC_PEER_CA_FILE below, so it should be a real certificate rather than the
+# self-signed one the browser endpoint generates.
+# export SILPHD_PEER_CERT="/etc/ssl/private/node-a.crt"
+# export SILPHD_PEER_KEY="/etc/ssl/private/node-a.key"
+
+# The initial congestion window of the QUIC links, in bytes. A fresh connection starts with
+# this much in flight and doubles it every round trip, so on a long path it decides how many
+# round trips the first bytes of a transfer take. Exposed so one build can be measured at
+# several sizes without a rebuild.
+# Default: 32768
+# export SILPHD_INITIAL_WINDOW="32768"
+
+# The daemon reads the reverse proxy's JSON access log and bans an address that keeps
+# tripping the gateway's refusal. Banning is done by adding the address to a cloud security
+# group, so these two name the region and the group that receives it. The daemon ships with
+# values of its own; a deployment that does not run on that cloud sets nothing and lets the
+# ban attempt fail loudly in the log.
+# export SILPHD_ECS_REGION=""
+# export SILPHD_ECS_SG=""
+
+# The name in the subject line of the daemon's own alert mail, which is a separate path from
+# the engine's notifications and has its own credentials below.
+# Default: Silphuu
+# export SITE_NAME="My blog"
+
+# The mail the daemon sends when it bans an address. Without a key the alert is written to
+# the log and not sent.
+# export RESEND_API_KEY=""
+# export ALERT_EMAIL_TO="operator@example.com"
+# export ALERT_EMAIL_FROM="Alerts <onboarding@resend.dev>"
+
+# The peer link.
+#
+# The daemon creates the socket below; the engine connects to it. All six values are set
+# together or none: a partial set leaves the engine dialling something that answers nothing,
+# and the failure is silent — pages render, only the bytes never travel.
+#
+# The engine's half of this is in /etc/conf.d/silphuu: SYNC_UDS_SOCK, SILPHUU_SYNC_PATHS and
+# SYNC_FLUSH_INTERVAL_SEC.
+
+# The socket the engine connects to. The daemon creates it.
+# export SYNC_UDS_SOCK="/run/silphd.sock"
+
+# The peer's addresses, the name its certificate carries, and the port its peer endpoint
+# binds. The name is what the certificate is verified against. The addresses are candidates:
+# all of them are dialled at once and the first to answer wins, so every route the peer
+# answers on belongs here.
+# export SYNC_PEER_IP="198.51.100.20, 2001:db8::20"
+# export SYNC_PEER_NAME="peer.example.com"
+# export SYNC_PEER_PORT="4434"
+
+# The authority the peer's certificate comes from. The link is verified against it rather
+# than against a digest, so the peer can restart and reissue its certificate without this
+# node needing to learn a new value.
+# export SYNC_PEER_CA_FILE="/etc/ssl/private/peer-ca.pem"

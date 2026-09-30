@@ -1,0 +1,64 @@
+{{define "base_layout"}}
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="{{.Theme}}" translate="no">
+{{template "head" .}}
+<body hx-boost:inherited="true" hx-target:inherited="#content-wrapper" hx-select:inherited="#content-wrapper" hx-swap:inherited="outerHTML" hx-sync:inherited="this:replace"
+      {{/* Site-wide copy no single widget owns: the comment area's relative-time units and
+           its load-failure notice, and the refresh overlay 12-lifecycle.js builds on <body>.
+           Same channel as #upload-progress — the JS holds no literal and every string still
+           reaches the font subset collector. <body> is not swapped by hx-boost, which is
+           correct here: these strings are the same on every page. */}}
+      data-cmt-just-now="{{.UI.comment.rel_time.just_now}}"
+      data-cmt-minutes="{{.UI.comment.rel_time.minutes}}"
+      data-cmt-hours="{{.UI.comment.rel_time.hours}}"
+      data-cmt-days="{{.UI.comment.rel_time.days}}"
+      data-cmt-load-error="{{.UI.comment.list.load_error}}"
+      data-cmt-del-confirm="{{.UI.comment.delete.confirm}}"
+      data-cmt-del-failed="{{.UI.comment.delete.failed}}"
+      data-cmt-del-network="{{.UI.comment.delete.network_error}}"
+      data-cmt-del-token="{{.UI.comment.delete.token_expired}}"
+      data-sw-update="{{.UI.common.sw_update}}"
+      {{/* The pages the worker warms, handed over by the page: a list inside sw.js would
+           follow the posts, and the browser replaces the worker whenever its bytes change.
+           Empty on the pages that build their own data (the editor), which warms nothing. */}}
+      data-sw-warm="{{.SWWarmURLs}}"{{block "body_attrs" .}}{{end}}>
+    <div class="app-loading" id="appLoading" aria-hidden="true"><div class="app-loading__spinner"></div></div>
+    <div class="scroll-progress" id="scrollProgress" aria-hidden="true" hx-preserve="true"><div class="scroll-progress__bar"></div></div>
+    {{/* Upload indicator: one per page, driven by the shared uploader (src/js/parts/17-uploader.js).
+         The copy rides on data-* so the JS holds no literal — same pattern as .cmt-sticker-panel —
+         and every string still reaches the font subset collector. aria-live announces each phase
+         change without stealing focus. */}}
+    <div class="upload-progress" id="upload-progress" hidden aria-live="polite" hx-preserve="true"
+         data-uploading="{{.UI.upload.uploading}}"
+         data-transcoding="{{.UI.upload.transcoding}}"
+         data-done="{{.UI.upload.done}}"
+         data-failed="{{.UI.upload.failed}}"
+         data-network="{{.UI.upload.network}}"
+         data-stalled="{{.UI.upload.stalled}}"
+         data-server="{{.UI.upload.server}}">
+        <div class="upload-progress__head">
+            <span class="upload-progress__name"></span>
+            <span class="upload-progress__state"></span>
+        </div>
+        <div class="upload-progress__track"><div class="upload-progress__fill"></div></div>
+    </div>
+    {{template "bg_shapes" .}}
+    {{block "header" .}}{{template "navbar" .}}{{end}}
+    <div class="profile-card-anchor">{{block "outer_profile" .}}{{template "profile_card" (dict "Signature" .Signature "UI" .UI)}}{{end}}</div>
+    <div id="content-wrapper" data-body-class="{{block "body_class" .}}{{end}}" data-page-title="{{.Title}}">
+        <main class="{{block "main_class" .}}main-content{{end}}">
+            {{block "content" .}}{{end}}
+        </main>
+        {{block "layout_footer" .}}{{template "global_footer" .}}{{end}}
+        {{block "floating" .}}{{end}}
+        {{block "scripts" .}}{{end}}
+    </div>
+    {{template "theme_fab" .}}
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(function(){});
+        }
+    </script>
+</body>
+</html>
+{{end}}

@@ -1,0 +1,380 @@
+{{define "author.html"}}
+{{template "base_layout" .}}
+{{end}}
+
+{{define "head_extra"}}
+    <meta name="theme-color" content="#232A2E">
+    <link rel="stylesheet" href="{{asset "css/browse.bundle.css"}}">
+    <script src="{{asset "js/browse.bundle.js"}}" defer></script>
+    {{/* After browse: 18-photo-upload.js calls window.getBaseURL, which 01-core.js defines. */}}
+    <script src="{{asset "js/photo.bundle.js"}}" defer></script>
+{{end}}
+
+{{define "content"}}
+
+        <!-- Photo Wall · vertical layout: three columns stack independently;
+             column gap equals in-column row gap at 10px.
+             Column assignment col = i % 3.
+             Admin tools land in column (len .Photos) % 3. -->
+        <div class="photo-wall" id="photo-wall" data-photo-labels="{{photoLabelPairsAttr}}">
+            <div class="wall-col" data-col="0">
+                {{range $i, $p := .Photos}}{{if eq (mod $i 3) 0}}{{template "photo_card" (dict "P" $p "I" $i "Col" 0 "Row" (div $i 3))}}{{end}}{{end}}
+                {{if eq (mod (len .Photos) 3) 0}}{{template "photo_admin_tools" .}}{{end}}
+            </div>
+            <div class="wall-col" data-col="1">
+                {{range $i, $p := .Photos}}{{if eq (mod $i 3) 1}}{{template "photo_card" (dict "P" $p "I" $i "Col" 1 "Row" (div $i 3))}}{{end}}{{end}}
+                {{if eq (mod (len .Photos) 3) 1}}{{template "photo_admin_tools" .}}{{end}}
+            </div>
+            <div class="wall-col" data-col="2">
+                {{range $i, $p := .Photos}}{{if eq (mod $i 3) 2}}{{template "photo_card" (dict "P" $p "I" $i "Col" 2 "Row" (div $i 3))}}{{end}}{{end}}
+                {{if eq (mod (len .Photos) 3) 2}}{{template "photo_admin_tools" .}}{{end}}
+            </div>
+        </div>
+
+        <!-- The batch-delete bar is not a card; it lives outside .photo-wall so the flex
+             layout does not turn it into a 4th column. Upload progress reports through the
+             page-level indicator in _base_layout.html, so there is no bar of its own here. -->
+        <form id="photo-batch-del" class="admin-control" method="POST" action="{{ URLCommit "photo/batch-delete" }}" style="display:none;" data-backdrop-scene="b">
+            <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div><div class="g-tint"></div><div class="g-noise"></div>
+            <button type="submit" class="photo-del-sel photo-del-submit" onclick="return confirm('删除选中的照片？')">{{.UI.author.photo.delete_sel}}</button>
+            <button type="button" class="photo-del-sel photo-del-cancel" onclick="exitDeleteMode()">{{.UI.common.action.cancel}}</button>
+        </form>
+{{end}}
+
+{{define "scripts"}}
+{{template "search_script" .}}
+{{template "signature_edit" .}}
+
+    <!-- Photo wall drag-sorting via Pointer Events (mouse + touch), edit mode only; native
+         HTML5 DnD dropped (.photo-card-glass covers the <img>, so dragstart never fires).
+         DOM order (col = i % 3, column-major) is restored to row-major before submit; the
+         follow-finger offset must use `translate` (.photo-card:hover has transform:none !important). -->
+    <script>
+        (function() {
+            var wall = document.getElementById('photo-wall');
+            if (!wall) return;
+
+            var MOVE_THRESHOLD = 6;   // px: beyond this it counts as a drag, otherwise a tap
+            var dragEl = null;
+            var pointerId = null;
+            var startX = 0;
+            var startY = 0;
+            var dragging = false;
+
+            function isAdmin() {
+                return document.body.classList.contains('is-admin') ||
+                       document.documentElement.classList.contains('is-admin');
+            }
+
+            // Dragging opens only inside edit mode: long-press enters the mode -> sortable;
+            // exiting the mode re-enables opening the full image
+            function editing() {
+                return wall.classList.contains('photo-wall--editing');
+            }
+
+            function cols() {
+                return Array.prototype.slice.call(wall.querySelectorAll('.wall-col'));
+            }
+
+            // Row-major flatten: round r takes the r-th card of each column in turn
+            function flatten() {
+                var list = cols();
+                var max = list.reduce(function(m, c) {
+                    return Math.max(m, c.querySelectorAll('.photo-card').length);
+                }, 0);
+                var out = [];
+                for (var r = 0; r < max; r++) {
+                    for (var c = 0; c < list.length; c++) {
+                        var card = list[c].querySelectorAll('.photo-card')[r];
+                        if (card) out.push(card);
+                    }
+                }
+                return out;
+            }
+
+            // Cards must come before the admin tools, otherwise "+" gets pushed into the
+            // middle of a column
+            function placeCard(colEl, card) {
+                var tools = colEl.querySelector('.photo-admin-tools');
+                if (tools) colEl.insertBefore(card, tools);
+                else colEl.appendChild(card);
+            }
+
+            function syncIndices() {
+                var list = cols();
+                flatten().forEach(function(card, i) {
+                    card.style.setProperty('--i', i);
+                });
+                list.forEach(function(colEl, c) {
+                    Array.prototype.forEach.call(colEl.querySelectorAll('.photo-card'), function(card, r) {
+                        card.style.setProperty('--col', c);
+                        card.style.setProperty('--row', r);
+                    });
+                });
+            }
+
+            // The card under the pointer (the dragged card already has pointer-events:none,
+            // so it never hits itself)
+            function cardAt(x, y) {
+                var el = document.elementFromPoint(x, y);
+                return el ? el.closest('.photo-card') : null;
+            }
+
+            function clearDropTarget() {
+                var hl = wall.querySelector('.photo-card--drop-target');
+                if (hl) hl.classList.remove('photo-card--drop-target');
+            }
+
+            function resetDrag() {
+                if (dragEl) {
+                    dragEl.classList.remove('photo-card--dragging');
+                    dragEl.style.translate = '';
+                    dragEl.style.pointerEvents = '';
+                }
+                clearDropTarget();
+                try { wall.releasePointerCapture(pointerId); } catch (err) {}
+                dragEl = null;
+                pointerId = null;
+                dragging = false;
+            }
+
+            // Drop point: the target card's top/bottom half decides insert-before or
+            // insert-after (same criterion as the old dragover)
+            function insertAt(x, y) {
+                var target = cardAt(x, y);
+                if (!target || target === dragEl) return;
+                var r = target.getBoundingClientRect();
+                if (y < r.top + r.height / 2) target.parentNode.insertBefore(dragEl, target);
+                else target.parentNode.insertBefore(dragEl, target.nextSibling);
+            }
+
+            function commit() {
+                // Settle: only move cards that are truly in the wrong column. In-column
+                // order is guaranteed by flatten; no reordering needed.
+                var order = flatten();
+                var list = cols();
+                order.forEach(function(card, i) {
+                    var colEl = list[i % list.length];
+                    if (card.parentNode !== colEl) placeCard(colEl, card);
+                });
+                syncIndices();
+
+                // DOM moves restart the entrance animation -> disable it after settling so
+                // every drag does not replay the fall
+                wall.classList.add('photo-wall--settled');
+
+                var ids = order.map(function(c) { return c.dataset.id; })
+                    .filter(function(id) { return id; });
+                if (!ids.length) return;
+                // No file here, so the body is urlencoded: r.ParseForm() does not read a
+                // multipart body, and the handler takes its fields from r.FormValue.
+                var params = new URLSearchParams();
+                params.append('ids', ids.join(','));
+                fetch(window.SITE_URLS.commit.photoReorder, { method: 'POST', body: params });
+            }
+
+            // Native drag strictly forbidden: once the full <img> has loaded, mousedown lands
+            // on it and the browser starts its own drag (file-icon ghost, pointercancel kills
+            // sorting). draggable="false" on both imgs plus this listener covers all descendants.
+            wall.addEventListener('dragstart', function(e) { e.preventDefault(); });
+            // Inside edit mode, long-press no longer pops the system image menu (most
+            // obvious on touch)
+            wall.addEventListener('contextmenu', function(e) {
+                if (editing()) e.preventDefault();
+            });
+
+            wall.addEventListener('pointerdown', function(e) {
+                if (!isAdmin() || !editing()) return;
+                if (e.target.closest('.photo-select')) return;
+                var card = e.target.closest('.photo-card');
+                if (!card) return;
+                delete wall.dataset.dragJustEnded;   // new interaction round: clear the previous round's click suppression
+                dragEl = card;
+                pointerId = e.pointerId;
+                startX = e.clientX;
+                startY = e.clientY;
+                dragging = false;
+            });
+
+            wall.addEventListener('pointermove', function(e) {
+                if (!dragEl || e.pointerId !== pointerId) return;
+                if (!dragging) {
+                    if (Math.abs(e.clientX - startX) < MOVE_THRESHOLD &&
+                        Math.abs(e.clientY - startY) < MOVE_THRESHOLD) return;
+                    dragging = true;
+                    dragEl.classList.add('photo-card--dragging');
+                    // Let elementFromPoint pass through to the card underneath, otherwise
+                    // it always hits itself
+                    dragEl.style.pointerEvents = 'none';
+                    try { wall.setPointerCapture(pointerId); } catch (err) {}
+                }
+                dragEl.style.translate = (e.clientX - startX) + 'px ' + (e.clientY - startY) + 'px';
+                var target = cardAt(e.clientX, e.clientY);
+                var hl = wall.querySelector('.photo-card--drop-target');
+                if (hl && hl !== target) hl.classList.remove('photo-card--drop-target');
+                if (target && target !== dragEl) target.classList.add('photo-card--drop-target');
+            });
+
+            function endDrag(e) {
+                if (!dragEl || (e && e.pointerId !== pointerId)) return;
+                var moved = dragging;
+                var x = e ? e.clientX : startX;
+                var y = e ? e.clientY : startY;
+                if (moved) insertAt(x, y);   // must run BEFORE restoring pointer-events
+                resetDrag();
+                if (!moved) return;
+                // After a drag the browser may synthesize a click on the card -> suppress
+                // it so the checkbox is not toggled by mistake
+                wall.dataset.dragJustEnded = '1';
+                commit();
+            }
+            wall.addEventListener('pointerup', endDrag);
+            wall.addEventListener('pointercancel', endDrag);
+
+            // Touch: touchmove must be consumed while dragging, otherwise page scrolling
+            // interrupts the pointer stream (the browser fires pointercancel)
+            wall.addEventListener('touchmove', function(e) {
+                if (dragging) e.preventDefault();
+            }, { passive: false });
+        })();
+    </script>
+
+    <!-- Long-press enters delete mode -->
+    <script>
+        (function() {
+            var wall = document.getElementById('photo-wall');
+            if (!wall) return;
+            var timer = null;
+            var inDeleteMode = false;
+            var batchForm = document.getElementById('photo-batch-del');
+
+            function enterDeleteMode() {
+                if (inDeleteMode) return;
+                inDeleteMode = true;
+                // Edit mode doubles as the drag-sorting switch (see editing() in the script above)
+                wall.classList.add('photo-wall--editing');
+                wall.querySelectorAll('.photo-card').forEach(function(card) {
+                    card.querySelector('.photo-select').style.display = 'block';
+                    card.addEventListener('click', toggleCheck);
+                });
+                if (batchForm) batchForm.style.display = 'flex';
+            }
+
+            function toggleCheck(e) {
+                // Sorting just ended -> the browser's synthesized click must not toggle the checkbox
+                if (wall.dataset.dragJustEnded) return;
+                if (e.target.closest('.photo-select')) return;
+                var cb = this.querySelector('.photo-select');
+                if (cb) { cb.checked = !cb.checked; }
+            }
+
+            window.exitDeleteMode = function() {
+                inDeleteMode = false;
+                wall.classList.remove('photo-wall--editing');
+                wall.querySelectorAll('.photo-card').forEach(function(card) {
+                    var cb = card.querySelector('.photo-select');
+                    if (cb) { cb.style.display = 'none'; cb.checked = false; }
+                    card.removeEventListener('click', toggleCheck);
+                });
+                if (batchForm) batchForm.style.display = 'none';
+            };
+
+            wall.addEventListener('pointerdown', function(e) {
+                if (e.target.closest('.photo-select')) return;
+                timer = setTimeout(enterDeleteMode, 600);
+            });
+            wall.addEventListener('pointerup', function() { clearTimeout(timer); });
+            wall.addEventListener('pointerleave', function() { clearTimeout(timer); });
+
+            document.addEventListener('click', function(e) {
+                if (inDeleteMode && !e.target.closest('.photo-wall') && !e.target.closest('#photo-batch-del')) {
+                    exitDeleteMode();
+                }
+            });
+        })();
+    </script>
+
+    <!-- Photo wall: hover/tap lazy loading + fade-in after load -->
+    <script>
+        (function() {
+            var wall = document.getElementById('photo-wall');
+            if (!wall) return;
+
+            var touchStartX = 0, touchStartY = 0, isSwiping = false;
+
+            wall.addEventListener('touchstart', function(e) {
+                var card = e.target.closest('.photo-card');
+                if (!card) return;
+                var touch = e.touches[0];
+                touchStartX = touch.clientX;
+                touchStartY = touch.clientY;
+                isSwiping = false;
+            }, { passive: true });
+
+            wall.addEventListener('touchmove', function(e) {
+                var touch = e.touches[0];
+                if (Math.abs(touch.clientX - touchStartX) > 10 || Math.abs(touch.clientY - touchStartY) > 10) {
+                    isSwiping = true;
+                }
+            }, { passive: true });
+
+            wall.addEventListener('touchend', function(e) {
+                if (isSwiping) return;
+                var card = e.target.closest('.photo-card');
+                if (!card) return;
+                if (e.target.closest('.photo-select')) return;
+                var full = card.querySelector('.full-img');
+                if (!full) return;
+                if (full.complete && full.naturalWidth > 0) {
+                    card.classList.toggle('photo-card--tapped');
+                } else if (!full.src) {
+                    full.addEventListener('load', function() {
+                        card.classList.add('photo-card--tapped');
+                    }, { once: true });
+                    full.src = full.dataset.full;
+                }
+            }, { passive: true });
+
+            // Desktop: load on hover, fade in when loaded, fade out immediately on leave
+            wall.querySelectorAll('.photo-card').forEach(function(card) {
+                var full = card.querySelector('.full-img');
+                if (!full) return;
+
+                var hovering = false;
+
+                full.addEventListener('load', function() {
+                    if (hovering) card.classList.add('photo-card--loaded');
+                });
+
+                card.addEventListener('mouseenter', function() {
+                    hovering = true;
+                    if (!full.src) full.src = full.dataset.full;
+                    if (full.complete && full.naturalWidth > 0) {
+                        card.classList.add('photo-card--loaded');
+                    }
+                });
+
+                card.addEventListener('mouseleave', function() {
+                    hovering = false;
+                    card.classList.remove('photo-card--loaded');
+                });
+            });
+
+            // blur thumbnail failed to load -> load and show the full image directly
+            wall.querySelectorAll('.blur-thumb').forEach(function(img) {
+                img.addEventListener('error', function() {
+                    var card = img.closest('.photo-card');
+                    if (!card) return;
+                    var full = card.querySelector('.full-img');
+                    if (full) {
+                        full.src = full.dataset.full;
+                        full.addEventListener('load', function() {
+                            card.classList.add('photo-card--loaded');
+                        }, { once: true });
+                    }
+                    img.style.visibility = 'hidden';
+                });
+            });
+        })();
+    </script>
+{{end}}

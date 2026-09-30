@@ -1,0 +1,6 @@
+{
+  "ext": ["asp", "aspx", "php", "jsp"],
+  "file": ["wlwmanifest.xml"],
+  "prefix": ["/.git", "/.env", "/wp-", "/wordpress"],
+  "eq": ["/graphql", "/cmd_sco"]
+}

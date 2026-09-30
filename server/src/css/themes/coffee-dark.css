@@ -1,0 +1,111 @@
+/* Coffee theme (Ujimatsu Chiya) - amber charcoal caramel (Plan A-1). */
+
+[data-theme="coffee-dark"] {
+  /* Accent */
+  --accent: #D4A373;            /* Caramel */
+
+  /* Glass tokens, hex base */
+  --glass-tint: #161412;        /* Very dark charcoal base */
+  --glass-light: var(--accent); /* Border/outline source */
+  --glass-dark: #000000;
+  
+
+  --glass-l1-alpha: 0.10;
+  --glass-l2-alpha: 0.16;
+  --glass-noise-opacity: 0;
+  --bg-noise-opacity: 0;
+
+  /* Caramel outer glow derived from accent */
+  --shadow-sm: 0 0 6px color-mix(in srgb, var(--accent) 25%, transparent);
+
+  /* Background */
+  --bg-body: #161412;
+  --bg-base: #161412;
+  --bg-glass-alt: rgba(36, 30, 28, 0.70);
+  --bg-nav: rgba(22, 20, 18, 0.85);
+  --bg-code: rgba(22, 20, 18, 0.65);
+  --bg-chroma: rgba(22, 20, 18, 0.65);
+  --bg-card: rgba(30, 26, 24, 0.65);
+  --bg-input: rgba(16, 14, 12, 0.35);
+  --bg-overlay: color-mix(in srgb, var(--glass-dark) 55%, transparent);
+
+  /* Surface */
+  --bg-subtle: color-mix(in srgb, var(--glass-light) calc(var(--surface-alpha) * 100%), transparent);
+  --bg-hover: color-mix(in srgb, var(--glass-light) 10%, transparent);
+  --bg-interactive: color-mix(in srgb, var(--accent) 8%, transparent);
+
+  /* Text (derived from ink-seed) */
+  --text-primary: #C3C2BF;
+  --text-muted: #AEAEAB;
+  --text-dim: #969693;
+  --timeline-line: color-mix(in srgb, var(--text-primary) 22%, transparent);
+  --timeline-node: color-mix(in srgb, var(--text-primary) 50%, transparent);
+
+  /* Accent & hover (derived from accent) */
+  --accent-hover: #E67E22;
+  --accent-soft: color-mix(in srgb, var(--accent) 15%, transparent);
+
+  /* Border */
+  --border-light: color-mix(in srgb, var(--glass-light) 14%, transparent);
+  --border-medium: color-mix(in srgb, var(--glass-light) 26%, transparent);
+  --border-subtle: color-mix(in srgb, var(--glass-light) 10%, transparent);
+
+  /* Shadow */
+  --shadow-card: 0 0 8px color-mix(in srgb, var(--accent) 12%, transparent), 0 0 16px color-mix(in srgb, var(--accent) 6%, transparent);
+
+  /* Hover states */
+  --hover-bg: color-mix(in srgb, var(--accent) 8%, transparent);
+  --hover-text: var(--accent);
+  --hover-border: color-mix(in srgb, var(--accent) 35%, transparent);
+  --hover-blur: 8px;
+  --hover-bg-active: color-mix(in srgb, var(--accent) 12%, transparent);
+  --hover-text-active: #E76F51;
+
+  /* Nav */
+  --nav-bg: rgba(16, 14, 12, 0.30);
+
+  /* Layout */
+  --sidebar-radius: var(--radius-md);
+  --blur-amount: 8px;
+
+  /* Group hover */
+  --group-hover-bg: color-mix(in srgb, var(--accent) 8%, transparent);
+  --group-hover-text: var(--accent);
+
+  /* Comment form */
+  --cmt-form-bg: rgba(36, 30, 28, 0.65);
+  --cmt-input-color: var(--text-primary);
+  --cmt-input-placeholder: var(--text-muted);
+  --cmt-textarea-color: var(--text-primary);
+  --cmt-textarea-placeholder: var(--text-muted);
+  --cmt-textarea-focus: var(--text-primary);
+  --cmt-input-focus: var(--text-primary);
+  --cmt-submit-bg: var(--accent);
+
+  /* Chroma */
+  --chroma-keyword: #E09F67;
+  --chroma-function: #D4A373;
+  --chroma-string: #A8B884;
+  --chroma-comment: color-mix(in srgb, #E6EAEF 40%, transparent);
+  --chroma-number: #E8A87C;
+  --chroma-operator: #C7A27D;
+  --chroma-punctuation: color-mix(in srgb, var(--accent) 65%, transparent);
+  --chroma-tag: #E27D60;
+  --chroma-deleted: #E27D60;
+  --chroma-inserted: #A8B884;
+
+  /* Decorative shapes: amber caramel palette - low-contrast brown base
+     with cream and terracotta accents (dark themes use screen blending). */
+  --shape-1: #6B4A32;   /* Mocha brown */
+  --shape-2: #E27D60;   /* Terracotta red */
+  --shape-3: #7FA99B;   /* Sage green */
+  --shape-4: #D9A0AE;   /* Rose latte */
+  --shape-5: #E8A87C;   /* Apricot caramel */
+  --shape-6: #4A3223;   /* Dark roast brown */
+  --shape-7: #D4A373;   /* Caramel (primary, same as accent) */
+  --shape-8: #33241A;   /* Espresso brown (darkest, adds depth) */
+  --shape-9: #E8C08A;   /* Milk-foam gold */
+  --shape-10: #8A6242;  /* Latte brown */
+  --shape-blend: screen;
+}
+

@@ -1,0 +1,134 @@
+{{define "posts_header"}}
+{{if or .IsArchive .CurrentCat .IsList}}
+<section class="browse-header page-card" data-backdrop-scene="b">
+    <div class="g-blur"><div class="g-filter"><div class="g-content"></div></div></div><div class="g-tint"></div><div class="g-noise"></div>
+    <div class="bh-inner">
+    <div class="browse-header__top-row">
+        <div class="browse-header__title-wrap">
+            {{/* On /posts the browser rewrites this to #<tag> from the fragment, and the count
+                 below to the number of cards that carry it (03-nav-filter.js). */}}
+            <h2 class="browse-header__title" id="browseHeaderTitle">
+                {{if .IsArchive}}{{.UI.posts.header.archive_title}}{{else if .CurrentCat}}{{.CurrentCat}}{{else}}{{.UI.nav.menu.articles}}{{end}}
+            </h2>
+            <div class="browse-header__stats">
+                <span class="browse-stat"><span class="browse-stat__ink" id="browseHeaderPostCount" data-suffix="{{.UI.posts.count.suffix}}">{{len .Posts}}<i>{{.UI.posts.count.suffix}}</i></span></span>
+                <span class="browse-stat"><span class="browse-stat__ink">{{len .AllTags}}<i>{{.UI.posts.header.tag_unit}}</i></span></span>
+            </div>
+        </div>
+
+        <div class="browse-header__cat-grid">
+            <div class="browse-cat-indicator" id="browse-cat-indicator"></div>
+            <a href="{{ URLArchive }}" class="browse-cat-card browse-cat-card--archive{{if .IsArchive}} active{{end}}">
+                <span class="browse-cat-card__name">{{.UI.nav.menu.archive}}</span>
+            </a>
+            {{range $c := .Categories}}
+            <a href="{{ URLTopic (index $.CategoryAliases $c) }}" class="browse-cat-card{{if eq $.CurrentCat $c}} active{{end}}">
+                <span class="browse-cat-card__name">{{$c}}</span>
+            </a>
+            {{end}}
+        </div>
+    </div>
+
+    {{if .AllTags}}
+    <div class="browse-header__tags-section">
+        <div class="browse-header__tags-head">
+            <span class="browse-header__tags-title">{{.UI.posts.header.tags_title}}</span>
+            <span class="browse-header__tags-hint">{{.UI.posts.header.tags_hint}}</span>
+        </div>
+        <div class="browse-header__tags-scroll-wrap">
+            <div class="browse-header__pill-row browse-header__pill-row--tags">
+                {{range $t := .AllTags}}
+                <a href="{{ URLTag $t }}" class="browse-tag-chip">
+                    <span class="browse-tag-chip__hash">#</span>
+                    <span class="browse-tag-chip__label">{{$t}}</span>
+                </a>
+                {{end}}
+            </div>
+        </div>
+    </div>
+    {{end}}
+    </div>
+</section>
+
+<script>
+(function() {
+    // Tag pill row horizontal wheel scrolling
+    var tagRow = document.querySelector('.browse-header__pill-row--tags');
+    if (tagRow) {
+        tagRow.addEventListener('wheel', function(e) {
+            if (e.deltaY !== 0) {
+                e.preventDefault();
+                tagRow.scrollLeft += e.deltaY;
+            }
+        }, { passive: false });
+    }
+
+    // Magnetic category indicator slider
+    var catGrid = document.querySelector('.browse-header__cat-grid');
+    var indicator = document.getElementById('browse-cat-indicator');
+
+    if (catGrid && indicator) {
+        var catCards = catGrid.querySelectorAll('.browse-cat-card');
+        var activeCard = catGrid.querySelector('.browse-cat-card.active');
+
+        var catArray = Array.prototype.slice.call(catCards);
+        var currentIndex = 0;
+
+        function moveTo(target, isInstant) {
+            if (!target) {
+                indicator.style.opacity = '0';
+                return;
+            }
+            var gridRect = catGrid.getBoundingClientRect();
+            var targetRect = target.getBoundingClientRect();
+            var left = targetRect.left - gridRect.left;
+            var width = targetRect.width;
+
+            var targetIndex = catArray.indexOf(target);
+            if (targetIndex === -1) targetIndex = 0;
+
+            if (isInstant) {
+                indicator.style.transition = 'none';
+            } else {
+                // 0.2s-per-step ladder animation: adjacent 0.2s, two steps 0.4s,
+                // wrapping from last to first 0.6s
+                var steps = Math.abs(targetIndex - currentIndex);
+                if (steps < 1) steps = 1;
+                var duration = (steps * 0.2).toFixed(1);
+                indicator.style.transition = 'transform ' + duration + 's cubic-bezier(0.16, 1, 0.3, 1), width ' + duration + 's cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease';
+            }
+            currentIndex = targetIndex;
+            indicator.style.transform = 'translateX(' + left + 'px)';
+            indicator.style.width = width + 'px';
+            indicator.style.opacity = '1';
+        }
+
+        function updateIndicator(isInstant) {
+            activeCard = catGrid.querySelector('.browse-cat-card.active');
+            if (activeCard) {
+                moveTo(activeCard, isInstant);
+            } else {
+                indicator.style.opacity = '0';
+            }
+        }
+
+        // Initialize the indicator position
+        updateIndicator(true);
+        window.addEventListener('resize', function() { updateIndicator(true); });
+
+        catCards.forEach(function(card) {
+            card.addEventListener('mouseenter', function() {
+                catGrid.classList.add('is-hovering');
+                moveTo(card, false);
+            });
+        });
+
+        catGrid.addEventListener('mouseleave', function() {
+            catGrid.classList.remove('is-hovering');
+            updateIndicator(false);
+        });
+    }
+})();
+</script>
+{{end}}
+{{end}}

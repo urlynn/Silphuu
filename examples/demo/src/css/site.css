@@ -1,0 +1,3 @@
+/* Site customisation layer, owned by the deployer; the engine ships no file under this
+   name. head.html links it after head_extra, so its selectors win without !important.
+   Stack manual ink offsets on top of the --font-<role>-shift variables, never replace them. */

@@ -1,0 +1,110 @@
+/* Tokyo Night Dark - semantic layer (layer 2).
+   Neon-city blue accent with purple/teal accents. */
+
+[data-theme="indigo-dark"] {
+    /* Accent */
+  --accent: #7AA2F7;
+
+  /* Glass system (hex base) */
+  --glass-tint: #1F243A;
+  --glass-light: #C0CAF5;
+  --glass-dark: #000000;
+  
+  --glass-l1-alpha: 0.10;
+  --glass-l2-alpha: 0.16;
+  --glass-noise-opacity: 0;
+  --bg-noise-opacity: 0;
+
+  /* Neon-city glow (replaces black shadows in dark mode, see /fun/error) */
+  --shadow-sm: 0 0 6px color-mix(in srgb, var(--accent) 25%, transparent);
+
+  /* Background */
+  --bg-body: #1A1B26;
+  --bg-base: #1A1B26;
+  --bg-glass-alt: rgba(31, 35, 53, 0.80);
+  --bg-nav: rgba(24, 26, 40, 0.55);
+  --bg-code: rgba(24, 26, 40, 0.55);
+  --bg-chroma: rgba(24, 26, 40, 0.55);
+  --bg-card: rgba(31, 35, 53, 0.40);
+  --bg-input: rgba(6, 8, 18, 0.35);
+  --bg-overlay: color-mix(in srgb, var(--glass-dark) 55%, transparent);
+
+  /* Surface */
+  --bg-subtle: color-mix(in srgb, var(--glass-light) calc(var(--surface-alpha) * 100%), transparent);
+  --bg-hover: color-mix(in srgb, var(--glass-light) 10%, transparent);
+  --bg-interactive: color-mix(in srgb, var(--glass-light) 8%, transparent);
+
+  /* Text */
+  --text-primary: #BEC5E1;
+  --text-muted: #A9B1CC;
+  --text-dim: #9198B2;
+  --timeline-line: color-mix(in srgb, var(--text-primary) 22%, transparent);
+  --timeline-node: color-mix(in srgb, var(--text-primary) 50%, transparent);
+
+  /* Accent (auto-derived) */
+  --accent-hover: #5EC2FB;
+  --accent-soft: color-mix(in srgb, var(--accent) 15%, transparent);
+
+  /* Border (neon-city glow edge) */
+  --border-light: color-mix(in srgb, var(--glass-light) 14%, transparent);
+  --border-medium: color-mix(in srgb, var(--accent) 26%, transparent);
+  --border-subtle: color-mix(in srgb, var(--glass-light) 10%, transparent);
+
+  /* Shadow */
+  --shadow-card: 0 0 8px color-mix(in srgb, var(--accent) 28%, transparent), 0 0 16px color-mix(in srgb, var(--accent) 14%, transparent);
+
+  /* Hover states */
+  --hover-bg: color-mix(in srgb, var(--accent) 8%, transparent);
+  --hover-text: var(--accent);
+  --hover-border: color-mix(in srgb, var(--accent) 35%, transparent);
+  --hover-blur: 8px;
+  --hover-bg-active: color-mix(in srgb, var(--accent) 12%, transparent);
+  --hover-text-active: #7AA2F7;
+
+  /* Nav */
+  --nav-bg: rgba(6, 8, 18, 0.30);
+
+  /* Layout */
+  --sidebar-radius: var(--radius-md);
+  --blur-amount: 8px;
+
+  /* Group hover */
+  --group-hover-bg: color-mix(in srgb, var(--glass-light) 8%, transparent);
+  --group-hover-text: var(--accent);
+
+  /* Comment form */
+  --cmt-form-bg: #1F2335;
+  --cmt-input-color: var(--text-primary);
+  --cmt-input-placeholder: var(--text-muted);
+  --cmt-textarea-color: var(--text-primary);
+  --cmt-textarea-placeholder: var(--text-muted);
+  --cmt-textarea-focus: var(--text-primary);
+  --cmt-input-focus: var(--text-primary);
+  --cmt-submit-bg: var(--accent);
+
+
+  /* Chroma */
+  --chroma-keyword: #BB9AF7;
+  --chroma-function: #7AA2F7;
+  --chroma-string: #9ECE6A;
+  --chroma-comment: rgba(169, 177, 214, 0.42);
+  --chroma-number: #FF9E64;
+  --chroma-operator: #89DDFF;
+  --chroma-punctuation: #A9B1D6;
+  --chroma-tag: #F7768E;
+  --chroma-deleted: #F7768E;
+  --chroma-inserted: #9ECE6A;
+
+  /* Decorative shapes: neon-city palette */
+  --shape-1: #9ECE6A;
+  --shape-2: #F7768E;
+  --shape-3: #73DACA;
+  --shape-4: #BB9AF7;
+  --shape-5: #FF9E64;
+  --shape-6: #E0AF68;
+  --shape-7: #7AA2F7;
+  --shape-8: #89DDFF;
+  --shape-9: #2AC3DE;
+  --shape-10: #24283B;
+  --shape-blend: screen;
+}

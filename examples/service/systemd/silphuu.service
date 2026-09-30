@@ -1,0 +1,41 @@
+# /etc/systemd/system/silphuu.service — the engine, run as a service.
+#
+#   install -m 0644 silphuu.service /etc/systemd/system/silphuu.service
+#   systemctl daemon-reload && systemctl enable --now silphuu
+#
+# Every value comes from /etc/conf.d/silphuu — the same file the OpenRC script reads, so a
+# host can move between the two without a second configuration.
+
+[Unit]
+Description=Silphuu blog engine
+After=network.target
+Before=nginx.service
+
+# A start that fails immediately would otherwise respawn in a tight loop. Three attempts in a
+# minute, then the unit stays failed and the reason is in the journal.
+StartLimitIntervalSec=60
+StartLimitBurst=3
+
+[Service]
+Type=simple
+
+# The engine resolves src/, templates/ and its shipped config/ relative to the working
+# directory, so this has to be the directory that holds server/.
+WorkingDirectory=/usr/local/lib/silphuu/server
+
+# Sourced through a shell, not read with EnvironmentFile=. systemd's environment-file parser
+# has no notion of the `export` keyword: `export SILPHUU_SOCK=...` is read as a variable named
+# "export SILPHUU_SOCK", fails the name check, and is dropped with a journal error while the
+# unit starts anyway and the variable is unset. OpenRC is the other way round — openrc-run.sh
+# only sources the file, and a shell variable that was not exported never reaches the service
+# — so the example keeps `export` and this line works with it.
+#
+# `exec` replaces the shell, so the process systemd supervises is the engine itself.
+ExecStart=/bin/sh -c '. /etc/conf.d/silphuu; exec /usr/local/bin/silphuu'
+
+# The OpenRC script's respawn_delay.
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

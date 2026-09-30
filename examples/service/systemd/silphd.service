@@ -1,0 +1,34 @@
+# /etc/systemd/system/silphd.service — the status daemon, run as a service.
+#
+#   install -m 0644 silphd.service /etc/systemd/system/silphd.service
+#   systemctl daemon-reload && systemctl enable --now silphd
+#
+# The endpoint it binds, the certificate it presents and the peer it syncs with come from
+# /etc/conf.d/silphd. That is also the file /etc/conf.d/silphuu sources, because the engine
+# hands the browser endpoint's address and port to the status page.
+
+[Unit]
+Description=Silphuu WebTransport status and guard daemon
+After=network.target
+
+# A start that fails immediately would otherwise respawn in a tight loop. Three attempts in a
+# minute, then the unit stays failed and the reason is in the journal.
+StartLimitIntervalSec=60
+StartLimitBurst=3
+
+[Service]
+Type=simple
+
+# Sourced through a shell rather than read with EnvironmentFile=, because the file uses the
+# `export` keyword that systemd's environment-file parser rejects. See silphuu.service beside
+# this file for what the two parsers do differently.
+#
+# `exec` replaces the shell, so the process systemd supervises is the daemon itself.
+ExecStart=/bin/sh -c '. /etc/conf.d/silphd; exec /usr/local/bin/silphd'
+
+# The OpenRC script's respawn_delay.
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

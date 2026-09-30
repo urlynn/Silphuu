@@ -1,0 +1,123 @@
+/* Tag input: a chip box with an autocomplete menu. Shared by the editor's meta bar and the
+   hero settings panel, which differ in the metrics they pass in: --tag-input-border,
+   --tag-input-radius, --tag-input-padding and --tag-input-font-size. */
+
+.tag-input {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    padding: var(--tag-input-padding, 5px 7px);
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid var(--tag-input-border, var(--border-light));
+    border-radius: var(--tag-input-radius, var(--radius-md));
+    background: rgba(var(--contrast-base-rgb), 0.04);
+    color: var(--text-primary);
+    font-size: var(--tag-input-font-size, 13px);
+    line-height: 1.5;
+    outline: none;
+    box-sizing: border-box;
+    cursor: text;
+    transition: border-color var(--duration-fast) ease;
+}
+/* The border is the whole focus state: a ring on top of it reads as a second, weaker edge. */
+.tag-input:focus-within {
+    border-color: var(--accent);
+}
+
+/* The field is as wide as the word in it, and the script writes that width from
+   .tag-input__measure. The chips need no mirror: they are boxes of their own, and the box is
+   a flex row that grows around both. */
+.tag-input__field {
+    flex: 1 1 auto;
+    min-width: var(--tag-input-field-min, 60px);
+    box-sizing: border-box;
+    padding: 2px 3px;
+    border: none;
+    background: none;
+    color: inherit;
+    font: inherit;
+    outline: none;
+}
+.tag-input__field::placeholder {
+    color: var(--text-dim);
+}
+
+/* The mirror the field is measured against: out of flow, so it takes no place in the row, and
+   carrying the field's own padding and font, so its width is the width the field needs. */
+.tag-input__measure {
+    position: absolute;
+    left: 0;
+    top: 0;
+    visibility: hidden;
+    white-space: pre;
+    pointer-events: none;
+    padding: 2px 3px;
+    font: inherit;
+}
+
+/* A neutral fill rather than var(--accent-soft): the chip holds the author's own text, and an
+   accent tint behind 12px text spends contrast in every theme. Same family as the fields' 0.04,
+   one step up so a chip reads as an item rather than as more field. */
+.tag-input__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    max-width: 100%;
+    padding: 1px 4px 1px 7px;
+    border-radius: var(--radius-sm);
+    background: rgba(var(--contrast-base-rgb), 0.09);
+    font-size: 12px;
+    line-height: 1.5;
+}
+.tag-input__chip-text {
+    overflow-wrap: anywhere;
+}
+.tag-input__chip-remove {
+    display: inline-flex;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--text-dim);
+    cursor: pointer;
+}
+.tag-input__chip-remove:hover {
+    color: var(--danger-red);
+}
+.tag-input__chip-remove svg {
+    display: block;
+    width: 10px;
+    height: 10px;
+}
+
+/* Suggestions drop from the box. */
+.tag-input__menu {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 4px);
+    z-index: 1;
+    margin: 0;
+    padding: 4px;
+    list-style: none;
+    max-height: 220px;
+    overflow-y: auto;
+    border: 1px solid var(--tag-input-border, var(--border-light));
+    border-radius: var(--tag-input-radius, var(--radius-md));
+    background: var(--form-bg);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+.tag-input__item {
+    padding: 5px 8px;
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 13px;
+    cursor: pointer;
+    overflow-wrap: anywhere;
+}
+.tag-input__item.is-active,
+.tag-input__item:hover {
+    background: rgba(var(--contrast-base-rgb), 0.07);
+}

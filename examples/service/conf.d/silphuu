@@ -1,0 +1,202 @@
+# /etc/conf.d/silphuu — every variable the engine reads at runtime.
+#
+# The service script in init.d/silphuu is a plain launcher: it exports this file and starts
+# the binary. Nothing here is compiled in, so moving a path or rotating a credential is an
+# edit to this file and a restart.
+#
+# Values are placeholders. A line that is commented out, or set to "", is one this example
+# deployment does not use; the engine's behaviour for each is stated beside it.
+
+# Required: SILPHUU_SOCK. The engine listens on a unix socket and exits when it is unset —
+# there is no port flag. A reverse proxy is what gives the site a URL; see
+# examples/nginx/dev.conf for the development shape of one.
+
+# The socket the reverse proxy forwards /api/ and /admin/ to.
+export SILPHUU_SOCK="/run/silphuu.sock"
+
+# The deployment root: configuration, state, posts and the sources they are built from.
+# Nothing under it is reachable by URL.
+export SILPHUU_HOME="/srv/silphuu"
+
+# The served root: rendered pages, built assets and uploads — what a browser fetches, and
+# what the reverse proxy's root points at. It must not contain the deployment root, or the
+# other way round: the engine refuses to start when one holds the other.
+export SILPHUU_STATIC="/srv/silphuu-served"
+
+# This deployment's own settings, apart from the site's config/: the notification routes the
+# admin panel records are written here. It must not sit inside the engine tree, which the
+# engine checks at startup.
+# Default: /var/lib/silphuu
+export SILPHUU_SETTINGS_DIR="/var/lib/silphuu"
+
+# This node's identity, recorded as the origin of every event. Unique across the nodes that
+# share an event log, and stable across restarts.
+# Default: the kernel host name
+export NODE_NAME="node-a"
+
+# The site's canonical origin, used to build absolute URLs. No trailing slash.
+# Default: base_url from config/site.json, and http://localhost when that is empty too
+export BASE_URL="https://blog.example.com"
+
+# The origin a cache-invalidation URL is built from, when it is not the origin the engine is
+# reached at — the public domain of the front that caches this site. Setting it to another
+# node's domain purges a cache this node does not write.
+# Default: BASE_URL
+# export CDN_BASE_URL="https://blog.example.com"
+
+# Seeds the HMAC that proves a visitor owns a comment. It is a signing key, not a login
+# credential: no administrator authenticates with it. config/site.json's comment_salt is read
+# first and this variable is its fallback; when neither is set, tokens are signed with a
+# constant that ships in the source.
+export COMMENT_SALT=""
+
+# The machine's CPU count, unless this deployment shares the box and names the cores it may
+# use. CPU-bound fan-outs (font subsetting, image conversion) take their width from here.
+# Default: the machine's core count
+# export SILPHUU_CPUS="2"
+
+# The compressor used to pre-compress text into a .br file beside it. nginx serves that file
+# on existence alone, so a missing binary is a startup failure rather than a site that quietly
+# ships uncompressed bytes.
+# Default: brotli, found on PATH
+# export SILPHUU_BROTLI="/usr/bin/brotli"
+
+# Set to 0 to serve rendered HTML without minifying it. Useful when reading the served pages.
+# Default: minification on
+# export HTML_MINIFY="0"
+
+# Event-log compaction. The log is compacted once at startup and afterwards only when it has
+# grown past the byte threshold, checked every interval.
+# Defaults: 8388608 bytes, 600 seconds
+# export SILPHUU_EVENT_COMPACT_BYTES="8388608"
+# export SILPHUU_EVENT_COMPACT_SEC="600"
+
+# The URL prefixes the site's assets and media answer on. Change these together with the
+# reverse proxy's locations, or every page asks for files nobody serves.
+# Defaults: /assets and /static
+# export ASSET_PREFIX="/assets"
+# export STATIC_PREFIX="/static"
+
+# Serves each request from the files on disk instead of the render cache, and reads assets
+# from source rather than from the built manifest. For development only.
+# export DEV_MODE="1"
+
+# Telling the edge what changed.
+#
+# The engine's part ends at "these URLs changed"; how the edge is told is this deployment's
+# business. Exactly one outlet exists per build, and it is chosen at compile time: the default
+# build carries the command outlet below, and `make build-esa` replaces it with the built-in
+# one. Neither falls back to the other.
+#
+# A node whose front does not cache pages needs no outlet: leaving both unset skips the flush
+# and records nothing, while pages keep rendering and being served.
+
+# The command outlet. The URLs arrive on stdin, one absolute URL per line; exit 0 means the
+# edge accepted them. A non-zero exit is logged with the URL list and not retried.
+# export SILPHUU_PURGE_CMD="/srv/silphuu/purge-my-edge.sh"
+
+# Seconds before that command is killed and the flush counted as failed.
+# Default: 15
+# export SILPHUU_PURGE_TIMEOUT="15"
+
+# Logs every cache decision for a URL. Noisy, and for diagnosing a page that will not update.
+# export SILPHUU_TRACE_INVALIDATION="1"
+
+# The built-in outlet, present only in a `make build-esa` binary. All three are required; any
+# one missing means this node has no outlet and the flush is skipped without a record. Leave
+# them out of a build that does not carry that outlet — a key on a node that never reads it is
+# a key with no purpose.
+# export ALIBABA_CLOUD_ACCESS_KEY_ID=""
+# export ALIBABA_CLOUD_ACCESS_KEY_SECRET=""
+# export ESA_SITE_ID=""
+
+# Notifications.
+#
+# A channel exists on this node when its credentials are here, and is used when
+# NOTIFY_CHANNELS names it. Both, or it is a silent entry: unset NOTIFY_CHANNELS sends nothing
+# at all, with no log line saying so. Names are local to this node.
+
+# The channels this node may send on, comma-separated, in the order they are tried. Naming one
+# is not the same as having it: a channel whose credentials are absent from this file does not
+# exist on the node, so listing every name costs nothing and lets a deployment fill in whichever
+# credentials it has. Unknown names are logged and skipped rather than fatal.
+# Known, in this build's own order: smtp, resend, bark, gotify, webhook, telegram.
+export NOTIFY_CHANNELS="smtp,resend,bark,gotify,webhook,telegram"
+
+# Which channels reach the operator, and which reach a visitor. A route recorded in the
+# settings panel replaces these for one event; a deployment that has recorded none is reached
+# exactly as they say.
+# Defaults: the operator is reached on every enabled channel; visitors on the mail ones
+# export NOTIFY_ADMIN_VIA="smtp,bark"
+# export NOTIFY_VISITOR_VIA="smtp"
+
+# Where an operator notification is mailed. A mail channel without it cannot carry one; the
+# chat and webhook channels reach their own destinations and need no recipient.
+# export NOTIFY_MAIL_TO="operator@example.com"
+
+# The From header. Unset, it is built from the site's own configuration — the site name and
+# the domain of BASE_URL — so renaming the site follows.
+# export NOTIFY_MAIL_FROM="Silphuu <noreply@example.com>"
+
+# smtp, on a submission port. These are a sending account's credentials, not the site's own.
+# export NOTIFY_SMTP_ADDR="smtp.example.com:587"
+# export NOTIFY_SMTP_USER="noreply@example.com"
+# export NOTIFY_SMTP_PASS=""
+
+# resend.
+# export NOTIFY_RESEND_API_KEY=""
+
+# telegram.
+# export NOTIFY_TELEGRAM_BOT_TOKEN=""
+# export NOTIFY_TELEGRAM_CHAT_ID=""
+
+# gotify.
+# export NOTIFY_GOTIFY_URL="https://gotify.example.com"
+# export NOTIFY_GOTIFY_TOKEN=""
+
+# bark. The push goes through the public server unless a self-hosted one is named, and the
+# group defaults to site_name@the domain of BASE_URL — which is what tells two nodes' notices
+# apart.
+# export NOTIFY_BARK_KEY=""
+# export NOTIFY_BARK_URL=""
+# export NOTIFY_BARK_GROUP=""
+# The App's history retention in seconds, counted from the moment the push is sent, read or
+# not. An expired notice is deleted from the App's history and from Notification Center.
+# Unset keeps it with no expiry.
+# export NOTIFY_BARK_TTL="604800"
+
+# webhook: the URL receives a JSON body describing the event.
+# export NOTIFY_WEBHOOK_URL=""
+
+# The peer link.
+#
+# Two nodes that share an event log let a change made on one reach the other. Without
+# SYNC_UDS_SOCK the whole feature is skipped — no goroutine, no socket, no resource use — so a
+# single-node deployment leaves all of this out.
+#
+# The socket alone is not enough: it has to be set together with the daemon's own SYNC_UDS_SOCK,
+# SYNC_PEER_IP, SYNC_PEER_NAME, SYNC_PEER_PORT and SYNC_PEER_CA_FILE in /etc/conf.d/silphd, or
+# the engine dials a socket nobody listens on.
+# export SYNC_UDS_SOCK="/run/silphd.sock"
+
+# Served-root-relative paths whose bytes travel between the nodes. Every node names the same
+# set; widening it is an edit here, never a code change.
+# export SILPHUU_SYNC_PATHS="assets/thumb,assets/stickers.json"
+
+# How often a pending batch is flushed to the peer.
+# Default: 60
+# export SYNC_FLUSH_INTERVAL_SEC="60"
+
+# Values this file reads from the daemon's own file.
+#
+# The status page hands the browser the address and port of the WebTransport endpoint, which
+# the daemon binds and therefore owns. Sourcing its file is what keeps the two from drifting:
+# a second copy that disagrees shows up only as a connection that never opens, with nothing on
+# the page to say why. The variables are SILPHD_IP_V4, SILPHD_IP_V6 and SILPHD_PORT, and they
+# are set in /etc/conf.d/silphd.
+#
+# Guarded because a deployment that runs no daemon has no such file, and a bare `.` on a
+# missing path would fail the service start.
+if [ -f /etc/conf.d/silphd ]; then
+    . /etc/conf.d/silphd
+fi

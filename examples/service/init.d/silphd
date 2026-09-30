@@ -1,0 +1,27 @@
+#!/sbin/openrc-run
+
+name="silphd"
+description="Silphuu WebTransport Datagram Status & Guard Daemon"
+
+# supervise-daemon, not command_background: the daemon never daemonises itself, so the
+# background form leaves the supervisor watching nothing and nothing restarts it when it dies.
+supervisor="supervise-daemon"
+
+command="/usr/local/bin/silphd"
+
+pidfile="/run/${RC_SVCNAME}.pid"
+output_log="/var/log/${RC_SVCNAME}.log"
+error_log="/var/log/${RC_SVCNAME}.err"
+
+# A start that fails immediately would otherwise respawn in a tight loop. The daemon refuses
+# to start without an endpoint configured, which is a configuration error rather than a crash
+# worth retrying. supervise-daemon gives up after respawn_max attempts (10 by default).
+respawn_delay=5
+
+# The endpoint it binds, the certificate it presents and the peer it syncs with come from
+# /etc/conf.d/silphd. The engine relays that same endpoint to the browser, so it reads those
+# values from that one file instead of holding a second copy of them.
+
+depend() {
+    need net
+}

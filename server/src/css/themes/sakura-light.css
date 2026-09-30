@@ -1,0 +1,103 @@
+/* Sakura Pink — Semantic Layer (Layer 2) */
+/* Anime magical-girl cute pastel pink light theme. */
+
+[data-theme="sakura-light"] {
+    /* Accent (theme primary color) */
+  --accent: #FF6B9D;
+
+  /* Glass hex base */
+  --glass-tint: #FFF5F8;
+  --glass-light: #5C3848;
+  --glass-dark: #000000;
+  
+
+  /* Soft shadow with pink-gray hue */
+  --shadow-sm: 0 2px 6px rgba(92, 56, 72, 0.06);
+
+  /* Background */
+  --bg-body: #FFF5F8;
+  --bg-base: #FFF5F8;
+  --bg-glass-alt: rgba(255, 234, 240, 0.80);
+  --bg-nav: rgba(255, 245, 248, 0.88);
+  --bg-code: rgba(255, 234, 240, 0.70);
+  --bg-chroma: rgba(255, 234, 240, 0.70);
+  --bg-card: rgba(92, 56, 72, 0.04);
+  --bg-input: rgba(92, 56, 72, 0.03);
+  --bg-overlay: color-mix(in srgb, var(--glass-dark) 30%, transparent);
+
+  /* Surface */
+  --bg-subtle: color-mix(in srgb, var(--glass-light) calc(var(--surface-alpha) * 100%), transparent);
+  --bg-hover: color-mix(in srgb, var(--glass-light) 8%, transparent);
+  --bg-interactive: color-mix(in srgb, var(--glass-light) 6%, transparent);
+
+  /* Text */
+  --text-primary: #494851;
+  --text-muted: #61606A;
+  --text-dim: #82818B;
+  --timeline-line: color-mix(in srgb, var(--text-primary) 18%, transparent);
+  --timeline-node: color-mix(in srgb, var(--text-primary) 35%, transparent);
+
+  /* Accent (auto-derived) */
+  --accent-hover: #E11D48;
+  --accent-soft: color-mix(in srgb, var(--accent) 18%, transparent);
+
+  /* Border */
+  --border-subtle: color-mix(in srgb, var(--glass-light) 7%, transparent);
+
+  /* Shadow */
+  --shadow-card: 0 4px 14px rgba(92, 56, 72, 0.07);
+
+  /* Hover states */
+  --hover-bg: color-mix(in srgb, var(--accent) 12%, transparent);
+  --hover-text: var(--accent);
+  --hover-border: color-mix(in srgb, var(--accent) 22%, transparent);
+  --hover-blur: 12px;
+  --hover-bg-active: color-mix(in srgb, var(--accent) 16%, transparent);
+  --hover-text-active: #E11D48;
+
+  /* Nav */
+  --nav-bg: rgba(0, 0, 0, 0.08);
+
+  /* Layout */
+  --sidebar-radius: 10px;
+  --blur-amount: 20px;
+
+  /* Group hover */
+  --group-hover-bg: color-mix(in srgb, var(--glass-light) 6%, transparent);
+  --group-hover-text: var(--accent);
+
+  /* Comment form */
+  --cmt-form-bg: #FFFFFF;
+  --cmt-input-color: var(--text-primary);
+  --cmt-input-placeholder: var(--text-muted);
+  --cmt-textarea-color: var(--text-primary);
+  --cmt-textarea-placeholder: var(--text-muted);
+  --cmt-textarea-focus: var(--text-primary);
+  --cmt-input-focus: var(--text-primary);
+  --cmt-submit-bg: var(--accent);
+
+
+  /* Chroma syntax highlighting */
+  --chroma-keyword: #E11D48;
+  --chroma-function: #8B5CF6;
+  --chroma-string: #10B981;
+  --chroma-comment: #9E7D8A;
+  --chroma-number: #F97316;
+  --chroma-operator: #06B6D4;
+  --chroma-punctuation: #8B5CF6;
+  --chroma-tag: #E11D48;
+  --chroma-deleted: #E11D48;
+  --chroma-inserted: #10B981;
+
+  /* Decorative shapes */
+  --shape-1: #FF6B9D;
+  --shape-2: #F472B6;
+  --shape-3: #8B5CF6;
+  --shape-4: #FBBF24;
+  --shape-5: #34D399;
+  --shape-6: #38BDF8;
+  --shape-7: #FB7185;
+  --shape-8: #C084FC;
+  --shape-9: #FDE047;
+  --shape-10: #FBCFE8;
+}

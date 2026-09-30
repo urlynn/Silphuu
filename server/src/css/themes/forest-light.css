@@ -1,0 +1,103 @@
+/* Everforest Light — Semantic Layer (Layer 2) */
+/* Light theme variables; article page benchmark: warm-beige tint + warm shadows. */
+
+[data-theme="forest-light"] {
+    /* Accent (theme primary color) */
+  --accent: #A7C080;
+
+  /* Glass hex base */
+  --glass-tint: #F4EEE2;
+  --glass-light: #3C3836;
+  --glass-dark: #000000;
+  
+
+  /* Restrained compact shadow with warmed hue */
+  --shadow-sm: 0 2px 6px rgba(60, 50, 35, 0.07);
+
+  /* Background */
+  --bg-body: #F5F0E3;
+  --bg-base: #F5F0E3;
+  --bg-glass-alt: rgba(245, 240, 227, 0.80);
+  --bg-nav: rgba(245, 240, 227, 0.85);
+  --bg-code: rgba(236, 232, 224, 0.70);
+  --bg-chroma: rgba(236, 232, 224, 0.70);
+  --bg-card: rgba(60, 56, 54, 0.05);
+  --bg-input: rgba(0, 0, 0, 0.04);
+  --bg-overlay: color-mix(in srgb, var(--glass-dark) 35%, transparent);
+
+  /* Surface */
+  --bg-subtle: color-mix(in srgb, var(--glass-light) calc(var(--surface-alpha) * 100%), transparent);
+  --bg-hover: color-mix(in srgb, var(--glass-light) 10%, transparent);
+  --bg-interactive: color-mix(in srgb, var(--glass-light) 8%, transparent);
+
+  /* Text */
+  --text-primary: #504C4A;
+  --text-muted: #64605D;
+  --text-dim: #837F7C;
+  --timeline-line: color-mix(in srgb, var(--text-primary) 18%, transparent);
+  --timeline-node: color-mix(in srgb, var(--text-primary) 35%, transparent);
+
+  /* Accent (auto-derived) */
+  --accent-hover: #5E815D;
+  --accent-soft: color-mix(in srgb, var(--accent) 24%, transparent);
+
+  /* Border */
+  --border-subtle: color-mix(in srgb, var(--glass-light) 8%, transparent);
+
+  /* Shadow */
+  --shadow-card: 0 4px 14px rgba(60, 50, 35, 0.09);
+
+  /* Hover states */
+  --hover-bg: color-mix(in srgb, var(--accent) 12%, transparent);
+  --hover-text: var(--accent);
+  --hover-border: rgba(211, 198, 170, 0.06);
+  --hover-blur: 12px;
+  --hover-bg-active: color-mix(in srgb, var(--accent) 12%, transparent);
+  --hover-text-active: #A7C080;
+
+  /* Nav */
+  --nav-bg: rgba(0, 0, 0, 0.10);
+
+  /* Layout */
+  --sidebar-radius: 10px;
+  --blur-amount: 20px;
+
+  /* Group hover */
+  --group-hover-bg: color-mix(in srgb, var(--glass-light) 8%, transparent);
+  --group-hover-text: var(--accent);
+
+  /* Comment form */
+  --cmt-form-bg: #FFFFFF;
+  --cmt-input-color: var(--text-primary);
+  --cmt-input-placeholder: var(--text-muted);
+  --cmt-textarea-color: var(--text-primary);
+  --cmt-textarea-placeholder: var(--text-muted);
+  --cmt-textarea-focus: var(--text-primary);
+  --cmt-input-focus: var(--text-primary);
+  --cmt-submit-bg: var(--accent);
+
+
+  /* Chroma syntax highlighting */
+  --chroma-keyword: #4A7A9E;
+  --chroma-function: #6C9E4A;
+  --chroma-string: #A87B40;
+  --chroma-comment: #9C8B7A;
+  --chroma-number: #8B6FA6;
+  --chroma-operator: #B85B6F;
+  --chroma-punctuation: #5C6A72;
+  --chroma-tag: #B85B6F;
+  --chroma-deleted: #B85B6F;
+  --chroma-inserted: #6C9E4A;
+
+  /* Decorative shapes: 10 slots + named aliases */
+  --shape-1: #A7C080;
+  --shape-2: #E67E80;
+  --shape-3: #7FBBB3;
+  --shape-4: #D699B6;
+  --shape-5: #E69875;
+  --shape-6: #DBBC7F;
+  --shape-7: #83C092;
+  --shape-8: #9DA9A0;
+  --shape-9: #B8C5A0;
+  --shape-10: #D3C6AA;
+}
